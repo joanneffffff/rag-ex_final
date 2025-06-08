@@ -1,0 +1,75 @@
+# Data directory
+data/
+data/*
+data/tatqa*
+data/alphafin*
+data/processed*
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment
+.env
+venv/
+.idea/
+
+# Directories to ignore
+.idea/
+venv/
+.pytest_cache/
+__pycache__/
+src/outputs/
+outputs/
+build/
+dist/
+LLMS.egg-info/
+xlm.egg-info/
+models/
+logs/
+temp/
+examples/
+test/data/
+
+# Cache and temp files
+*.pyo
+*.pyd
+.Python
+*.db
+*.sqlite
+*.npy
+*.arrow
+*.bin
+*.pt
+*.ckpt
+*.h5
+*.hdf5
+*.pkl
+*.model
+*.index
+
+# Environment files
+.env
+.venv
+env/
+ENV/
+.DS_Store
+
+# IDE files
+.vscode/
+*.swp
+*.swo
+.project
+.pydevproject
+.settings/
+
+# Logs
+*.log
+*.out
+
+# Model files
+*.onnx
+*.tflite
+*.pb
+*.savedmodel
+*.pth
