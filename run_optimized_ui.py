@@ -107,32 +107,78 @@ def generate_response(model, tokenizer, query, history=None):
         return f"Error: {str(e)}", history
 
 class OptimizedUI:
-    def __init__(
-        self,
-        port=7860,
-        share=False,
-        debug=False,
-        enable_queue=True,
-    ):
-        self.port = port
-        self.share = share
-        self.debug = debug
-        self.enable_queue = enable_queue
+    def __init__(self):
         self.model = None
         self.tokenizer = None
-        self.history = []
+        self.data_loader = UnifiedDataLoader(
+            batch_size=16,  # 减小批处理大小
+            max_samples=500  # 减少每个数据源的样本数
+        )
+        # 数据加载器会在初始化时自动加载数据
+        self.documents = self.data_loader.documents
+        self.rag_system = None
         
     def init_model(self):
-        """Initialize the model and tokenizer"""
-        if self.model is None:
-            self.model, self.tokenizer = load_model()
+        """Initialize the model and system components"""
+        if self.model is not None:
+            return
             
-    def chat(self, query, history=None):
-        """Chat with the model"""
-        if history is None:
-            history = []
-        response, new_history = generate_response(self.model, self.tokenizer, query, history)
-        return response, new_history
+        try:
+            # 初始化检索器
+            print("Initializing retriever...")
+            encoder = Encoder(
+                model_name="sentence-transformers/all-MiniLM-L6-v2",
+                cache_dir="D:/AI/huggingface"
+            )
+            retriever = SBERTRetriever(
+                encoder=encoder,
+                corpus_documents=self.documents
+            )
+            
+            # 初始化生成器
+            print("Initializing generator...")
+            generator = load_generator(
+                generator_model_name="facebook/opt-125m",
+                use_local_llm=True
+            )
+            
+            # 初始化RAG系统
+            print("Initializing RAG system...")
+            self.rag_system = RagSystem(
+                retriever=retriever,
+                generator=generator,
+                prompt_template="Context: {context}\nQuestion: {question}\nAnswer:",
+                retriever_top_k=1
+            )
+            
+        except Exception as e:
+            print(f"Error during initialization: {str(e)}")
+            traceback.print_exc()
+            raise e
+
+    def process_query(self, query: str, datasource: str):
+        """Process a query and return results"""
+        try:
+            # 运行RAG系统
+            rag_output = self.rag_system.run(user_input=query)
+            
+            # 准备输出
+            answer = rag_output.generated_responses[0]
+            doc = rag_output.retrieved_documents[0]
+            score = rag_output.retriever_scores[0]
+            
+            # 构建响应
+            response = {
+                "answer": answer,
+                "context": f"相关度分数: {score:.4f}\n\n{doc.content}"
+            }
+            
+            return response["answer"], response["context"]
+            
+        except Exception as e:
+            print(f"Error processing query: {str(e)}")
+            traceback.print_exc()
+            return "处理查询时发生错误", str(e)
 
     def run(self):
         """Run the Gradio interface"""
@@ -145,6 +191,7 @@ class OptimizedUI:
         with gr.Blocks() as demo:
             gr.Markdown("# Financial Explainable RAG System")
             
+            # 输入区域
             with gr.Row():
                 with gr.Column(scale=4):
                     datasource = gr.Radio(
@@ -162,158 +209,54 @@ class OptimizedUI:
                     )
                     submit_btn = gr.Button("Submit")
             
-            with gr.Row():
-                gr.Markdown("## System Response")
-                with gr.Column(scale=4):
+            # 使用标签页分离显示
+            with gr.Tabs():
+                # 回答标签页
+                with gr.TabItem("Answer"):
                     answer_box = gr.Textbox(
                         show_label=False,
                         interactive=False,
                         label="Answer",
-                        max_lines=5
+                        lines=5
                     )
+                
+                # 解释标签页
+                with gr.TabItem("Explanation"):
                     context_box = gr.Textbox(
                         show_label=False,
                         interactive=False,
                         label="Context",
-                        max_lines=5
+                        lines=10
                     )
-            
-            with gr.Row():
-                gr.Markdown("## Example Questions")
-                with gr.Column():
-                    example_questions = gr.Examples(
-                        examples=[
-                            ["What is the revenue for Q4 2019?"],
-                            ["What is the operating margin in 2018?"],
-                            ["What are the R&D expenses in 2019?"],
-                            ["2019年第四季度利润是多少？"],
-                            ["毛利率趋势分析"],
-                            ["研发投入比例"]
-                        ],
-                        inputs=query
-                    )
-            
-            def process_query(question, source):
-                try:
-                    response, _ = self.chat(question, [])
-                    return response, f"Source: {source}\nQuestion: {question}"
-                except Exception as e:
-                    print(f"Error in process_query: {str(e)}")
-                    return f"Error: {str(e)}", "An error occurred while processing your request."
-            
-            submit_btn.click(
-                process_query,
-                inputs=[query, datasource],
-                outputs=[answer_box, context_box],
-                queue=self.enable_queue
-            )
-            
-            query.submit(
-                process_query,
-                inputs=[query, datasource],
-                outputs=[answer_box, context_box],
-                queue=self.enable_queue
+
+            # 添加示例问题
+            gr.Examples(
+                examples=[
+                    ["What is the revenue for Q4 2019?"],
+                    ["What is the operating margin in 2018?"],
+                    ["What are the R&D expenses in 2019?"],
+                    ["2019年第四季度利润是多少？"],
+                    ["毛利率趋势分析"],
+                    ["研发投入比例"]
+                ],
+                inputs=query,
+                label="Example Questions"
             )
 
-        demo.queue()
-        demo.launch(
-            server_name="127.0.0.1",
-            server_port=self.port,
-            share=self.share,
-            debug=self.debug
-        )
+            # 处理提交
+            submit_btn.click(
+                fn=self.process_query,
+                inputs=[query, datasource],
+                outputs=[answer_box, context_box],
+            )
+
+        demo.launch(share=False)
 
 if __name__ == "__main__":
-    import sys
-    import os
-    import time
-    import psutil
-    import traceback
+    # 确保必要的目录存在
+    ensure_directories()
     
-    def kill_python_processes():
-        """Kill all Python processes except the current one"""
-        current_pid = os.getpid()
-        killed = []
-        for proc in psutil.process_iter(['pid', 'name']):
-            try:
-                if proc.info['name'] == 'python.exe' and proc.pid != current_pid:
-                    proc.kill()
-                    killed.append(proc.pid)
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
-                pass
-        return killed
-    
-    def is_port_in_use(port):
-        """Check if a port is in use"""
-        import socket
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            try:
-                s.bind(('127.0.0.1', port))
-                return False
-            except socket.error:
-                return True
-    
-    def wait_for_port_release(port, timeout=30):
-        """Wait for a port to be released"""
-        start_time = time.time()
-        while time.time() - start_time < timeout:
-            if not is_port_in_use(port):
-                return True
-            time.sleep(1)
-        return False
-    
-    try:
-        # 显示系统信息
-        print("\n=== System Information ===")
-        print(f"Python version: {sys.version}")
-        print(f"Current directory: {os.getcwd()}")
-        print(f"Process ID: {os.getpid()}")
-        
-        # 终止其他Python进程
-        print("\n=== Cleaning Up Processes ===")
-        killed_pids = kill_python_processes()
-        if killed_pids:
-            print(f"Terminated Python processes: {killed_pids}")
-            time.sleep(2)  # 等待进程完全关闭
-        else:
-            print("No other Python processes found")
-        
-        # 检查端口状态
-        print("\n=== Checking Port Status ===")
-        port = 7860
-        if is_port_in_use(port):
-            print(f"Port {port} is in use, waiting for release...")
-            if not wait_for_port_release(port):
-                print(f"Port {port} is still in use after timeout")
-                print("Please try the following:")
-                print("1. Close any running Python processes")
-                print("2. Close any web browsers using port 7860")
-                print("3. Wait a few minutes and try again")
-                sys.exit(1)
-        print(f"Port {port} is available")
-        
-        # 设置环境变量
-        print("\n=== Setting Up Environment ===")
-        cache_dir = "D:/AI/huggingface"
-        os.environ['TRANSFORMERS_CACHE'] = os.path.join(cache_dir, 'transformers')
-        os.environ['HF_HOME'] = cache_dir
-        os.environ['HF_DATASETS_CACHE'] = os.path.join(cache_dir, 'datasets')
-        print(f"Cache directory: {cache_dir}")
-        
-        # 确保目录存在
-        ensure_directories()
-        
-        # 创建和启动UI
-        print("\n=== Starting UI ===")
-        ui = OptimizedUI()
-        ui.run()
-        
-    except KeyboardInterrupt:
-        print("\nShutting down gracefully...")
-    except SystemExit as e:
-        sys.exit(e.code)
-    except Exception as e:
-        print(f"\nUnexpected error: {str(e)}")
-        print("\nStack trace:")
-        traceback.print_exc()
-        sys.exit(1) 
+    # 启动UI
+    print("Starting Financial QA System...")
+    ui = OptimizedUI()
+    ui.run() 

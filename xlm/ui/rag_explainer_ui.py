@@ -75,6 +75,7 @@ class RagExplainerUI:
                 submit_btn,
                 user_input_text,
                 retrieved_document,
+                retriever_scores,
                 prompt,
                 generated_response,
                 retriever_vis,
@@ -97,6 +98,7 @@ class RagExplainerUI:
                 outputs=[
                     user_input_text,
                     retrieved_document,
+                    retriever_scores,
                     prompt,
                     generated_response,
                     retriever_vis,
@@ -120,8 +122,10 @@ class RagExplainerUI:
             gr.Error("Please provide an input!")
             return None
 
+        # 运行RAG系统
         rag_output = self.rag_system.run(user_input=user_input)
 
+        # 准备检索器解释
         retriever_explanation_granularity = ExplanationGranularity.WORD_LEVEL
         retriever_explanation_dto = self.retriever_explainer.explain(
             user_input=user_input,
@@ -140,6 +144,7 @@ class RagExplainerUI:
             lower_percentile=10,
         )
 
+        # 准备生成器解释
         generator_explanation_granularity = ExplanationGranularity.SENTENCE_LEVEL
         generator_explanation_dto = self.generator_explainer.explain(
             user_input=rag_output.prompt,
@@ -158,17 +163,20 @@ class RagExplainerUI:
             lower_percentile=5,
         )
 
-        retrieved_document = rag_output.retrieved_documents[0]
+        # 准备输出
+        retrieved_document = rag_output.retrieved_documents[0].content
+        retriever_score = f"{rag_output.retriever_scores[0]:.4f}"
         prompt = rag_output.prompt
         generated_response = rag_output.generated_responses[0]
 
         return (
-            user_input,
-            retrieved_document,
-            prompt,
-            generated_response,
-            retriever_explanations_vis,
-            generator_explanations_vis,
+            user_input,  # user_input_text
+            retrieved_document,  # retrieved_document
+            retriever_score,  # retriever_scores
+            prompt,  # prompt
+            generated_response,  # generated_response
+            retriever_explanations_vis,  # retriever_vis
+            generator_explanations_vis,  # generator_vis
         )
 
     def get_retriever_explainer(self) -> GenericRetrieverExplainer:
@@ -222,114 +230,61 @@ class RagExplainerUI:
 
     def __build_chat_and_explain(self):
         with gr.Row():
-            user_input = gr.Textbox(
-                placeholder="Type your question here and press Enter.",
-                label="Question",
-                container=True,
-                lines=1,
-            )
-        # with gr.Row():
-        #     granularity = gr.Radio(
-        #         choices=[e for e in ExplanationGranularity],
-        #         value=ExplanationGranularity.SENTENCE_LEVEL,
-        #         label="Explanation Granularity",
-        #     )
+            with gr.Column(scale=1):
+                user_input = gr.Textbox(
+                    label="请输入问题",
+                    placeholder="例如：2019年第四季度利润是多少？",
+                    lines=3,
+                )
+                submit_btn = gr.Button("提交")
 
-        # with gr.Accordion(label="Settings", open=False, elem_id="accordion"):
-        # with gr.Row(variant="compact"):
-        #     explainer_name = gr.Radio(
-        #         label="Explainer",
-        #         choices=list(EXPLAINERS.keys()),
-        #         value=list(EXPLAINERS.keys())[0],
-        #         container=True,
-        #     )
-        # with gr.Row(variant="compact"):
-        #     upper_percentile = gr.Textbox(label="Upper", value="85", container=True)
-        #     middle_percentile = gr.Textbox(
-        #         label="Middle", value="75", container=True
-        #     )
-        #     lower_percentile = gr.Textbox(label="Lower", value="10", container=True)
-
-        # with gr.Row(variant="compact"):
-        #     model_name = gr.Radio(
-        #         label="Model",
-        #         choices=list(MODELS.keys()),
-        #         value=list(MODELS.keys())[0],
-        #         container=True,
-        #     )
-        # with gr.Row(variant="compact"):
-        #     perturber_name = gr.Radio(
-        #         label="Perturber",
-        #         choices=list(PERTURBERS.keys()),
-        #         value=list(PERTURBERS.keys())[0],
-        #         container=True,
-        #     )
-        # with gr.Row(variant="compact"):
-        #     comparator_name = gr.Radio(
-        #         label="Comparator",
-        #         choices=list(COMPARATORS.keys()),
-        #         value=list(COMPARATORS.keys())[0],
-        #         container=True,
-        #     )
-        with gr.Row(variant="compact"):
-            # passing "elem_id" to use a custom style for the component
-            # in the CSS passed.
-            submit_btn = gr.Button(
-                value="🛠 Submit",
-                variant="secondary",
-                elem_id="button",
-                interactive=True,
-            )
-
-        with gr.Accordion(
-            label="Retrieve and Explain!", open=False, elem_id="accordion"
-        ):
-            with gr.Row():
-                with gr.Column(scale=1):
-                    gr.Markdown("🔍 **User Query** (input to the Retriever)")
-                    with gr.Row():
-                        user_input_text = gr.Markdown(container=True)
-
-                    gr.Markdown("📝 **Retrieved document** (output from the Retriever)")
-                    with gr.Row():
-                        retrieved_document = gr.Markdown(container=True)
-
-                with gr.Column(scale=1):
-                    gr.Markdown("✨ **Explaining the Retrieval process**")
-                    with gr.Row():
-                        retriever_vis = gr.HTML(container=True)
-
-        with gr.Accordion(
-            label="Generate and Explain!", open=False, elem_id="accordion"
-        ):
-            with gr.Row():
-                with gr.Column(scale=1):
-                    gr.Markdown("❓ **Prompt** (input to the Generator)")
-                    with gr.Row():
-                        prompt = gr.Markdown(container=True)
-
-                    gr.Markdown("✔️ **Generated Response** (output from the Generator)")
-                    with gr.Row():
-                        generated_response = gr.Markdown(container=True)
-
-                with gr.Column(scale=1):
-                    gr.Markdown("✨ **Explaining the Generation process**")
-                    with gr.Row():
-                        generator_vis = gr.HTML(container=True)
+        # 使用标签页分离显示
+        with gr.Tabs():
+            # 回答标签页
+            with gr.TabItem("回答"):
+                generated_response = gr.Textbox(
+                    label="生成的回答",
+                    interactive=False,
+                    lines=5
+                )
+            
+            # 解释标签页
+            with gr.TabItem("解释详情"):
+                user_input_text = gr.Textbox(
+                    label="用户输入",
+                    interactive=False,
+                )
+                
+                with gr.Row():
+                    with gr.Column(scale=1):
+                        retrieved_document = gr.Textbox(
+                            label="检索到的文档",
+                            interactive=False,
+                            lines=8
+                        )
+                    with gr.Column(scale=1):
+                        retriever_scores = gr.Textbox(
+                            label="相关度分数",
+                            interactive=False,
+                        )
+                
+                prompt = gr.Textbox(
+                    label="生成的提示词",
+                    interactive=False,
+                    lines=8
+                )
+            
+            # 可视化标签页
+            with gr.TabItem("可视化解释"):
+                retriever_vis = gr.HTML(label="检索器解释")
+                generator_vis = gr.HTML(label="生成器解释")
 
         return (
             user_input,
-            # granularity,
-            # upper_percentile,
-            # middle_percentile,
-            # lower_percentile,
-            # explainer_name,
-            # model_name,
-            # perturber_name,
-            # comparator_name,
             submit_btn,
             user_input_text,
             retrieved_document,
+            retriever_scores,
             prompt,
             generated_response,
             retriever_vis,
