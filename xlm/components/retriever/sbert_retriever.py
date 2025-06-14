@@ -79,22 +79,17 @@ class SBERTRetriever(Retriever):
                     train_data = np.array(self.corpus_embeddings).astype('float32')
                     self.index.train(train_data)
     
-    def _batch_encode_corpus(self, documents: List[DocumentWithMetadata]) -> List[List[float]]:
-        """Encode corpus documents in batches to manage memory"""
+    def _batch_encode_corpus(self, documents: List[DocumentWithMetadata]) -> np.ndarray:
+        """Encode corpus documents in batches"""
         all_embeddings = []
-        texts = [doc.content for doc in documents]
-        
-        # Process in batches
-        for i in range(0, len(texts), self.batch_size):
-            batch_texts = texts[i:i+self.batch_size]
-            batch_embeddings = self.encoder.encode(batch_texts)
-            all_embeddings.extend(batch_embeddings)
-            
-            # Clear CUDA cache if using GPU
-            if self.use_gpu and torch.cuda.is_available():
-                torch.cuda.empty_cache()
-        
-        return all_embeddings
+        batch_size = 32  # 可以根据需要调整
+        for i in range(0, len(documents), batch_size):
+            batch = documents[i:i + batch_size]
+            batch_texts = [doc.content for doc in batch]
+            # 调用 encode_batch 而不是 encode
+            batch_embeddings = self.encoder.encode_batch(texts=batch_texts)
+            all_embeddings.extend(batch_embeddings['text'])
+        return np.array(all_embeddings)
     
     def _add_to_faiss(self, embeddings: List[List[float]]):
         """Add embeddings to FAISS index in batches"""
@@ -115,10 +110,15 @@ class SBERTRetriever(Retriever):
         texts = [str(doc.content) for doc in documents]
         return self.encoder.encode(texts=texts)
 
-    def encode_queries(self, text: str) -> List[List[float]]:
-        """Encode query text"""
-        text = str(text)
-        return self.encoder.encode(texts=[text])
+    def encode_queries(self, text: str):
+        # 兼容原始Encoder和MultiModalEncoder
+        if hasattr(self.encoder, "encode"):
+            return self.encoder.encode([text])
+        elif hasattr(self.encoder, "encode_batch"):
+            result = self.encoder.encode_batch(texts=[text])
+            return result['text']
+        else:
+            raise AttributeError("Encoder does not support encode or encode_batch methods.")
 
     def update_corpus(self, documents: List[DocumentWithMetadata], embeddings: List[List[float]] = None):
         """Update corpus documents and embeddings"""
@@ -185,14 +185,14 @@ class SBERTRetriever(Retriever):
     def retrieve_documents_with_scores(
         self,
         text: str,
-        top_k: int = 3,
+        top_k: int = 5,
     ) -> List[Dict]:
         query_embeddings = self.encode_queries(text=text)
         
         # Ensure we have corpus embeddings
-        if not self.corpus_embeddings:
-            self.corpus_embeddings = self._batch_encode_corpus(self.corpus_documents)
-            
+        if self.corpus_embeddings is None or self.corpus_embeddings.shape[0] == 0:
+            return [], []
+        
         results = self.search(
             query_embeddings=query_embeddings,
             corpus_embeddings=self.corpus_embeddings,

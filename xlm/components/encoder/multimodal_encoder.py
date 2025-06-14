@@ -10,6 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from sentence_transformers import SentenceTransformer
 
 from xlm.components.encoder.encoder import Encoder
+from xlm.components.encoder.multimodal_encoder2 import TableEncoder, TimeSeriesEncoder
 from config.parameters import Config, EncoderConfig
 
 class MultiModalEncoder:
@@ -18,12 +19,21 @@ class MultiModalEncoder:
         config: Config,
         text_encoder: Optional[Encoder] = None,
         table_encoder: Optional[Encoder] = None,
-        time_series_encoder: Optional[Encoder] = None
+        time_series_encoder: Optional[Encoder] = None,
+        use_enhanced_encoders: bool = False  # New parameter for enhanced encoders
     ):
         self.config = config
-        self.text_encoder = text_encoder or self._create_text_encoder()
-        self.table_encoder = table_encoder or self._create_table_encoder()
-        self.time_series_encoder = time_series_encoder or self._create_time_series_encoder()
+        self.use_enhanced_encoders = use_enhanced_encoders
+        
+        # Initialize encoders based on use_enhanced_encoders flag
+        if use_enhanced_encoders:
+            self.text_encoder = text_encoder or self._create_text_encoder()
+            self.table_encoder = table_encoder or TableEncoder()
+            self.time_series_encoder = time_series_encoder or TimeSeriesEncoder()
+        else:
+            self.text_encoder = text_encoder or self._create_text_encoder()
+            self.table_encoder = table_encoder or self._create_table_encoder()
+            self.time_series_encoder = time_series_encoder or self._create_time_series_encoder()
         
         # Setup parallel processing
         self.executor = ThreadPoolExecutor(max_workers=config.retriever.num_threads)
@@ -125,7 +135,7 @@ class MultiModalEncoder:
 
     def _batch_encode(
         self,
-        encoder: Encoder,
+        encoder: Union[Encoder, TableEncoder, TimeSeriesEncoder],
         items: List[str],
         batch_size: int
     ) -> np.ndarray:
@@ -134,7 +144,11 @@ class MultiModalEncoder:
         
         for i in range(0, len(items), batch_size):
             batch = items[i:i + batch_size]
-            embeddings = encoder.encode(batch)
+            # Handle different encoder types
+            if isinstance(encoder, (TableEncoder, TimeSeriesEncoder)):
+                embeddings = encoder.encode(batch)
+            else:
+                embeddings = encoder.encode(batch)
             all_embeddings.extend(embeddings)
             
             # Clear CUDA cache if using GPU
@@ -176,3 +190,8 @@ class MultiModalEncoder:
             raise ValueError(f"Unsupported combine method: {self.config.modality.combine_method}")
             
         return combined 
+
+    @property
+    def model_name(self):
+        # 返回主文本编码器的 model_name
+        return getattr(self.text_encoder, "model_name", "multimodal_encoder") 

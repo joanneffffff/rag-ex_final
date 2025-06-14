@@ -3,7 +3,7 @@ Configuration parameters for the RAG system.
 """
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Optional, List
 
 @dataclass
@@ -44,11 +44,11 @@ class SystemConfig:
 
 @dataclass
 class Config:
-    encoder: EncoderConfig = EncoderConfig()
-    retriever: RetrieverConfig = RetrieverConfig()
-    data: DataConfig = DataConfig()
-    modality: ModalityConfig = ModalityConfig()
-    system: SystemConfig = SystemConfig()
+    encoder: EncoderConfig = field(default_factory=EncoderConfig)
+    retriever: RetrieverConfig = field(default_factory=RetrieverConfig)
+    data: DataConfig = field(default_factory=DataConfig)
+    modality: ModalityConfig = field(default_factory=ModalityConfig)
+    system: SystemConfig = field(default_factory=SystemConfig)
 
     @classmethod
     def load_environment_config(cls) -> 'Config':

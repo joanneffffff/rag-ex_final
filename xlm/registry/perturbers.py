@@ -4,6 +4,9 @@ from xlm.modules.perturber.random_word_perturber import RandomWordPerturber
 from xlm.modules.perturber.reorder_perturber import ReorderPerturber
 from xlm.components.generator.llm_generator import LLMGenerator
 from xlm.registry import DEFAULT_LMS_ENDPOINT
+from xlm.modules.perturber.trend_perturber import TrendPerturber
+from xlm.modules.perturber.term_perturber import TermPerturber
+from xlm.modules.perturber.year_perturber import YearPerturber
 
 # 初始化基本perturbers
 leave_one_out_perturber = LeaveOneOutPerturber()
@@ -46,6 +49,9 @@ PERTURBERS = {
     "antonym_perturber": antonym_perturber,
     "synonym_perturber": synonym_perturber,
     "paraphrase_perturber": paraphrase_perturber,
+    "trend_perturber": TrendPerturber(),
+    "term_perturber": TermPerturber(),
+    "year_perturber": YearPerturber(),
 }
 
 

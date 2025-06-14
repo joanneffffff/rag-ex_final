@@ -33,26 +33,25 @@ class UnifiedDataLoader:
         # Initialize logger
         self.logger = logging.getLogger(__name__)
         
-        # Load encoder model
-        print(f"\n加载编码器模型: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
-        print(f"- 设备: cpu")
-        print(f"- 缓存目录: {cache_dir}\n")
-        
+        print("准备加载 SentenceTransformer ...")
         self.encoder = SentenceTransformer(
             "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
             cache_folder=cache_dir
         )
+        print("SentenceTransformer 加载完成")
         
-        # Load data
+        print("准备加载数据 ...")
         self.documents: List[DocumentWithMetadata] = []
         self._load_data()
+        print("数据加载完成")
         
         # Initialize retriever attributes
         self.corpus_embeddings = None
         self.index = None
         
-        # Build or load index
+        print("准备构建/加载索引 ...")
         self.build_unified_index(save_dir="data/processed")
+        print("索引构建/加载完成")
     
     def _load_data(self):
         """Load and process all data sources"""

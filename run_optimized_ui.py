@@ -21,7 +21,8 @@ from xlm.utils.unified_data_loader import UnifiedDataLoader
 from xlm.registry.generator import load_generator
 from xlm.components.rag_system.rag_system import RagSystem
 from xlm.components.retriever.sbert_retriever import SBERTRetriever
-from xlm.components.encoder.encoder import Encoder
+from xlm.components.encoder.multimodal_encoder import MultiModalEncoder
+from config.parameters import Config, EncoderConfig, RetrieverConfig, ModalityConfig
 
 # Ignore warnings
 warnings.filterwarnings("ignore")
@@ -126,9 +127,23 @@ class OptimizedUI:
         try:
             # 初始化检索器
             print("Initializing retriever...")
-            encoder = Encoder(
-                model_name="sentence-transformers/all-MiniLM-L6-v2",
-                cache_dir="D:/AI/huggingface"
+            config = Config(
+                encoder=EncoderConfig(
+                    model_name="sentence-transformers/all-MiniLM-L6-v2",
+                    device="cpu",
+                    batch_size=8
+                ),
+                retriever=RetrieverConfig(num_threads=2),
+                modality=ModalityConfig(
+                    combine_method="weighted_sum",
+                    text_weight=0.4,
+                    table_weight=0.3,
+                    time_series_weight=0.3
+                )
+            )
+            encoder = MultiModalEncoder(
+                config=config,
+                use_enhanced_encoders=True  # 使用增强编码器
             )
             retriever = SBERTRetriever(
                 encoder=encoder,
@@ -136,11 +151,12 @@ class OptimizedUI:
             )
             
             # 初始化生成器
-            print("Initializing generator...")
+            print("加载生成器模型: facebook/opt-125m")
             generator = load_generator(
                 generator_model_name="facebook/opt-125m",
                 use_local_llm=True
             )
+            print("生成器模型加载完成")
             
             # 初始化RAG系统
             print("Initializing RAG system...")
