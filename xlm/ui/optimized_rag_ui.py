@@ -11,6 +11,7 @@ from xlm.registry.retriever import load_retriever
 from xlm.registry.rag_system import load_rag_system
 from xlm.utils.visualizer import Visualizer
 from xlm.dto.dto import DocumentWithMetadata
+from config.parameters import Config, EncoderConfig, RetrieverConfig, ModalityConfig
 
 class OptimizedRagUI:
     def __init__(
@@ -52,9 +53,33 @@ class OptimizedRagUI:
     def _init_components(self):
         """Initialize RAG system components"""
         print("\n1. Loading retriever...")
+        from xlm.components.encoder.multimodal_encoder import MultiModalEncoder
+        
+        # Initialize with enhanced encoder configuration
+        config = Config(
+            encoder=EncoderConfig(
+                model_name=self.encoder_model_name,
+                device="cpu",
+                batch_size=8
+            ),
+            retriever=RetrieverConfig(num_threads=2),
+            modality=ModalityConfig(
+                combine_method="weighted_sum",
+                text_weight=0.4,
+                table_weight=0.3,
+                time_series_weight=0.3
+            )
+        )
+        
+        encoder = MultiModalEncoder(
+            config=config,
+            use_enhanced_encoders=True  # Enable enhanced encoder by default
+        )
+        
         self.retriever = load_retriever(
             encoder_model_name=self.encoder_model_name,
-            data_path=self.data_path
+            data_path=self.data_path,
+            encoder=encoder  # Pass the enhanced encoder
         )
         
         if self.use_faiss:

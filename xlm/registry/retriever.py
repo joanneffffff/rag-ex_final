@@ -3,20 +3,23 @@ from xlm.components.encoder.encoder import Encoder
 from xlm.dto.dto import DocumentWithMetadata, DocumentMetadata
 
 
-def load_retriever(encoder_model_name: str, data_path: str):
+def load_retriever(encoder_model_name: str, data_path: str, encoder=None):
     """
     加载检索器
     Args:
         encoder_model_name: 编码器模型名称
         data_path: 数据文件路径
+        encoder: 可选的编码器实例
     Returns:
         检索器实例
     """
-    # 加载编码器
-    encoder = Encoder(
-        model_name=encoder_model_name,
-        cache_dir="D:/AI/huggingface"
-    )
+    # 如果提供了编码器，直接使用
+    if encoder is None:
+        # 加载默认编码器
+        encoder = Encoder(
+            model_name=encoder_model_name,
+            cache_dir="D:/AI/huggingface"
+        )
     
     # 读取文档
     with open(data_path, encoding="utf-8") as f:

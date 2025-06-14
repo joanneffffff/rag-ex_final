@@ -31,3 +31,31 @@ encoder = MultiModalEncoder(config, use_enhanced_encoders=True)
 2. 第二个：sentence-transformers/all-MiniLM-L6-v2
 这也是编码器，同样用于把文本等转成向量。
 这是你在主配置里指定的主检索/问答用的编码器，比如 RAG 检索、UI 问答等。
+
+------------------------
+优化方向：
+1. 集成 FinBERT（金融专用编码器/融合）
+from xlm.components.encoder.finbert_sbert import FinBertSBERT
+finbert_sbert_encoder = FinBertSBERT()
+encoder = MultiModalEncoder(
+    config=config,
+    text_encoder=finbert_sbert_encoder,
+    use_enhanced_encoders=True
+)
+2. Prompt Engineering（优化提示词）
+self.prompt_template = (
+    "You are a financial analyst assistant. "
+    "Given the following context, answer the user's question as accurately and concisely as possible. "
+    "If the answer requires calculation, show the calculation steps. "
+    "If the answer is not found, say 'Not found in context.'\n\n"
+    "Context:\n{context}\n\n"
+    "Question: {question}\n"
+    "Answer:"
+)
+3. Generator Model Selection（更强生成器模型）
+generator = load_generator(
+    generator_model_name="llama2-7b-chat",
+    use_local_llm=True
+)
+4. 后处理
+5. 检索-生成协同优化：rerank （TODO in future）
