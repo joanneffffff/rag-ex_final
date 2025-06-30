@@ -26,6 +26,10 @@ class LocalLLMGenerator(Generator):
         if model_name is None:
             model_name = config.generator.model_name
         
+        # 如果没有提供device，从config读取
+        if device is None:
+            device = config.generator.device
+        
         # 如果没有提供量化参数，从config读取
         if use_quantization is None:
             use_quantization = config.generator.use_quantization

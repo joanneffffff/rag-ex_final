@@ -30,6 +30,8 @@ from xlm.utils.visualizer import Visualizer
 from xlm.registry.retriever import load_enhanced_retriever
 from xlm.registry.generator import load_generator
 from config.parameters import Config, EncoderConfig, RetrieverConfig, ModalityConfig, EMBEDDING_CACHE_DIR, RERANKER_CACHE_DIR
+from xlm.components.prompt_templates.template_loader import template_loader
+from xlm.utils.stock_info_extractor import extract_stock_info, extract_report_date
 
 # 尝试导入多阶段检索系统
 try:
@@ -490,34 +492,22 @@ class OptimizedRagUI:
                 # 使用多阶段检索系统处理中文查询
                 print("使用多阶段检索系统处理中文查询...")
                 
-                # 提取公司名称和股票代码
-                company_name = None
-                stock_code = None
-                
-                # 提取股票代码
-                stock_match = re.search(r'\((\d{6})\)', question)
-                if stock_match:
-                    stock_code = stock_match.group(1)
+                # 使用通用的股票信息提取函数
+                company_name, stock_code = extract_stock_info(question)
+                report_date = extract_report_date(question)
+                if company_name:
+                    print(f"提取到公司名称: {company_name}")
+                if stock_code:
                     print(f"提取到股票代码: {stock_code}")
-                
-                # 提取公司名称
-                company_patterns = [
-                    r'([^，。？\s]+(?:股份|集团|公司|有限|科技|网络|银行|证券|保险))',
-                    r'([^，。？\s]+(?:股份|集团|公司|有限|科技|网络|银行|证券|保险)[^，。？\s]*)'
-                ]
-                
-                for pattern in company_patterns:
-                    company_match = re.search(pattern, question)
-                    if company_match:
-                        company_name = company_match.group(1)
-                        print(f"提取到公司名称: {company_name}")
-                        break
+                if report_date:
+                    print(f"提取到报告日期: {report_date}")
                 
                 # 执行多阶段检索
                 results = self.chinese_retrieval_system.search(
                     query=question,
                     company_name=company_name,
                     stock_code=stock_code,
+                    report_date=report_date,
                     top_k=20
                 )
                 

@@ -1,12 +1,14 @@
 from xlm.components.generator.generator import Generator
 from xlm.components.retriever.retriever import Retriever
 from xlm.dto.dto import RagOutput
+from xlm.components.prompt_templates.template_loader import template_loader
 import os
 import collections
 import re
 from langdetect import detect, LangDetectException
+from typing import List, Union, Optional, Dict, Any
 
-# Define the robust "Golden Prompts" directly in the code
+# Define the robust "Golden Prompts" directly in the code (only for English)
 PROMPT_TEMPLATE_EN = """You are a highly analytical and precise financial expert. Your task is to answer the user's question **strictly based on the provided <context> information**.
 
 **CRITICAL: Your output must be a pure, direct answer. Do NOT include any self-reflection, thinking process, prompt analysis, irrelevant comments, format markers (like boxed, numbered lists, bold text), or any form of meta-commentary. Do NOT quote or restate the prompt content. Your answer must end directly and concisely without any follow-up explanations.**
@@ -103,7 +105,7 @@ class RagSystem:
         retriever: Retriever,
         generator: Generator,
         retriever_top_k: int,
-        prompt_template: str = None, # No longer used, but kept for compatibility
+        prompt_template: Optional[str] = None, # No longer used, but kept for compatibility
         use_cot: bool = False,  # 是否使用Chain-of-Thought
         use_simple: bool = False,  # 是否使用超简洁模式
     ):
@@ -114,7 +116,7 @@ class RagSystem:
         self.use_cot = use_cot
         self.use_simple = use_simple
 
-    def run(self, user_input: str, language: str = None) -> RagOutput:
+    def run(self, user_input: str, language: Optional[str] = None) -> RagOutput:
         # 1. Detect language of the user's question
         if language is None:
             try:
@@ -131,18 +133,12 @@ class RagSystem:
             text=user_input, top_k=self.retriever_top_k, return_scores=True
         )
 
-        # 3. Select prompt based on question language and format the context
+        # 3. For Chinese queries, we should use multi-stage retrieval system
+        # For now, we'll use a simple fallback for Chinese queries
         if is_chinese_q:
-            if self.use_simple:
-                prompt_template = PROMPT_TEMPLATE_ZH_SIMPLE
-            elif self.use_cot:
-                prompt_template = PROMPT_TEMPLATE_ZH_COT
-            else:
-                # 默认使用简洁版本
-                prompt_template = PROMPT_TEMPLATE_ZH_CLEAN
-            no_context_message = "未找到合适的语料，请检查数据源。"
+            no_context_message = "未找到合适的语料，请检查数据源。建议使用多阶段检索系统处理中文查询。"
         else:
-            prompt_template = PROMPT_TEMPLATE_EN
+            template_name = "rag_english_template"
             no_context_message = "No suitable context found for your question. Please check the data sources."
 
         if not retrieved_documents or (isinstance(retrieved_documents, list) and len(retrieved_documents) == 0):
@@ -163,10 +159,11 @@ class RagSystem:
                     # 处理不同类型的content
                     if isinstance(content, dict):
                         # 如果是字典，优先提取context字段，然后是content字段
-                        if 'context' in content:
-                            context_parts.append(str(content['context']))
-                        elif 'content' in content:
-                            context_parts.append(str(content['content']))
+                        content_dict = content  # type: Dict[str, Any]
+                        if 'context' in content_dict:
+                            context_parts.append(str(content_dict.get('context', '')))
+                        elif 'content' in content_dict:
+                            context_parts.append(str(content_dict.get('content', '')))
                         else:
                             # 如果没有找到context或content字段，将整个字典转为字符串
                             context_parts.append(str(content))
@@ -180,44 +177,26 @@ class RagSystem:
         else:
             context_str = str(retrieved_documents)
         
-        # 4. Create the final prompt
-        # 多层回退机制确保prompt格式化成功
-        prompt = None
-        error_messages = []
-        
-        # 方法1: 使用命名参数格式化
+        # 4. Create the final prompt using template
         try:
-            prompt = prompt_template.format(context=context_str, question=user_input)
-        except (KeyError, IndexError) as e:
-            error_msg = f"命名参数格式化失败: {e}"
-            error_messages.append(error_msg)
-        
-        # 方法2: 如果命名参数失败，尝试使用位置参数
-        if prompt is None:
-            try:
-                prompt = prompt_template.format(context_str, user_input)
-            except Exception as e:
-                error_msg = f"位置参数格式化失败: {e}"
-                error_messages.append(error_msg)
-        
-        # 方法3: 如果位置参数也失败，使用简单回退方案
-        if prompt is None:
-            try:
-                if is_chinese_q:
-                    prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{user_input}\n\n回答："
-                else:
-                    prompt = f"Context: {context_str}\nQuestion: {user_input}\nAnswer:"
-            except Exception as e:
-                error_msg = f"简单回退prompt创建失败: {e}"
-                error_messages.append(error_msg)
-        
-        # 方法4: 最后的兜底方案
-        if prompt is None:
-            prompt = f"Answer this question: {user_input}"
-        
-        # 确保prompt不为None
-        if prompt is None:
-            prompt = "Please answer the question."
+            if is_chinese_q:
+                # 中文查询使用多阶段检索系统，这里只是回退
+                prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{user_input}\n\n回答："
+            else:
+                # 英文查询使用模板
+                prompt = template_loader.format_template(
+                    template_name,
+                    context=context_str, 
+                    question=user_input
+                )
+                if prompt is None:
+                    raise Exception("Template formatting failed")
+        except Exception as e:
+            # 回退到简单prompt
+            if is_chinese_q:
+                prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{user_input}\n\n回答："
+            else:
+                prompt = f"Context: {context_str}\nQuestion: {user_input}\nAnswer:"
         
         # 5. Generate the response
         try:
@@ -227,7 +206,8 @@ class RagSystem:
         
         # 6. Gather metadata
         retriever_model_name = ""
-        if hasattr(self.retriever, 'encoder_en') and hasattr(self.retriever, 'encoder_ch'):
+        # 检查retriever是否有encoder属性
+        if hasattr(self.retriever, 'encoder_ch') and hasattr(self.retriever, 'encoder_en'):
             if is_chinese_q:
                 retriever_model_name = getattr(self.retriever.encoder_ch, 'model_name', 'unknown')
             else:
@@ -235,25 +215,36 @@ class RagSystem:
 
         # 确定prompt模板类型
         if is_chinese_q:
-            if self.use_simple:
-                template_type = "ZH-SIMPLE"
-            elif self.use_cot:
-                template_type = "ZH-COT"
-            else:
-                template_type = "ZH"
+            template_type = "ZH-MULTI-STAGE"
         else:
             template_type = "EN"
 
+        # 确保retrieved_documents是列表类型
+        if not isinstance(retrieved_documents, list):
+            retrieved_documents = [retrieved_documents]
+        
+        # 确保retriever_scores是列表类型且包含float值
+        if not isinstance(retriever_scores, list):
+            retriever_scores = [retriever_scores] if retriever_scores is not None else []
+        
+        # 确保retriever_scores只包含float值
+        float_scores = []
+        for score in retriever_scores:
+            if isinstance(score, (int, float)):
+                float_scores.append(float(score))
+            else:
+                float_scores.append(0.0)
+
         result = RagOutput(
             retrieved_documents=retrieved_documents,
-            retriever_scores=retriever_scores,
+            retriever_scores=float_scores,
             prompt=prompt,
             generated_responses=generated_responses,
             metadata=dict(
                 retriever_model_name=retriever_model_name,
                 top_k=self.retriever_top_k,
                 generator_model_name=self.generator.model_name,
-                prompt_template=f"Golden-{template_type}",
+                prompt_template=f"Template-{template_type}",
                 question_language="zh" if is_chinese_q else "en",
                 use_cot=self.use_cot,
                 use_simple=self.use_simple

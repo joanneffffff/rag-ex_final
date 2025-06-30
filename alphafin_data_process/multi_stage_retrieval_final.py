@@ -28,6 +28,8 @@ except ImportError as e:
     print("请确保xlm目录结构正确")
     exit(1)
 
+from xlm.components.prompt_templates.template_loader import template_loader
+
 def load_json_or_jsonl(file_path: Path) -> List[Dict]:
     """
     兼容加载JSON或JSONL格式文件
@@ -423,7 +425,7 @@ class MultiStageRetrievalSystem:
             # 使用配置中的参数
             model_name = None  # 让LocalLLMGenerator从config读取
             cache_dir = None   # 让LocalLLMGenerator从config读取
-            device = "cuda:1"  # 生成器使用cuda:1
+            device = None      # 让LocalLLMGenerator从config读取
             use_quantization = None  # 让LocalLLMGenerator从config读取
             quantization_type = None  # 让LocalLLMGenerator从config读取
             
@@ -432,6 +434,7 @@ class MultiStageRetrievalSystem:
                 if hasattr(self.config, 'generator'):
                     model_name = self.config.generator.model_name
                     cache_dir = self.config.generator.cache_dir
+                    device = self.config.generator.device
                     use_quantization = self.config.generator.use_quantization
                     quantization_type = self.config.generator.quantization_type
             
@@ -694,42 +697,34 @@ class MultiStageRetrievalSystem:
                 # 根据数据集类型选择prompt模板
                 if self.dataset_type == "chinese":
                     # 中文prompt模板
-                    prompt = f"基于以下上下文信息，回答用户的问题。\n\n上下文：{context}\n\n问题：{query}\n\n回答："
+                    prompt = template_loader.format_template(
+                        "multi_stage_chinese_template",
+                        context=context, 
+                        query=query
+                    )
                 else:
                     # 英文prompt模板
-                    prompt = f"""You are a highly analytical and precise financial expert. Your task is to answer the user's question **strictly based on the provided context information**.
-
-**CRITICAL: Your output must be a pure, direct answer. Do NOT include any self-reflection, thinking process, prompt analysis, irrelevant comments, format markers (like boxed, numbered lists, bold text), or any form of meta-commentary. Do NOT quote or restate the prompt content. Your answer must end directly and concisely without any follow-up explanations.**
-
-Requirements:
-1.  **Strictly adhere to the provided context. Do not use any external knowledge or make assumptions.**
-2.  If the context does not contain sufficient information to answer the question, state: "The answer cannot be found in the provided context."
-3.  For questions involving financial predictions or future outlook, prioritize information explicitly stated as forecasts or outlooks within the context.
-4.  Provide a concise and direct answer in complete sentences.
-5.  Do not repeat the question or add conversational fillers.
-
-Context:
-{context}
-
-Question: {query}
-
-Answer:"""
+                    prompt = template_loader.format_template(
+                        "multi_stage_english_template",
+                        context=context, 
+                        query=query
+                    )
                 
-                # 使用LocalLLMGenerator的generate方法
-                generated_texts = self.llm_generator.generate([prompt])
-                answer = generated_texts[0] if generated_texts else "抱歉，无法生成答案。"
+                if prompt is None:
+                    # 回退到简单prompt
+                    if self.dataset_type == "chinese":
+                        prompt = f"基于以下上下文回答问题：\n\n{context}\n\n问题：{query}\n\n回答："
+                    else:
+                        prompt = f"Context: {context}\nQuestion: {query}\nAnswer:"
+                
+                # 生成答案
+                answer = self.llm_generator.generate(texts=[prompt])[0]
+                return answer
             except Exception as e:
-                print(f"LLM生成失败: {e}")
-                answer = f"抱歉，生成答案时出现错误：{str(e)}"
+                print(f"生成答案时出错: {e}")
+                return "生成答案时出现错误。"
         else:
-            # 回退到默认的简单模板回答
-            if self.dataset_type == "chinese":
-                answer = f"基于检索到的信息，我可以回答您的问题：{query}\n\n相关上下文：{context[:500]}...\n\n这是一个基于检索结果的回答。"
-            else:
-                answer = f"Based on the retrieved information, I can answer your question: {query}\n\nRelevant context: {context[:500]}...\n\nThis is an answer based on the retrieved results."
-        
-        print(f"LLM答案生成完成")
-        return answer
+            return "未配置LLM生成器。"
     
     def search(self, 
                query: str,

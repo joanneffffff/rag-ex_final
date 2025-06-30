@@ -28,6 +28,8 @@ from xlm.utils.visualizer import Visualizer
 from xlm.registry.retriever import load_enhanced_retriever
 from xlm.registry.generator import load_generator
 from config.parameters import Config, EncoderConfig, RetrieverConfig, ModalityConfig, EMBEDDING_CACHE_DIR, RERANKER_CACHE_DIR
+from xlm.components.prompt_templates.template_loader import template_loader
+from xlm.utils.stock_info_extractor import extract_stock_info, extract_report_date
 
 # 尝试导入多阶段检索系统
 try:
@@ -339,34 +341,13 @@ class OptimizedRagUIWithMultiStage:
             return self._fallback_retrieval(question, 'zh')
         
         try:
-            # 尝试提取公司名称和股票代码用于元数据过滤
-            company_name = None
-            stock_code = None
-            
-            # 简单的实体提取
-            import re
-            # 提取股票代码
-            stock_match = re.search(r'\((\d{6})\)', question)
-            if stock_match:
-                stock_code = stock_match.group(1)
-            
-            # 提取公司名称（简单实现）
-            company_patterns = [
-                r'([^，。？\s]+(?:股份|集团|公司|有限|科技|网络|银行|证券|保险))',
-                r'([^，。？\s]+(?:股份|集团|公司|有限|科技|网络|银行|证券|保险)[^，。？\s]*)'
-            ]
-            
-            for pattern in company_patterns:
-                company_match = re.search(pattern, question)
-                if company_match:
-                    company_name = company_match.group(1)
-                    break
-            
-            # 执行多阶段检索
+            company_name, stock_code = extract_stock_info(question)
+            report_date = extract_report_date(question)
             results = self.chinese_retrieval_system.search(
                 query=question,
                 company_name=company_name,
                 stock_code=stock_code,
+                report_date=report_date,
                 top_k=20
             )
             
@@ -414,8 +395,9 @@ class OptimizedRagUIWithMultiStage:
             
             if retrieved_documents:
                 context_str = "\n\n".join([doc.content for doc in retrieved_documents[:10]])
-                from xlm.components.rag_system.rag_system import PROMPT_TEMPLATE_ZH
-                prompt = PROMPT_TEMPLATE_ZH.format(context=context_str, question=question)
+                # 中文查询使用多阶段检索系统，直接使用简单prompt
+                prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question}\n\n回答："
+                
                 generated_responses = self.generator.generate(texts=[prompt])
                 answer = generated_responses[0] if generated_responses else "Unable to generate answer"
                 context_data = []
@@ -460,8 +442,16 @@ class OptimizedRagUIWithMultiStage:
             
             if retrieved_documents:
                 context_str = "\n\n".join([doc.content for doc in retrieved_documents[:10]])
-                from xlm.components.rag_system.rag_system import PROMPT_TEMPLATE_EN
-                prompt = PROMPT_TEMPLATE_EN.format(context=context_str, question=question)
+                # 使用模板加载器获取英文prompt
+                prompt = template_loader.format_template(
+                    "rag_english_template",
+                    context=context_str, 
+                    question=question
+                )
+                if prompt is None:
+                    # 回退到简单prompt
+                    prompt = f"Context: {context_str}\nQuestion: {question}\nAnswer:"
+                
                 generated_responses = self.generator.generate(texts=[prompt])
                 answer = generated_responses[0] if generated_responses else "Unable to generate answer"
                 context_data = []
@@ -491,11 +481,18 @@ class OptimizedRagUIWithMultiStage:
                 
                 # 根据语言选择prompt模板
                 if language == 'zh':
-                    from xlm.components.rag_system.rag_system import PROMPT_TEMPLATE_ZH
-                    prompt = PROMPT_TEMPLATE_ZH.format(context=context_str, question=question)
+                    # 中文查询使用多阶段检索系统，直接使用简单prompt
+                    prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question}\n\n回答："
                 else:
-                    from xlm.components.rag_system.rag_system import PROMPT_TEMPLATE_EN
-                    prompt = PROMPT_TEMPLATE_EN.format(context=context_str, question=question)
+                    # 使用模板加载器获取英文prompt
+                    prompt = template_loader.format_template(
+                        "rag_english_template",
+                        context=context_str, 
+                        question=question
+                    )
+                    if prompt is None:
+                        # 回退到简单prompt
+                        prompt = f"Context: {context_str}\nQuestion: {question}\nAnswer:"
                 
                 # 生成答案
                 generated_responses = self.generator.generate(texts=[prompt])

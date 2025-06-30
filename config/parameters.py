@@ -64,6 +64,7 @@ class DataConfig:
     # 数据路径配置
     chinese_data_path: str = "data/alphafin/alphafin_merged_generated_qa.json"  # 中文数据路径
     english_data_path: str = "evaluate_mrr/tatqa_train_qc.jsonl"     # 英文数据路径
+    prompt_template_dir: str = "data/prompt_templates"  # prompt模板目录
 
 @dataclass
 class ModalityConfig:
@@ -85,6 +86,7 @@ class GeneratorConfig:
     # model_name: str = "Qwen/Qwen3-8B"  # Qwen3-8B基础版本，更大的模型，替代Fin-R1
     model_name: str = "SUFE-AIFLM-Lab/Fin-R1"  # 上海财经大学金融推理大模型，专门针对金融领域优化
     cache_dir: str = GENERATOR_CACHE_DIR
+    device: Optional[str] = "cuda:1"  # 生成器使用cuda:1
     
     # 模型特定配置 - 针对Qwen3-8B优化的参数
     use_quantization: bool = True  # 是否使用量化
@@ -107,6 +109,7 @@ class Config:
     modality: ModalityConfig = field(default_factory=ModalityConfig)
     system: SystemConfig = field(default_factory=SystemConfig)
     generator: GeneratorConfig = field(default_factory=GeneratorConfig)
+    prompt_template_dir: str = "data/prompt_templates"  # prompt模板目录
 
     def __post_init__(self):
         # Propagate the global cache_dir to other configs if they have it
