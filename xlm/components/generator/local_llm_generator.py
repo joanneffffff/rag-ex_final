@@ -1,4 +1,5 @@
 import os
+import json
 from typing import List, Optional
 
 import torch
@@ -121,6 +122,62 @@ class LocalLLMGenerator(Generator):
             self.model_name,
             **model_kwargs
         )
+    
+    def convert_to_json_chat_format(self, text):
+        """将单一字符串转换为JSON聊天格式"""
+        
+        # 检测是否包含系统指令
+        if "你是一位专业的金融分析师" in text:
+            # 提取system部分 - 查找系统指令的开始和结束
+            system_start = text.find("你是一位专业的金融分析师")
+            
+            # 查找系统指令的结束位置（通常是"【公司财务报告摘要】"或"【公司财务报告片段】"之前）
+            context_markers = ["【公司财务报告摘要】", "【公司财务报告片段】", "【完整公司财务报告片段】"]
+            context_start = -1
+            for marker in context_markers:
+                pos = text.find(marker)
+                if pos != -1:
+                    context_start = pos
+                    break
+            
+            if system_start != -1 and context_start != -1:
+                system_content = text[system_start:context_start].strip()
+                user_content = text[context_start:].strip()
+                
+                # 构造JSON格式
+                json_chat = [
+                    {
+                        "role": "system",
+                        "content": system_content
+                    },
+                    {
+                        "role": "user", 
+                        "content": user_content
+                    }
+                ]
+                
+                return json.dumps(json_chat, ensure_ascii=False)
+        
+        return text
+
+    def convert_json_to_fin_r1_format(self, json_chat):
+        """将JSON格式转换为Fin-R1聊天格式"""
+        
+        try:
+            chat_data = json.loads(json_chat)
+            fin_r1_format = ""
+            
+            for message in chat_data:
+                if message["role"] == "system":
+                    fin_r1_format += f'<|im_start|>system\n{message["content"]}<|im_end|>\n'
+                elif message["role"] == "user":
+                    fin_r1_format += f'<|im_start|>user\n{message["content"]}<|im_end|>\n'
+            
+            fin_r1_format += '<|im_start|>assistant\n'
+            return fin_r1_format
+            
+        except json.JSONDecodeError:
+            return json_chat
         
     def generate(self, texts: List[str]) -> List[str]:
         responses = []
@@ -133,14 +190,33 @@ class LocalLLMGenerator(Generator):
             if hasattr(self.tokenizer, 'device') and self.tokenizer.device != self.device:
                 print(f"Warning: Tokenizer device mismatch. Moving to {self.device}")
             
+            # 检查输入长度
+            print(f"Input text length: {len(text)} characters")
+            
+            # 检查Fin-R1是否支持聊天格式
+            if "Fin-R1" in self.model_name:
+                print("Fin-R1 detected, converting to JSON chat format...")
+                # 转换为JSON格式
+                json_chat = self.convert_to_json_chat_format(text)
+                print(f"JSON chat format length: {len(json_chat)} characters")
+                
+                # 转换为Fin-R1格式
+                text = self.convert_json_to_fin_r1_format(json_chat)
+                print(f"Converted to Fin-R1 format, length: {len(text)} characters")
+            else:
+                print("Non-Fin-R1 model detected, using original format...")
+            
             # 优化：直接用tokenizer.__call__处理padding和truncation
+            # 移除max_length限制，完全避免截断
             inputs = self.tokenizer(
                 text,
                 return_tensors="pt",
-                truncation=True,
-                max_length=1024,
-                padding="max_length"
+                truncation=False,  # 完全禁用截断
+                padding=False,     # 改为False，避免不必要的padding
+                add_special_tokens=True
             )
+            
+            print(f"Tokenized input length: {inputs['input_ids'].shape[1]} tokens")
             
             # 确保所有输入都在正确的设备上
             model_device = next(self.model.parameters()).device
@@ -166,7 +242,8 @@ class LocalLLMGenerator(Generator):
                     temperature=self.temperature,
                     pad_token_id=self.tokenizer.eos_token_id,  # Use eos_token_id for padding
                     repetition_penalty=1.1,  # 添加重复惩罚
-                    length_penalty=1.0  # 添加长度惩罚
+                    length_penalty=1.0,  # 添加长度惩罚
+                    eos_token_id=self.tokenizer.eos_token_id  # 明确指定结束token
                 )
             
             # Decode the response

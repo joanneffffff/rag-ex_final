@@ -438,14 +438,35 @@ class MultiStageRetrievalSystem:
                     use_quantization = self.config.generator.use_quantization
                     quantization_type = self.config.generator.quantization_type
             
-            self.llm_generator = LocalLLMGenerator(
-                model_name=model_name,
-                cache_dir=cache_dir,
-                device=device,
-                use_quantization=use_quantization,
-                quantization_type=quantization_type
-            )
-            print("LLM生成器初始化完成")
+            # 首先尝试GPU模式
+            try:
+                print(f"尝试GPU模式加载LLM生成器: {device}")
+                self.llm_generator = LocalLLMGenerator(
+                    model_name=model_name,
+                    cache_dir=cache_dir,
+                    device=device,
+                    use_quantization=use_quantization,
+                    quantization_type=quantization_type
+                )
+                print("✅ LLM生成器GPU模式初始化完成")
+            except Exception as gpu_error:
+                print(f"❌ GPU模式加载失败: {gpu_error}")
+                print("回退到CPU模式...")
+                
+                # 回退到CPU模式
+                try:
+                    self.llm_generator = LocalLLMGenerator(
+                        model_name=model_name,
+                        cache_dir=cache_dir,
+                        device="cpu",  # 强制使用CPU
+                        use_quantization=False,  # CPU模式不使用量化
+                        quantization_type=None
+                    )
+                    print("✅ LLM生成器CPU模式初始化完成")
+                except Exception as cpu_error:
+                    print(f"❌ CPU模式也失败: {cpu_error}")
+                    self.llm_generator = None
+                    
         except Exception as e:
             print(f"LLM生成器初始化失败: {e}")
             self.llm_generator = None
@@ -652,7 +673,7 @@ class MultiStageRetrievalSystem:
     
     def generate_answer(self, query: str, candidate_results: List[Tuple[int, float, float]], top_k_for_context: int = 5) -> str:
         """
-        生成LLM答案 - 将重排序后的Top-K1个chunks拼接作为上下文
+        生成LLM答案 - 使用智能上下文提取，大幅缩短传递给LLM的上下文
         
         Args:
             query: 查询文本
@@ -667,29 +688,13 @@ class MultiStageRetrievalSystem:
             return ""
         
         print(f"开始生成LLM答案...")
+        print(f"原始查询: '{query}'")
+        print(f"查询长度: {len(query)} 字符")
         
-        # 获取重排序后的Top-K1个文档的chunks
-        top_chunks = []
-        for doc_idx, faiss_score, reranker_score in candidate_results[:top_k_for_context]:
-            if doc_idx in self.doc_to_chunks_mapping:
-                chunks = self.doc_to_chunks_mapping[doc_idx]
-                # 添加所有chunks
-                top_chunks.extend(chunks)
-            else:
-                # 如果找不到映射，使用原始数据
-                if doc_idx < len(self.data):
-                    record = self.data[doc_idx]
-                    if self.dataset_type == "chinese":
-                        content = record.get('summary', '')
-                    else:
-                        content = record.get('context', '')
-                    top_chunks.append(content)
+        # 使用智能上下文提取，限制在2000字符以内
+        context = self.extract_relevant_context(query, candidate_results, max_chars=2000)
         
-        # 拼接chunks作为上下文
-        context = "\n\n".join([chunk for chunk in top_chunks if chunk.strip()])
-        
-        print(f"上下文长度: {len(context)} 个字符")
-        print(f"使用了 {len(top_chunks)} 个chunks")
+        print(f"智能提取的上下文长度: {len(context)} 个字符")
         
         # 使用LLM生成器生成答案
         if self.llm_generator:
@@ -717,8 +722,58 @@ class MultiStageRetrievalSystem:
                     else:
                         prompt = f"Context: {context}\nQuestion: {query}\nAnswer:"
                 
+                # ===== 详细的Prompt调试信息 =====
+                print("\n" + "="*80)
+                print("🔍 PROMPT调试信息")
+                print("="*80)
+                print(f"📝 模板名称: {'multi_stage_chinese_template' if self.dataset_type == 'chinese' else 'multi_stage_english_template'}")
+                print(f"📏 完整Prompt长度: {len(prompt)} 字符")
+                print(f"📋 原始查询: '{query}'")
+                print(f"📋 查询长度: {len(query)} 字符")
+                print(f"📄 上下文长度: {len(context)} 字符")
+                print(f"📄 上下文前200字符: '{context[:200]}...'")
+                print(f"📄 上下文后200字符: '...{context[-200:]}'")
+                
+                # 检查Prompt是否被截断
+                if len(prompt) > 10000:
+                    print("⚠️  WARNING: Prompt长度超过10000字符，可能被截断")
+                else:
+                    print("✅ Prompt长度正常")
+                
+                # 检查查询是否在Prompt中
+                if query in prompt:
+                    print("✅ 查询正确包含在Prompt中")
+                else:
+                    print("❌ 查询未在Prompt中找到！")
+                    print(f"   期望的查询: '{query}'")
+                    print(f"   Prompt中的查询部分: '{prompt.split('问题：')[-1].split('回答：')[0] if '问题：' in prompt else 'NOT_FOUND'}'")
+                
+                # 检查上下文是否在Prompt中
+                if context[:100] in prompt:
+                    print("✅ 上下文正确包含在Prompt中")
+                else:
+                    print("❌ 上下文未在Prompt中找到！")
+                
+                print("\n" + "="*80)
+                print("📤 发送给LLM的完整Prompt:")
+                print("="*80)
+                print(prompt)
+                print("="*80)
+                print("📤 Prompt结束")
+                print("="*80 + "\n")
+                
                 # 生成答案
                 answer = self.llm_generator.generate(texts=[prompt])[0]
+                
+                # ===== 答案调试信息 =====
+                print("\n" + "="*80)
+                print("📥 LLM生成的答案:")
+                print("="*80)
+                print(answer)
+                print("="*80)
+                print("📥 答案结束")
+                print("="*80 + "\n")
+                
                 return answer
             except Exception as e:
                 print(f"生成答案时出错: {e}")
@@ -906,6 +961,150 @@ class MultiStageRetrievalSystem:
         
         print(f"索引已从 {index_dir} 加载")
         print(f"数据集类型: {self.dataset_type}")
+
+    def extract_relevant_context(self, query: str, candidate_results: List[Tuple[int, float, float]], max_chars: int = 2000) -> str:
+        """
+        智能提取与查询最相关的上下文片段
+        
+        Args:
+            query: 查询文本
+            candidate_results: 候选结果列表
+            max_chars: 最大字符数限制
+            
+        Returns:
+            提取的相关上下文
+        """
+        print(f"🔍 开始智能提取相关上下文...")
+        print(f"📋 查询: {query}")
+        print(f"📊 候选文档数: {len(candidate_results)}")
+        
+        # 提取查询关键词
+        query_keywords = self._extract_keywords(query)
+        print(f"🔑 查询关键词: {query_keywords}")
+        
+        relevant_sentences = []
+        total_chars = 0
+        
+        # 只处理前3个最相关的文档
+        for doc_idx, faiss_score, reranker_score in candidate_results[:3]:
+            if doc_idx >= len(self.data):
+                continue
+                
+            record = self.data[doc_idx]
+            
+            # 获取文档内容
+            if self.dataset_type == "chinese":
+                content = record.get('summary', '') or record.get('original_context', '')
+            else:
+                content = record.get('context', '') or record.get('content', '')
+            
+            if not content:
+                continue
+            
+            # 提取最相关的句子
+            relevant_sentences_for_doc = self._extract_relevant_sentences(content, query_keywords, max_chars_per_doc=800)
+            
+            for sentence in relevant_sentences_for_doc:
+                if total_chars + len(sentence) <= max_chars:
+                    relevant_sentences.append(sentence)
+                    total_chars += len(sentence)
+                else:
+                    break
+            
+            if total_chars >= max_chars:
+                break
+        
+        # 如果没有找到相关句子，使用文档摘要
+        if not relevant_sentences:
+            print("⚠️ 未找到相关句子，使用文档摘要...")
+            for doc_idx, _, _ in candidate_results[:2]:
+                if doc_idx < len(self.data):
+                    record = self.data[doc_idx]
+                    if self.dataset_type == "chinese":
+                        summary = record.get('summary', '')
+                        if summary and len(summary) <= 500:
+                            relevant_sentences.append(summary)
+                            break
+                    else:
+                        content = record.get('context', '')
+                        if content and len(content) <= 500:
+                            relevant_sentences.append(content[:500])
+                            break
+        
+        # 拼接上下文
+        context = "\n\n".join(relevant_sentences)
+        
+        print(f"✅ 上下文提取完成:")
+        print(f"   📏 字符数: {len(context)}")
+        print(f"   📄 句子数: {len(relevant_sentences)}")
+        print(f"   📝 前100字符: {context[:100]}...")
+        
+        return context
+    
+    def _extract_keywords(self, query: str) -> List[str]:
+        """提取查询关键词"""
+        # 简单的关键词提取
+        keywords = []
+        
+        # 提取股票代码
+        import re
+        stock_pattern = r'[A-Z]{2}\d{4}|[A-Z]{2}\d{6}|\d{6}'
+        stock_matches = re.findall(stock_pattern, query)
+        keywords.extend(stock_matches)
+        
+        # 提取公司名称
+        company_pattern = r'([A-Za-z\u4e00-\u9fff]+)(?:公司|集团|股份|有限)'
+        company_matches = re.findall(company_pattern, query)
+        keywords.extend(company_matches)
+        
+        # 提取年份
+        year_pattern = r'20\d{2}年'
+        year_matches = re.findall(year_pattern, query)
+        keywords.extend(year_matches)
+        
+        # 提取关键概念
+        key_concepts = ['利润', '营收', '增长', '业绩', '预测', '原因', '主要', '持续']
+        for concept in key_concepts:
+            if concept in query:
+                keywords.append(concept)
+        
+        return list(set(keywords))
+    
+    def _extract_relevant_sentences(self, content: str, keywords: List[str], max_chars_per_doc: int = 800) -> List[str]:
+        """从文档中提取与关键词最相关的句子"""
+        if not content or not keywords:
+            return []
+        
+        # 按句子分割
+        import re
+        sentences = re.split(r'[。！？\n]+', content)
+        sentences = [s.strip() for s in sentences if s.strip()]
+        
+        # 计算每个句子的相关性分数
+        sentence_scores = []
+        for sentence in sentences:
+            score = 0
+            for keyword in keywords:
+                if keyword in sentence:
+                    score += 1
+            # 考虑句子长度，避免过长的句子
+            if len(sentence) > 200:
+                score *= 0.5
+            sentence_scores.append((sentence, score))
+        
+        # 按分数排序
+        sentence_scores.sort(key=lambda x: x[1], reverse=True)
+        
+        # 选择最相关的句子
+        selected_sentences = []
+        total_chars = 0
+        
+        for sentence, score in sentence_scores:
+            if score > 0 and total_chars + len(sentence) <= max_chars_per_doc:
+                selected_sentences.append(sentence)
+                total_chars += len(sentence)
+        
+        return selected_sentences
 
 def main():
     """主函数 - 演示多阶段检索系统"""
