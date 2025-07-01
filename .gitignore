@@ -33,24 +33,34 @@ logs/
 .pytest_cache/
 
 # --- Data and Generated Output Specific Ignores (CRITICAL for your goal) ---
-# 1. 默认忽略 'data/' 目录下所有层级的文件和子目录的内容
-#    这是最宽泛的忽略规则，会递归忽略 data/ 下的一切。
-data/**/*
 
-# 2. 精确包含你想要追踪的那个特定文件
-#    这条规则否定了上面的 data/**/* 规则，只允许这一个文件被追踪。
-#    不需要单独的 !data/alphafin/ 规则了，因为 Git 足够智能可以直接找到文件。
+# 1. 首先，忽略 'data/' 目录下所有层级的文件和子目录的内容
+#    **但不要直接忽略目录本身，否则下面的重新包含会失效**
+#    这条规则应该放在前面，作为宽泛的忽略
+data/* # 忽略 data/ 下的所有文件，但不包括子目录本身
+data/**/*/ # 忽略 data/ 下所有子目录中的所有文件和子目录
+
+# 2. 精确重新包含你想要追踪的特定目录本身
+#    **这一步至关重要！确保目录本身不被忽略。**
+!data/alphafin/
+!data/prompt_templates/
+
+# 3. 然后，在这些被重新包含的目录下，再进行细粒度的排除和包含
+#    **现在这些规则可以正常工作了，因为它们所在的目录已经被重新包含。**
+
+# 忽略 data/alphafin/ 目录下除指定文件外的所有文件
+data/alphafin/*
 !data/alphafin/alphafin_summarized_and_structured_qa_0627_b8_s50_fullsentence.json
 !data/alphafin/alphafin_summarized_and_structured_qa_0627_colab_backward.json
 !data/alphafin/alphafin_summarized_and_structured_qa_0628_colab_backward.json
 !data/alphafin/alphafin_summarized_and_structured_qa_0628_colab_missing.json
 !data/alphafin/alphafin_merged_generated_qa.json
 
+# 忽略 data/prompt_templates/ 目录下除指定文件外的所有文件
 data/prompt_templates/*
 !data/prompt_templates/multi_stage_chinese_template.txt
 !data/prompt_templates/rag_english_template.txt
 
-# --- Other Specific Ignores (If you have other top-level directories to ignore) ---
-# 例如，如果你有 models/ 或 checkpoints/ 目录需要忽略，可以在这里添加：
+# --- Other Specific Ignores ---
 models/
 checkpoints/
