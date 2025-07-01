@@ -391,41 +391,52 @@ class LocalLLMGenerator(Generator):
         # 打印调试信息
         print(f"🔧 生成参数调试:")
         print(f"   - max_new_tokens: {self.max_new_tokens}")
-        print(f"   - temperature: {self.temperature}")
-        print(f"   - top_p: {self.top_p}")
-        print(f"   - do_sample: {getattr(self.config.generator, 'do_sample', False)}")
         print(f"   - model_type: {model_config['model_type']}")
+        
+        # 根据模型类型显示相关参数
+        if model_config["model_type"] == "fin_r1":
+            print(f"   - do_sample: False (Fin-R1使用确定性生成)")
+            print(f"   - repetition_penalty: 1.1")
+        else:
+            print(f"   - temperature: {self.temperature}")
+            print(f"   - top_p: {self.top_p}")
+            print(f"   - do_sample: {getattr(self.config.generator, 'do_sample', False)}")
         
         # 获取配置参数
         do_sample = getattr(self.config.generator, 'do_sample', False)
         repetition_penalty = getattr(self.config.generator, 'repetition_penalty', 1.1)
         
         # 根据模型类型选择不同的生成参数
-        generation_kwargs = {
-            "input_ids": input_ids,
-            "attention_mask": attention_mask,
-            "max_new_tokens": self.max_new_tokens,
-            "do_sample": do_sample,
-            "pad_token_id": model_config["pad_token_id"],
-            "eos_token_id": model_config["eos_token_id"],
-            "repetition_penalty": repetition_penalty
-        }
-        
-        # 与test_clean.py保持一致：只使用模型支持的参数
-        if do_sample and model_config["model_type"] != "fin_r1":
-            generation_kwargs.update({
-                "top_p": self.top_p,
-                "temperature": self.temperature,
-                "no_repeat_ngram_size": 3
-            })
-        elif model_config["model_type"] == "fin_r1":
-            # Fin-R1 参数：与test_clean.py完全一致
-            generation_kwargs.update({
+        if model_config["model_type"] == "fin_r1":
+            # Fin-R1 参数：只使用模型支持的参数，避免警告
+            generation_kwargs = {
+                "input_ids": input_ids,
+                "attention_mask": attention_mask,
+                "max_new_tokens": self.max_new_tokens,
                 "do_sample": False,  # 使用确定性生成
-                "repetition_penalty": 1.1,  # 防止重复
                 "pad_token_id": model_config["pad_token_id"],
-                "eos_token_id": model_config["eos_token_id"]
-            })
+                "eos_token_id": model_config["eos_token_id"],
+                "repetition_penalty": 1.1  # 防止重复
+            }
+        else:
+            # 其他模型：使用完整的生成参数
+            generation_kwargs = {
+                "input_ids": input_ids,
+                "attention_mask": attention_mask,
+                "max_new_tokens": self.max_new_tokens,
+                "do_sample": do_sample,
+                "pad_token_id": model_config["pad_token_id"],
+                "eos_token_id": model_config["eos_token_id"],
+                "repetition_penalty": repetition_penalty
+            }
+            
+            # 添加采样相关参数（仅对非Fin-R1模型）
+            if do_sample:
+                generation_kwargs.update({
+                    "top_p": self.top_p,
+                    "temperature": self.temperature,
+                    "no_repeat_ngram_size": 3
+                })
         
         print(f"   - 最终使用的max_new_tokens: {generation_kwargs['max_new_tokens']}")
         print(f"   - 生成参数数量: {len(generation_kwargs)}")
