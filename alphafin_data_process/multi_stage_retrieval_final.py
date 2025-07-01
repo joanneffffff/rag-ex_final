@@ -390,7 +390,7 @@ class MultiStageRetrievalSystem:
             model_name = "Qwen/Qwen3-Reranker-0.6B"
             cache_dir = DEFAULT_CACHE_DIR  # 使用DEFAULT_CACHE_DIR
             use_quantization = True
-            quantization_type = "8bit"
+            quantization_type = "4bit"
             
             if self.config:
                 model_name = self.config.reranker.model_name

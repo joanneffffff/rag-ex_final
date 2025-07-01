@@ -99,8 +99,8 @@ class LocalLLMGenerator(Generator):
             # 启用内存缓存
             torch.cuda.empty_cache()
             
-            # 设置内存分配策略
-            os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:128'
+            # 设置更激进的内存分配策略
+            os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True,max_split_size_mb:64'
             
             # 如果内存不足，启用梯度检查点
             if hasattr(self.config.generator, 'use_gradient_checkpointing'):
@@ -124,7 +124,7 @@ class LocalLLMGenerator(Generator):
         model_kwargs = {
             "cache_dir": self.cache_dir,
             "low_cpu_mem_usage": True,
-            "use_cache": True,
+            "use_cache": False,  # 禁用 KV 缓存以节省内存
         }
 
         # 根据配置应用量化
@@ -141,6 +141,8 @@ class LocalLLMGenerator(Generator):
             elif self.quantization_type == "8bit":
                 quantization_config = BitsAndBytesConfig(
                     load_in_8bit=True,
+                    llm_int8_threshold=6.0,
+                    llm_int8_has_fp16_weight=False,
                 )
             else:
                 print(f"Unknown quantization type: {self.quantization_type}, falling back to 4bit")
@@ -409,7 +411,7 @@ class LocalLLMGenerator(Generator):
             "repetition_penalty": repetition_penalty
         }
         
-        # 只在需要时添加采样参数（Fin-R1 不支持某些参数）
+        # 与test_clean.py保持一致：只使用模型支持的参数
         if do_sample and model_config["model_type"] != "fin_r1":
             generation_kwargs.update({
                 "top_p": self.top_p,
@@ -417,10 +419,12 @@ class LocalLLMGenerator(Generator):
                 "no_repeat_ngram_size": 3
             })
         elif model_config["model_type"] == "fin_r1":
-            # Fin-R1 专用参数
+            # Fin-R1 参数：与test_clean.py完全一致
             generation_kwargs.update({
-                "do_sample": False,  # Fin-R1 推荐使用确定性生成
-                "repetition_penalty": 1.1  # 适中的重复惩罚
+                "do_sample": False,  # 使用确定性生成
+                "repetition_penalty": 1.1,  # 防止重复
+                "pad_token_id": model_config["pad_token_id"],
+                "eos_token_id": model_config["eos_token_id"]
             })
         
         print(f"   - 最终使用的max_new_tokens: {generation_kwargs['max_new_tokens']}")
@@ -910,7 +914,7 @@ class LocalLLMGenerator(Generator):
         
         if "Fin-R1" in self.model_name:
             config.update({
-                "eos_token_id": 151643,  # Fin-R1的EOS token ID
+                "eos_token_id": 151645,  # Fin-R1的EOS token ID (修正)
                 "pad_token_id": 0,
                 "model_type": "fin_r1"
             })

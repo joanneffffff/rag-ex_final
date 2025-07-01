@@ -83,7 +83,7 @@ def load_generator(
             device=device,
             cache_dir=final_cache_dir,
             use_quantization=use_quantization,
-            quantization_type="8bit",
+            quantization_type="4bit",
             use_flash_attention=False
         )
     else:

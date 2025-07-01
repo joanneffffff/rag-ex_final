@@ -21,6 +21,7 @@ def extract_stock_info(query: str) -> Tuple[Optional[str], Optional[str]]:
     6. 德赛电池（000049.SH） - 中文括号+后缀
     7. 德赛电池000049.SZ - 无括号+后缀
     8. 德赛电池 000049 - 空格分隔
+    9. 首钢股份的业绩表现如何？ - 仅公司名称，无股票代码
     
     Args:
         query: 查询文本
@@ -84,7 +85,20 @@ def extract_stock_info(query: str) -> Tuple[Optional[str], Optional[str]]:
                 company_name = match.group(1)
                 break
     
-    # 4. 清理股票代码（移除交易所后缀用于索引匹配）
+    # 4. 如果没有找到股票代码，尝试提取仅公司名称（新增步骤）
+    if not company_name:
+        company_patterns = [
+            r'([^，。？\s]+(?:股份|集团|公司|有限|科技|网络|银行|证券|保险))',
+            r'([^，。？\s]+(?:股份|集团|公司|有限|科技|网络|银行|证券|保险)[^，。？\s]*)'
+        ]
+        
+        for pattern in company_patterns:
+            company_match = re.search(pattern, query)
+            if company_match:
+                company_name = company_match.group(1)
+                break
+    
+    # 5. 清理股票代码（移除交易所后缀用于索引匹配）
     if stock_code:
         # 提取纯6位数字代码
         pure_code_match = re.search(r'(\d{6})', stock_code)

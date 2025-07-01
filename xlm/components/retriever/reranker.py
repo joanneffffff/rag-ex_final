@@ -16,7 +16,7 @@ class QwenReranker:
         device: Optional[str] = None,
         cache_dir: Optional[str] = None,
         use_quantization: bool = True,
-        quantization_type: str = "8bit",  # "8bit" or "4bit"
+        quantization_type: str = "4bit",  # "4bit" or "8bit"
         use_flash_attention: bool = False
     ):
         """

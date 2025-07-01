@@ -83,21 +83,21 @@ class SystemConfig:
 class GeneratorConfig:
     # 可选的生成器模型
     # model_name: str = "Qwen/Qwen2-1.5B-Instruct"  # 原始小模型
-    model_name: str = "Qwen/Qwen3-8B"  # Qwen3-8B基础版本，更大的模型，替代Fin-R1
-    # model_name: str = "SUFE-AIFLM-Lab/Fin-R1"  # 上海财经大学金融推理大模型，专门针对金融领域优化
+    # model_name: str = "Qwen/Qwen3-8B"  # Qwen3-8B基础版本，更大的模型，替代Fin-R1
+    model_name: str = "SUFE-AIFLM-Lab/Fin-R1"  # 上海财经大学金融推理大模型，专门针对金融领域优化
     cache_dir: str = GENERATOR_CACHE_DIR
-    device: Optional[str] = "cuda:0"  # 改为cuda:0，因为GPU 0使用率更低
+    device: Optional[str] = "cuda:1"  # 改为cuda:1，避免与其他组件冲突
     
-    # 模型特定配置 - 针对Qwen3-8B优化的参数
+    # 模型特定配置 - 与test_clean.py保持一致
     use_quantization: bool = True  # 是否使用量化
-    quantization_type: str = "4bit"  # 改为4bit量化以节省GPU内存
-    max_new_tokens: int = 200  # 进一步减少到200，避免停滞
-    temperature: float = 0.1  # 进一步降低温度，获得更简洁的回答
-    top_p: float = 0.7  # 进一步降低top-p，减少冗长
-    do_sample: bool = False  # 改为False，使用贪婪解码提高速度
-    repetition_penalty: float = 1.1  # 减少重复惩罚，提高速度
+    quantization_type: str = "4bit"  # 使用4bit量化以节省内存
+    max_new_tokens: int = 150  # 与test_clean.py一致
+    temperature: float = 0.1  # 不使用temperature（do_sample=False时）
+    top_p: float = 0.7  # 不使用top_p（do_sample=False时）
+    do_sample: bool = False  # 使用确定性生成，与test_clean.py一致
+    repetition_penalty: float = 1.1  # 与test_clean.py一致
     pad_token_id: int = 0  # 填充token ID
-    eos_token_id: int = 151645  # Qwen3-8B的结束token ID (151645)
+    eos_token_id: int = 151645  # Fin-R1的结束token ID
     
     # 句子完整性检测配置
     enable_sentence_completion: bool = False  # 暂时禁用句子完整性检测以解决停滞问题

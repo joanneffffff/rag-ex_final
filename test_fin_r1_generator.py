@@ -20,7 +20,7 @@ def test_fin_r1_generator():
             model_name="SUFE-AIFLM-Lab/Fin-R1",
             device="cuda:0",  # 使用 GPU
             use_quantization=True,
-            quantization_type="8bit"
+            quantization_type="4bit"
         )
         
         print("✅ 生成器初始化成功")
