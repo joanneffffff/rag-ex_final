@@ -702,10 +702,21 @@ class MultiStageRetrievalSystem:
                 # 根据数据集类型选择prompt模板
                 if self.dataset_type == "chinese":
                     # 中文prompt模板
+                    # 获取Top1文档的summary
+                    if candidate_results and candidate_results[0][0] < len(self.data):
+                        top1_record = self.data[candidate_results[0][0]]
+                        summary = top1_record.get('summary', '')
+                        if not summary:
+                            # 如果没有summary字段，使用context前200字符
+                            summary = context[:200] + "..." if len(context) > 200 else context
+                    else:
+                        summary = context[:200] + "..." if len(context) > 200 else context
+                    
                     prompt = template_loader.format_template(
                         "multi_stage_chinese_template",
                         context=context, 
-                        query=query
+                        query=query,
+                        summary=summary
                     )
                 else:
                     # 英文prompt模板
@@ -964,7 +975,7 @@ class MultiStageRetrievalSystem:
 
     def extract_relevant_context(self, query: str, candidate_results: List[Tuple[int, float, float]], max_chars: int = 2000) -> str:
         """
-        智能提取与查询最相关的上下文片段
+        对Top1文档智能提取相关上下文
         
         Args:
             query: 查询文本
@@ -972,70 +983,54 @@ class MultiStageRetrievalSystem:
             max_chars: 最大字符数限制
             
         Returns:
-            提取的相关上下文
+            Top1文档智能提取的相关上下文
         """
-        print(f"🔍 开始智能提取相关上下文...")
+        print(f"🔍 开始对Top1文档智能提取相关上下文...")
         print(f"📋 查询: {query}")
         print(f"📊 候选文档数: {len(candidate_results)}")
         
+        if not candidate_results:
+            print("❌ 没有候选结果")
+            return ""
+        
+        # 获取Top1文档
+        top1_idx, top1_faiss_score, top1_reranker_score = candidate_results[0]
+        
+        if top1_idx >= len(self.data):
+            print(f"❌ Top1文档索引超出范围: {top1_idx}")
+            return ""
+        
+        record = self.data[top1_idx]
+        print(f"✅ 使用Top1文档 (索引: {top1_idx}, FAISS分数: {top1_faiss_score:.4f}, 重排序分数: {top1_reranker_score:.4f})")
+        
+        # 获取Top1文档的完整context
+        if self.dataset_type == "chinese":
+            full_context = record.get('original_context', '')
+            if not full_context:
+                full_context = record.get('summary', '')
+        else:
+            full_context = record.get('context', '') or record.get('content', '')
+        
+        if not full_context:
+            print("❌ Top1文档没有context内容")
+            return ""
+        
+        print(f"📄 Top1文档完整context长度: {len(full_context)} 字符")
+        
+        # 对Top1文档进行智能提取
         # 提取查询关键词
         query_keywords = self._extract_keywords(query)
         print(f"🔑 查询关键词: {query_keywords}")
         
-        relevant_sentences = []
-        total_chars = 0
-        
-        # 只处理前3个最相关的文档
-        for doc_idx, faiss_score, reranker_score in candidate_results[:3]:
-            if doc_idx >= len(self.data):
-                continue
-                
-            record = self.data[doc_idx]
-            
-            # 获取文档内容
-            if self.dataset_type == "chinese":
-                content = record.get('summary', '') or record.get('original_context', '')
-            else:
-                content = record.get('context', '') or record.get('content', '')
-            
-            if not content:
-                continue
-            
-            # 提取最相关的句子
-            relevant_sentences_for_doc = self._extract_relevant_sentences(content, query_keywords, max_chars_per_doc=800)
-            
-            for sentence in relevant_sentences_for_doc:
-                if total_chars + len(sentence) <= max_chars:
-                    relevant_sentences.append(sentence)
-                    total_chars += len(sentence)
-                else:
-                    break
-            
-            if total_chars >= max_chars:
-                break
-        
-        # 如果没有找到相关句子，使用文档摘要
-        if not relevant_sentences:
-            print("⚠️ 未找到相关句子，使用文档摘要...")
-            for doc_idx, _, _ in candidate_results[:2]:
-                if doc_idx < len(self.data):
-                    record = self.data[doc_idx]
-                    if self.dataset_type == "chinese":
-                        summary = record.get('summary', '')
-                        if summary and len(summary) <= 500:
-                            relevant_sentences.append(summary)
-                            break
-                    else:
-                        content = record.get('context', '')
-                        if content and len(content) <= 500:
-                            relevant_sentences.append(content[:500])
-                            break
+        # 智能提取相关句子
+        relevant_sentences = self._extract_relevant_sentences(full_context, query_keywords, max_chars_per_doc=max_chars)
         
         # 拼接上下文
         context = "\n\n".join(relevant_sentences)
         
-        print(f"✅ 上下文提取完成:")
-        print(f"   📏 字符数: {len(context)}")
+        print(f"✅ Top1文档智能提取完成:")
+        print(f"   📏 原始长度: {len(full_context)} 字符")
+        print(f"   📏 提取后长度: {len(context)} 字符")
         print(f"   📄 句子数: {len(relevant_sentences)}")
         print(f"   📝 前100字符: {context[:100]}...")
         

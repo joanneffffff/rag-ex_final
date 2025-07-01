@@ -395,8 +395,38 @@ class OptimizedRagUIWithMultiStage:
             
             if retrieved_documents:
                 context_str = "\n\n".join([doc.content for doc in retrieved_documents[:10]])
-                # 中文查询使用多阶段检索系统，直接使用简单prompt
-                prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question}\n\n回答："
+                
+                # 根据查询语言动态选择prompt模板
+                try:
+                    from langdetect import detect
+                    query_language = detect(question)
+                    is_chinese_query = query_language.startswith('zh')
+                except:
+                    # 如果语言检测失败，根据查询内容判断
+                    is_chinese_query = any('\u4e00' <= char <= '\u9fff' for char in question)
+                
+                if is_chinese_query:
+                    # 中文查询使用中文prompt模板
+                    summary = context_str[:200] + "..." if len(context_str) > 200 else context_str
+                    prompt = template_loader.format_template(
+                        "multi_stage_chinese_template",
+                        summary=summary,
+                        context=context_str,
+                        query=question
+                    )
+                    if prompt is None:
+                        # 回退到简单中文prompt
+                        prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question}\n\n回答："
+                else:
+                    # 英文查询使用英文prompt模板
+                    prompt = template_loader.format_template(
+                        "rag_english_template",
+                        context=context_str,
+                        question=question
+                    )
+                    if prompt is None:
+                        # 回退到简单英文prompt
+                        prompt = f"Context: {context_str}\nQuestion: {question}\nAnswer:"
                 
                 generated_responses = self.generator.generate(texts=[prompt])
                 answer = generated_responses[0] if generated_responses else "Unable to generate answer"
@@ -442,15 +472,38 @@ class OptimizedRagUIWithMultiStage:
             
             if retrieved_documents:
                 context_str = "\n\n".join([doc.content for doc in retrieved_documents[:10]])
-                # 使用模板加载器获取英文prompt
-                prompt = template_loader.format_template(
-                    "rag_english_template",
-                    context=context_str, 
-                    question=question
-                )
-                if prompt is None:
-                    # 回退到简单prompt
-                    prompt = f"Context: {context_str}\nQuestion: {question}\nAnswer:"
+                
+                # 根据查询语言动态选择prompt模板
+                try:
+                    from langdetect import detect
+                    query_language = detect(question)
+                    is_chinese_query = query_language.startswith('zh')
+                except:
+                    # 如果语言检测失败，根据查询内容判断
+                    is_chinese_query = any('\u4e00' <= char <= '\u9fff' for char in question)
+                
+                if is_chinese_query:
+                    # 中文查询使用中文prompt模板
+                    summary = context_str[:200] + "..." if len(context_str) > 200 else context_str
+                    prompt = template_loader.format_template(
+                        "multi_stage_chinese_template",
+                        summary=summary,
+                        context=context_str,
+                        query=question
+                    )
+                    if prompt is None:
+                        # 回退到简单中文prompt
+                        prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question}\n\n回答："
+                else:
+                    # 英文查询使用英文prompt模板
+                    prompt = template_loader.format_template(
+                        "rag_english_template",
+                        context=context_str, 
+                        question=question
+                    )
+                    if prompt is None:
+                        # 回退到简单英文prompt
+                        prompt = f"Context: {context_str}\nQuestion: {question}\nAnswer:"
                 
                 generated_responses = self.generator.generate(texts=[prompt])
                 answer = generated_responses[0] if generated_responses else "Unable to generate answer"
@@ -479,19 +532,36 @@ class OptimizedRagUIWithMultiStage:
                 # 构建上下文
                 context_str = "\n\n".join([doc.content for doc in rag_output.retrieved_documents[:10]])
                 
-                # 根据语言选择prompt模板
-                if language == 'zh':
-                    # 中文查询使用多阶段检索系统，直接使用简单prompt
-                    prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question}\n\n回答："
+                # 根据查询语言动态选择prompt模板
+                try:
+                    from langdetect import detect
+                    query_language = detect(question)
+                    is_chinese_query = query_language.startswith('zh')
+                except:
+                    # 如果语言检测失败，根据查询内容判断
+                    is_chinese_query = any('\u4e00' <= char <= '\u9fff' for char in question)
+                
+                if is_chinese_query:
+                    # 中文查询使用中文prompt模板
+                    summary = context_str[:200] + "..." if len(context_str) > 200 else context_str
+                    prompt = template_loader.format_template(
+                        "multi_stage_chinese_template",
+                        summary=summary,
+                        context=context_str,
+                        query=question
+                    )
+                    if prompt is None:
+                        # 回退到简单中文prompt
+                        prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question}\n\n回答："
                 else:
-                    # 使用模板加载器获取英文prompt
+                    # 英文查询使用英文prompt模板
                     prompt = template_loader.format_template(
                         "rag_english_template",
                         context=context_str, 
                         question=question
                     )
                     if prompt is None:
-                        # 回退到简单prompt
+                        # 回退到简单英文prompt
                         prompt = f"Context: {context_str}\nQuestion: {question}\nAnswer:"
                 
                 # 生成答案

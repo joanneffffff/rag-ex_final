@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from typing import List, Optional
 
 import torch
@@ -21,31 +22,31 @@ class LocalLLMGenerator(Generator):
         use_flash_attention: bool = False
     ):
         # 使用config中的平台感知配置
-        config = Config()
+        self.config = Config()
         
         # 如果没有提供model_name，从config读取
         if model_name is None:
-            model_name = config.generator.model_name
+            model_name = self.config.generator.model_name
         
         # 如果没有提供device，从config读取
         if device is None:
-            device = config.generator.device
+            device = self.config.generator.device
         
         # 如果没有提供量化参数，从config读取
         if use_quantization is None:
-            use_quantization = config.generator.use_quantization
+            use_quantization = self.config.generator.use_quantization
         if quantization_type is None:
-            quantization_type = config.generator.quantization_type
+            quantization_type = self.config.generator.quantization_type
         
         super().__init__(model_name=model_name)
         self.device = device
-        self.temperature = config.generator.temperature
-        self.max_new_tokens = config.generator.max_new_tokens
-        self.top_p = config.generator.top_p
+        self.temperature = self.config.generator.temperature
+        self.max_new_tokens = self.config.generator.max_new_tokens
+        self.top_p = self.config.generator.top_p
         
         # 使用config中的平台感知配置
         if cache_dir is None:
-            cache_dir = config.generator.cache_dir  # 使用generator的缓存目录
+            cache_dir = self.config.generator.cache_dir  # 使用generator的缓存目录
         
         self.cache_dir = cache_dir  # 关键修正，确保属性存在
         self.use_quantization = use_quantization
@@ -231,23 +232,167 @@ class LocalLLMGenerator(Generator):
                 attention_mask = inputs["attention_mask"].cpu()
                 print(f"Input tensors moved to: {input_ids.device}")
             
-            # Generate with increased length
-            with torch.no_grad():  # 添加no_grad来节省内存
+            # 根据配置决定是否使用句子完整性检测
+            enable_completion = getattr(self.config.generator, 'enable_sentence_completion', True)
+            
+            if enable_completion:
+                # Generate with sentence completion check
+                response = self._generate_with_completion_check(input_ids, attention_mask)
+            else:
+                # 使用原始生成方法
+                with torch.no_grad():
+                    outputs = self.model.generate(
+                        input_ids,
+                        attention_mask=attention_mask,
+                        max_new_tokens=self.max_new_tokens,
+                        do_sample=True,
+                        top_p=self.top_p,
+                        temperature=self.temperature,
+                        pad_token_id=self.tokenizer.eos_token_id,
+                        repetition_penalty=1.3,
+                        length_penalty=0.8,
+                        eos_token_id=self.tokenizer.eos_token_id,
+                        early_stopping=True,
+                        no_repeat_ngram_size=3
+                    )
+                response = self.tokenizer.decode(outputs[0][input_ids.shape[1]:], skip_special_tokens=True)
+            
+            # 清理答案，移除可能的prompt注入
+            cleaned_response = self._clean_response(response)
+            responses.append(cleaned_response.strip())
+            
+        return responses
+    
+    def _clean_response(self, response: str) -> str:
+        """清理LLM生成的答案，移除可能的prompt注入和格式标记"""
+        
+        # 移除常见的prompt注入标记和格式
+        injection_patterns = [
+            # 中文标记
+            r'【回答】.*',  # 移除"【回答】"及其后面的内容
+            r'回答：.*',   # 移除"回答："及其后面的内容
+            r'回答\s*[:：].*',  # 移除"回答:"及其后面的内容
+            
+            # 英文标记
+            r'Answer:.*',  # 移除"Answer:"及其后面的内容
+            r'Answer\s*[:：].*',  # 移除"Answer:"及其后面的内容
+            
+            # 分隔线和格式标记
+            r'---.*',      # 移除分隔线
+            r'===.*',      # 移除分隔线
+            r'___.*',      # 移除下划线分隔线
+            r'\*\*\*.*',   # 移除星号分隔线
+            
+            # 格式标记
+            r'boxed\{.*?\}',  # 移除boxed格式
+            r'\\boxed\{.*?\}',  # 移除LaTeX boxed格式
+            r'\\text\{.*?\}',  # 移除LaTeX text格式
+            
+            # 其他常见注入
+            r'根据.*?信息.*?无法.*?提供.*?信息.*',  # 移除重复的"无法提供信息"表述
+            r'根据现有信息.*?无法提供此项信息.*',  # 移除重复的"无法提供此项信息"表述
+        ]
+        
+        cleaned = response
+        for pattern in injection_patterns:
+            cleaned = re.sub(pattern, '', cleaned, flags=re.DOTALL | re.IGNORECASE)
+        
+        # 移除多余的空白字符和换行
+        cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+        
+        # 移除开头和结尾的标点符号
+        cleaned = re.sub(r'^[，。！？、；：,.!?;:]+', '', cleaned)
+        cleaned = re.sub(r'[，。！？、；：,.!?;:]+$', '', cleaned)
+        
+        # 移除重复的句子
+        sentences = cleaned.split('。')
+        unique_sentences = []
+        for sentence in sentences:
+            sentence = sentence.strip()
+            if sentence and sentence not in unique_sentences:
+                unique_sentences.append(sentence)
+        
+        cleaned = '。'.join(unique_sentences)
+        
+        # 如果清理后为空，返回原始响应的前100个字符
+        if not cleaned.strip():
+            return response[:100].strip()
+        
+        return cleaned
+    
+    def _is_sentence_complete(self, text: str) -> bool:
+        """检测句子是否完整"""
+        if not text.strip():
+            return True
+        
+        # 中文句子完整性检测
+        chinese_endings = ['。', '！', '？', '；', '：', '…', '...']
+        # 英文句子完整性检测
+        english_endings = ['.', '!', '?', ';', ':', '...']
+        
+        # 检查是否以完整句子结尾
+        text = text.strip()
+        for ending in chinese_endings + english_endings:
+            if text.endswith(ending):
+                return True
+        
+        # 检查是否包含完整的句子结构（有主语和谓语）
+        # 简单的中文句子结构检测
+        if '。' in text:
+            sentences = text.split('。')
+            if sentences and sentences[-1].strip():  # 最后一句不为空
+                return False  # 最后一句不完整
+            return True
+        
+        # 英文句子结构检测
+        if '.' in text:
+            sentences = text.split('.')
+            if sentences and sentences[-1].strip():  # 最后一句不为空
+                return False  # 最后一句不完整
+            return True
+        
+        return False
+    
+    def _generate_with_completion_check(self, input_ids, attention_mask):
+        """带完整性检查的生成，如果句子不完整则重试"""
+        
+        # 从配置获取参数
+        max_attempts = getattr(self.config.generator, 'max_completion_attempts', 3)
+        token_increment = getattr(self.config.generator, 'token_increment', 50)
+        max_total_tokens = getattr(self.config.generator, 'max_total_tokens', 400)
+        
+        for attempt in range(max_attempts):
+            # 计算当前尝试的token数量
+            current_max_tokens = min(
+                self.max_new_tokens + (attempt * token_increment),
+                max_total_tokens
+            )
+            
+            with torch.no_grad():
                 outputs = self.model.generate(
                     input_ids,
                     attention_mask=attention_mask,
-                    max_new_tokens=self.max_new_tokens,  # 使用配置文件中的值
+                    max_new_tokens=current_max_tokens,
                     do_sample=True,
                     top_p=self.top_p,
                     temperature=self.temperature,
-                    pad_token_id=self.tokenizer.eos_token_id,  # Use eos_token_id for padding
-                    repetition_penalty=1.1,  # 添加重复惩罚
-                    length_penalty=1.0,  # 添加长度惩罚
-                    eos_token_id=self.tokenizer.eos_token_id  # 明确指定结束token
+                    pad_token_id=self.tokenizer.eos_token_id,
+                    repetition_penalty=1.3,
+                    length_penalty=0.8,
+                    eos_token_id=self.tokenizer.eos_token_id,
+                    early_stopping=True,
+                    no_repeat_ngram_size=3
                 )
             
-            # Decode the response
+            # 解码响应
             response = self.tokenizer.decode(outputs[0][input_ids.shape[1]:], skip_special_tokens=True)
-            responses.append(response.strip())
             
-        return responses 
+            # 检查句子完整性
+            if self._is_sentence_complete(response):
+                return response
+            
+            print(f"⚠️  第{attempt+1}次生成句子不完整，增加token数量重试...")
+        
+        # 如果所有尝试都失败，返回最后一次的结果
+        print("⚠️  达到最大重试次数，返回当前结果")
+        return response

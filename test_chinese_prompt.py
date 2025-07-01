@@ -26,10 +26,11 @@ def test_chinese_prompt():
     """
     
     query = "德赛电池（000049）2021年利润持续增长的主要原因是什么？"
-    
+    summary = context[:200] + "..." if len(context) > 200 else context
     # 格式化模板
     formatted_prompt = template_loader.format_template(
         "multi_stage_chinese_template",
+        summary=summary,
         context=context,
         query=query
     )

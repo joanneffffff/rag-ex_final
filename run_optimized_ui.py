@@ -43,7 +43,7 @@ def main():
             window_title="Financial Explainable RAG System",
             title="Financial Explainable RAG System",
             examples=[
-                ["德赛电池(000049)的下一季度收益预测如何？"],
+                ["德赛电池（000049）2021年利润持续增长的主要原因是什么？"],
                 ["用友网络2019年的每股经营活动产生的现金流量净额是多少？"],
                 ["首钢股份的业绩表现如何？"],
                 ["钢铁行业发展趋势"],

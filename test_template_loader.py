@@ -37,10 +37,14 @@ def test_template_loader():
     
     # 测试多阶段模板
     print("\n=== 测试多阶段模板 ===")
+    multi_stage_context = "测试上下文内容"
+    multi_stage_query = "测试查询"
+    multi_stage_summary = multi_stage_context[:200] + "..." if len(multi_stage_context) > 200 else multi_stage_context
     multi_stage_prompt = template_loader.format_template(
         "multi_stage_chinese_template",
-        context="测试上下文内容",
-        query="测试查询"
+        summary=multi_stage_summary,
+        context=multi_stage_context,
+        query=multi_stage_query
     )
     print(f"多阶段模板结果:\n{multi_stage_prompt}")
 

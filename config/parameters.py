@@ -91,13 +91,19 @@ class GeneratorConfig:
     # 模型特定配置 - 针对Qwen3-8B优化的参数
     use_quantization: bool = True  # 是否使用量化
     quantization_type: str = "4bit"  # 改为4bit量化以节省GPU内存
-    max_new_tokens: int = 600  # 大幅增加到600，给模型足够空间生成完整答案
+    max_new_tokens: int = 350  # 基础token数量
     temperature: float = 0.2  # 降低温度，获得更稳定的回答
     top_p: float = 0.8  # 进一步降低top-p，减少冗长
     do_sample: bool = True  # 是否使用采样
     repetition_penalty: float = 1.3  # 进一步增加重复惩罚
     pad_token_id: int = 0  # 填充token ID
     eos_token_id: int = 151643  # 结束token ID
+    
+    # 句子完整性检测配置
+    enable_sentence_completion: bool = True  # 是否启用句子完整性检测
+    max_completion_attempts: int = 3  # 最大重试次数
+    token_increment: int = 100  # 每次重试增加的token数量
+    max_total_tokens: int = 650  # 最大总token数量限制
 
 @dataclass
 class Config:
