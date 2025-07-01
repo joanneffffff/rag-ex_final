@@ -45,6 +45,8 @@ data/**/*
 !data/alphafin/alphafin_summarized_and_structured_qa_0628_colab_backward.json
 !data/alphafin/alphafin_summarized_and_structured_qa_0628_colab_missing.json
 !data/alphafin/alphafin_merged_generated_qa.json
+
+data/prompt_templates/*
 !data/prompt_templates/multi_stage_chinese_template.txt
 !data/prompt_templates/rag_english_template.txt
 
