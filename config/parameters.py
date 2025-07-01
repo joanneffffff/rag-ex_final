@@ -83,27 +83,43 @@ class SystemConfig:
 class GeneratorConfig:
     # 可选的生成器模型
     # model_name: str = "Qwen/Qwen2-1.5B-Instruct"  # 原始小模型
-    # model_name: str = "Qwen/Qwen3-8B"  # Qwen3-8B基础版本，更大的模型，替代Fin-R1
-    model_name: str = "SUFE-AIFLM-Lab/Fin-R1"  # 上海财经大学金融推理大模型，专门针对金融领域优化
+    model_name: str = "Qwen/Qwen3-8B"  # Qwen3-8B基础版本，更大的模型，替代Fin-R1
+    # model_name: str = "SUFE-AIFLM-Lab/Fin-R1"  # 上海财经大学金融推理大模型，专门针对金融领域优化
     cache_dir: str = GENERATOR_CACHE_DIR
-    device: Optional[str] = "cuda:1"  # 生成器使用cuda:1
+    device: Optional[str] = "cuda:0"  # 改为cuda:0，因为GPU 0使用率更低
     
     # 模型特定配置 - 针对Qwen3-8B优化的参数
     use_quantization: bool = True  # 是否使用量化
     quantization_type: str = "4bit"  # 改为4bit量化以节省GPU内存
-    max_new_tokens: int = 350  # 基础token数量
-    temperature: float = 0.2  # 降低温度，获得更稳定的回答
-    top_p: float = 0.8  # 进一步降低top-p，减少冗长
-    do_sample: bool = True  # 是否使用采样
-    repetition_penalty: float = 1.3  # 进一步增加重复惩罚
+    max_new_tokens: int = 200  # 进一步减少到200，避免停滞
+    temperature: float = 0.1  # 进一步降低温度，获得更简洁的回答
+    top_p: float = 0.7  # 进一步降低top-p，减少冗长
+    do_sample: bool = False  # 改为False，使用贪婪解码提高速度
+    repetition_penalty: float = 1.1  # 减少重复惩罚，提高速度
     pad_token_id: int = 0  # 填充token ID
-    eos_token_id: int = 151643  # 结束token ID
+    eos_token_id: int = 151645  # Qwen3-8B的结束token ID (151645)
     
     # 句子完整性检测配置
-    enable_sentence_completion: bool = True  # 是否启用句子完整性检测
-    max_completion_attempts: int = 3  # 最大重试次数
+    enable_sentence_completion: bool = False  # 暂时禁用句子完整性检测以解决停滞问题
+    max_completion_attempts: int = 2  # 最大重试次数
     token_increment: int = 100  # 每次重试增加的token数量
-    max_total_tokens: int = 650  # 最大总token数量限制
+    max_total_tokens: int = 1000  # 从1000增加到1500
+    
+    # 语言一致性检查配置
+    enable_language_consistency_check: bool = True  # 是否启用语言一致性检查
+    force_chinese_company_names: bool = True  # 强制保持中文公司名称
+    enable_company_name_correction: bool = True  # 是否启用公司名称修正
+    
+    # 回答长度控制
+    max_response_chars: int = 600  # 最大回答字符数，避免过长回答
+    enable_response_length_limit: bool = False  # 是否启用回答长度限制，设为False以测试回答质量
+    
+    # 性能优化配置
+    enable_fast_mode: bool = True  # 启用快速模式，减少生成参数
+    enable_performance_monitoring: bool = True  # 启用性能监控
+
+    # 超时和性能配置
+    max_generation_time: int = 30  # 生成超时时间（秒）
 
 @dataclass
 class Config:
