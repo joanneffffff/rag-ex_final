@@ -123,11 +123,11 @@ def evaluate_dataset(eval_data: List[Dict[str, Any]],
                 # 获取文档内容列表用于rerank
                 docs_content_for_rerank = [doc.content for doc in initial_retrieved_docs]
                 
-                # 调用reranker，假设它返回排序后的 {text: ..., score: ...} 列表
+                # 调用reranker，返回排序后的 (doc_text, score) 元组列表
                 reranked_items = reranker.rerank(
                     query=query, 
                     documents=docs_content_for_rerank, 
-                    top_k=20 # Reranker 最终返回的 top K
+                    batch_size=4
                 )
 
                 # 根据reranked_items的顺序，重建 DocumentWithMetadata 列表
@@ -135,8 +135,8 @@ def evaluate_dataset(eval_data: List[Dict[str, Any]],
                 content_to_original_doc_map = {doc.content: doc for doc in initial_retrieved_docs}
                 
                 temp_reranked_docs = []
-                for item in reranked_items:
-                    original_doc = content_to_original_doc_map.get(item['text'])
+                for doc_text, score in reranked_items[:20]:  # 取前20个结果
+                    original_doc = content_to_original_doc_map.get(doc_text)
                     if original_doc:
                         # 确保DocWithMetadata对象被添加到列表中
                         temp_reranked_docs.append(original_doc)

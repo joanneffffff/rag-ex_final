@@ -187,7 +187,8 @@ def process_tatqa_to_qca_enhanced(input_paths, output_path):
                     "context": correct_chunk_content.strip(),
                     "answer": answer_str,
                     "doc_id": doc_id,
-                    "relevant_doc_ids": relevant_doc_ids
+                    "relevant_doc_ids": relevant_doc_ids,
+                    "answer_from": answer_type
                 })
 
     with open(output_path, "w", encoding="utf-8") as fout:

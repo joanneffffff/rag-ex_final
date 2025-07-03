@@ -3,7 +3,7 @@ Reranker component using Qwen3-0.6B model for document reranking
 Following official implementation guidelines
 """
 
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Union
 import torch
 import numpy as np
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
@@ -289,6 +289,8 @@ class QwenReranker:
             # 恢复模型到原始设备
             self.model = self.model.to(original_device)
     
+
+    
     def rerank_with_metadata(
         self,
         query: str,
@@ -309,19 +311,27 @@ class QwenReranker:
         if not documents_with_metadata:
             return []
         
-        # 提取文档文本
-        documents = [doc.get('content', doc.get('text', '')) for doc in documents_with_metadata]
+        # 提取文档文本并创建映射
+        documents = []
+        doc_to_metadata_map = {}
+        
+        for i, doc_metadata in enumerate(documents_with_metadata):
+            doc_text = doc_metadata.get('content', doc_metadata.get('text', ''))
+            documents.append(doc_text)
+            # 使用文档内容作为key来映射元数据
+            doc_to_metadata_map[doc_text] = doc_metadata
         
         # 进行重排序
         reranked_results = self.rerank(query, documents, batch_size)
         
-        # 将分数添加回元数据
+        # 将分数添加回元数据，保持重排序后的顺序
         results = []
-        for i, (doc_text, score) in enumerate(reranked_results):
-            # 找到对应的原始元数据
-            original_metadata = documents_with_metadata[i]
+        for doc_text, score in reranked_results:
+            # 通过文档内容找到对应的原始元数据
+            original_metadata = doc_to_metadata_map.get(doc_text, {})
             updated_metadata = original_metadata.copy()
             updated_metadata['reranker_score'] = score
+            updated_metadata['content'] = doc_text  # 确保content字段存在
             results.append(updated_metadata)
         
         return results 

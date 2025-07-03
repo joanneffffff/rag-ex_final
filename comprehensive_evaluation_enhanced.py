@@ -1,613 +1,367 @@
 #!/usr/bin/env python3
 """
-增强版全面评估脚本 - 确保tqdm进度条正常显示
-使用Minimal模板进行100样本评估
+最终版全面评估脚本
+集成了混合决策算法、动态prompt路由、智能答案提取和多维度评估。
 """
 
-# 临时关闭warnings，避免transformers参数警告
+# 1. 导入必要的库
 import warnings
-warnings.filterwarnings("ignore")
-
-# 更精确地过滤transformers生成参数警告
 import logging
-logging.getLogger("transformers.generation.utils").setLevel(logging.ERROR)
-logging.getLogger("transformers").setLevel(logging.WARNING)
-logging.getLogger("torch").setLevel(logging.WARNING)
-logging.getLogger("xlm").setLevel(logging.WARNING)
-
-# 设置环境变量减少transformers的详细输出
 import os
-os.environ['TRANSFORMERS_VERBOSITY'] = 'error'
-
 import json
 import re
 import torch
 import numpy as np
 from pathlib import Path
 from typing import List, Dict, Any, Optional
-import random
 import time
-from difflib import SequenceMatcher
-import sys
 import argparse
 from collections import Counter
+from difflib import SequenceMatcher
+import sys
 
-# 确保tqdm正确导入和配置
+# 2. 环境设置
+warnings.filterwarnings("ignore")
+logging.getLogger("transformers").setLevel(logging.ERROR)
+os.environ['TRANSFORMERS_VERBOSITY'] = 'error'
 try:
     from tqdm import tqdm
-    # 强制启用tqdm进度条
-    tqdm.monitor_interval = 0
 except ImportError:
     print("❌ tqdm未安装，请运行: pip install tqdm")
     sys.exit(1)
-
-# 添加项目根目录到路径
 sys.path.append(str(Path(__file__).parent))
-
-# 导入RAG系统的LocalLLMGenerator
 try:
+    # 确保你的RAG生成器可以被正确导入
     from xlm.components.generator.local_llm_generator import LocalLLMGenerator
     USE_RAG_GENERATOR = True
     print("✅ 使用RAG系统的LocalLLMGenerator")
 except ImportError:
     USE_RAG_GENERATOR = False
-    print("⚠️ 无法导入RAG系统的LocalLLMGenerator，使用备用方案")
-    from transformers import AutoTokenizer, AutoModelForCausalLM
-    from transformers.utils.quantization_config import BitsAndBytesConfig
+    print("⚠️ 无法导入RAG系统的LocalLLMGenerator，脚本将无法运行。")
+    sys.exit(1)
 
 
-import re # 确保你的脚本顶部有 import re
+# ===================================================================
+# 3. 核心辅助函数
+# ===================================================================
 
-# 你脚本中的这个函数现在是完美的，因为它做的就是这件事
-def extract_final_answer(raw_output: str) -> str:
-    """从模型的原始输出中提取<answer>标签内的内容"""
-    match = re.search(r'<answer>(.*?)</answer>', raw_output, re.DOTALL)
-    if match:
-        # 完整地返回标签内的所有内容
-        return match.group(1).strip()
-    # 如果没找到标签，返回空字符串或整个输出作为备用
-    return ""
+def extract_final_answer_with_rescue(raw_output: str) -> str:
+    """
+    从模型的原始输出中智能提取最终答案。
+    它首先尝试寻找<answer>标签，如果失败或为空，则启动救援逻辑从<think>标签中提取。
+    """
+    answer_match = re.search(r'<answer>(.*?)</answer>', raw_output, re.DOTALL)
+    if answer_match:
+        content = answer_match.group(1).strip()
+        if content:
+            return content
 
+    think_match = re.search(r'<think>(.*?)</think>', raw_output, re.DOTALL)
+    if not think_match:
+        lines = raw_output.strip().split('\n')
+        return lines[-1].strip() if lines else ""
+
+    think_content = think_match.group(1)
+    
+    conclusion_phrases = [
+        'the answer is', 'the final answer is', 'therefore, the answer is', 
+        'the result is', 'equals to', 'is equal to', 'the value is', 
+        'the change is', 'the amount is'
+    ]
+    for phrase in conclusion_phrases:
+        # 寻找结论性短语，并捕获后面的内容
+        conclusion_match = re.search(
+            f'{re.escape(phrase)}\\s*:?\\s*([$()\\d,.;\\w\\s-]+)($|\\.|\\n)', 
+            think_content, 
+            re.IGNORECASE
+        )
+        if conclusion_match:
+            conclusion = conclusion_match.group(1).strip()
+            return re.sub(r'[\.。,]$', '', conclusion).strip()
+
+    numbers = re.findall(r'[-+]?\$?\(?[\d,]+\.?\d*\)?\%?', think_content)
+    if numbers:
+        last_number = numbers[-1].replace('$', '').replace(',', '').replace('(', '').replace(')', '').strip()
+        return last_number
+        
+    lines = [line for line in think_content.strip().split('\n') if line.strip()]
+    return lines[-1].strip() if lines else ""
 
 def calculate_f1_score(prediction: str, ground_truth: str) -> float:
-    """
-    计算两个字符串之间基于词语重叠的F1分数。
-    """
-    # 文本规范化：转小写，移除标点，按空格分词
+    """计算F1分数"""
     def normalize(text):
         return re.sub(r'[^\w\s]', '', text.lower()).split()
-
     prediction_tokens = normalize(prediction)
     ground_truth_tokens = normalize(ground_truth)
-
-    if not ground_truth_tokens:
-        return 1.0 if not prediction_tokens else 0.0
-    if not prediction_tokens:
-        return 0.0
-
-    # 使用Counter来处理词频
+    if not ground_truth_tokens: return 1.0 if not prediction_tokens else 0.0
+    if not prediction_tokens: return 0.0
     common = Counter(prediction_tokens) & Counter(ground_truth_tokens)
     num_same = sum(common.values())
-
-    if num_same == 0:
-        return 0.0
-
-    # 计算精确率、召回率和F1
+    if num_same == 0: return 0.0
     precision = 1.0 * num_same / len(prediction_tokens)
     recall = 1.0 * num_same / len(ground_truth_tokens)
     f1 = (2 * precision * recall) / (precision + recall)
-    
     return f1
 
+# ===================================================================
+# 4. 智能路由算法
+# ===================================================================
 
-class LLMTemplateTester:
-    """LLM模板测试器"""
-    
-    def __init__(self, model_name: str = "SUFE-AIFLM-Lab/Fin-R1", device: str = "cuda"):
-        self.model_name = model_name
-        self.device = self._setup_device(device)
-        self.llm_generator = None  # 使用RAG的LocalLLMGenerator
-        self.max_length = 4096 # Increased context window for complex prompts
-        self.max_new_tokens = 2048  # 默认token限制
-        
-    def _setup_device(self, device: str) -> str:
-        """设置设备"""
-        if device == "auto":
-            if torch.cuda.is_available():
-                return "cuda"
-            else:
-                return "cpu"
-        return device
-    
-    def load_model(self):
-        """加载模型"""
-        if USE_RAG_GENERATOR:
-            # 使用RAG系统的LocalLLMGenerator
-            self.llm_generator = LocalLLMGenerator(
-                model_name=self.model_name,
-                device=self.device
-            )
-        else:
-            # 备用方案：直接使用transformers
-            print("⚠️ 使用备用transformers方案")
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-            self.model = AutoModelForCausalLM.from_pretrained(
-                self.model_name,
-                torch_dtype=torch.float16,
-                device_map=self.device
-            )
-    
-    def _convert_messages_to_text(self, messages: List[Dict[str, str]]) -> str:
-        """将messages转换为文本格式"""
-        text = ""
-        for message in messages:
-            role = message["role"]
-            content = message["content"]
-            if role == "system":
-                text += f"System: {content}\n\n"
-            elif role == "user":
-                text += f"User: {content}\n\n"
-            elif role == "assistant":
-                text += f"Assistant: {content}\n\n"
-        return text.strip()
-    
-    def generate_response(self, messages: List[Dict[str, str]]) -> Dict[str, Any]:
-        """生成回答"""
-        start_time = time.time()
-        
-        if USE_RAG_GENERATOR and self.llm_generator:
-            # 使用RAG系统的LocalLLMGenerator
-            try:
-                # 将messages转换为文本格式
-                prompt_text = self._convert_messages_to_text(messages)
-                
-                # 设置生成参数
-                generation_params = {
-                    "max_new_tokens": self.max_new_tokens,
-                    "do_sample": False,  # Fin-R1使用确定性生成
-                    "repetition_penalty": 1.1
-                }
-                
-                # 生成回答
-                generated_text = self.llm_generator.generate([prompt_text])[0]
-                
-                generation_time = time.time() - start_time
-                
-                # 清理回答
-                cleaned_answer = self._clean_answer(generated_text)
-                
-                return {
-                    "generated_answer": generated_text,
-                    "cleaned_answer": cleaned_answer,
-                    "generation_time": generation_time
-                }
-                
-            except Exception as e:
-                print(f"⚠️ RAG生成器错误: {e}")
-                return {
-                    "generated_answer": f"Error: {e}",
-                    "cleaned_answer": f"Error: {e}",
-                    "generation_time": time.time() - start_time
-                }
-        else:
-            # 备用方案
-            return {
-                "generated_answer": "RAG generator not available",
-                "cleaned_answer": "RAG generator not available",
-                "generation_time": time.time() - start_time
-            }
-    
-    def _clean_answer(self, answer: str) -> str:
-        """清理回答"""
-        # 移除多余的空白字符
-        cleaned = answer.strip()
-        
-        # 移除长度限制，让LLM自由生成
-        return cleaned
-    
-    def evaluate_answer_quality(self, generated_answer: str, expected_answer: str, 
-                              context: str, question: str, raw_answer: str = "") -> Dict[str, Any]:
-        """评估答案质量"""
-        # 基础评估
-        exact_match = generated_answer.strip().lower() == expected_answer.strip().lower()
-        
-        # 包含检查
-        contains_expected = expected_answer.strip().lower() in generated_answer.strip().lower()
-        
-        # 语义相似度（简化版本）
-        similarity = SequenceMatcher(None, generated_answer.lower(), expected_answer.lower()).ratio()
-        
-        # 质量分数计算
-        quality_score = 0.0
-        
-        if exact_match:
-            quality_score = 1.0
-        elif contains_expected:
-            quality_score = 0.8
-        elif similarity > 0.7:
-            quality_score = 0.6
-        elif similarity > 0.5:
-            quality_score = 0.4
-        elif similarity > 0.3:
-            quality_score = 0.2
-        else:
-            quality_score = 0.0
-        
-        # 格式违规检查
-        format_violations = []
-        # 移除长度限制，让LLM自由生成
-        if not generated_answer.strip():
-            format_violations.append("空回答")
-        
-        f1_score = calculate_f1_score(generated_answer, expected_answer)
-        return {
-            "quality_score": quality_score,
-            "exact_match": exact_match,
-            "contains_expected": contains_expected,
-            "semantic_similarity": similarity,
-            "format_violations": format_violations,
-            "f1_score": f1_score
-        }
+def determine_context_type(context: str) -> str:
+    """根据context内容判断结构类型"""
+    has_table = "Table ID:" in context
+    text_content = re.sub(r'Table ID:.*?\n(Headers:.*?\n)?', '', context, flags=re.DOTALL)
+    text_content = re.sub(r'Row \d+:.*?\n', '', text_content)
+    text_content = re.sub(r'Category:.*?\n', '', text_content)
+    has_meaningful_text = any(len(line.strip()) > 20 for line in text_content.split('\n'))
 
-def get_detailed_english_prompt_messages(context_content: str, question_text: str, summary_content: Optional[str] = None) -> List[Dict[str, str]]:
-    """
-    生成 LLM 期望的 messages 列表。
-    使用详细的Chain-of-Thought模板，解析system和user标签。
-    """
+    if has_table and has_meaningful_text: return "table-text"
+    elif has_table: return "table"
+    else: return "text"
+
+def analyze_query_features(query: str) -> Dict[str, Any]:
+    """分析query特征"""
+    query_lower = query.lower()
+    calculation_keywords = ['sum', 'total', 'average', 'mean', 'percentage', 'ratio', 'difference', 'increase', 'decrease', 'growth', 'change', 'compare', 'calculate']
+    text_keywords = ['describe', 'explain', 'what is', 'what was the effect', 'how', 'why', 'when', 'where', 'who', 'what does', 'consist of', 'what led to']
     
-    # 读取模板文件
+    is_calc = any(keyword in query_lower for keyword in calculation_keywords)
+    is_textual = any(keyword in query_lower for keyword in text_keywords)
+    
+    return {'is_calc': is_calc, 'is_textual': is_textual}
+
+def hybrid_decision(context: str, query: str) -> str:
+    """混合决策算法，预测答案来源"""
+    context_type = determine_context_type(context)
+    query_features = analyze_query_features(query)
+
+    if context_type == "text":
+        return "text"
+    
+    # 对于包含表格的context
+    if query_features['is_textual'] and not query_features['is_calc']:
+        # 如果问题明显是解释性的，答案很可能在文本中，即使表格存在
+        return "text" if context_type == "table-text" else "table-text"
+    
+    if query_features['is_calc']:
+         # 如果问题是计算性的，答案很可能需要结合表格和文本
+        return "table-text"
+    
+    # 默认情况，答案更可能直接来自表格
+    return "table"
+
+
+# ===================================================================
+# 5. 动态Prompt加载与路由
+# ===================================================================
+
+def load_and_format_template(template_name: str, context: str, query: str) -> List[Dict[str, str]]:
+    """加载并格式化指定的prompt模板"""
+    # 模板放在 'data/prompt_templates' 文件夹下
+    template_path = Path("data/prompt_templates") / template_name
     try:
-        with open('rag_english_template.txt', 'r', encoding='utf-8') as f:
+        with open(template_path, 'r', encoding='utf-8') as f:
             template_content = f.read().strip()
     except FileNotFoundError:
-        print("⚠️ 模板文件未找到，使用默认模板")
-        return [
-            {"role": "system", "content": "You are a world-class quantitative financial analyst AI."},
-            {"role": "user", "content": f"Context:\n{context_content}\n\nQuestion:\n{question_text}\n\nA:"}
-        ]
+        print(f"❌ 模板文件未找到: {template_path}，无法继续。")
+        sys.exit(1)
     
-    # 解析system和user标签
-    import re
-    
-    # 提取system内容
     system_match = re.search(r'<system>(.*?)</system>', template_content, re.DOTALL)
-    if system_match:
-        system_content = system_match.group(1).strip()
-    else:
-        system_content = "You are a world-class quantitative financial analyst AI."
-    
-    # 提取user模板
+    system_content = system_match.group(1).strip() if system_match else ""
     user_match = re.search(r'<user>(.*?)</user>', template_content, re.DOTALL)
-    if user_match:
-        user_template = user_match.group(1).strip()
-        # 替换占位符
-        user_content = user_template.replace('{context}', context_content).replace('{question}', question_text)
-    else:
-        user_content = f"Context:\n{context_content}\n\nQuestion:\n{question_text}\n\nA:"
+    user_template = user_match.group(1).strip() if user_match else "Context:\n{context}\n\nQuestion:\n{question}"
+    user_content = user_template.replace('{context}', context).replace('{question}', query)
+    return [{"role": "system", "content": system_content}, {"role": "user", "content": user_content}]
 
-    return [
-        {"role": "system", "content": system_content},
-        {"role": "user", "content": user_content}
-    ]
-
-class EnhancedComprehensiveEvaluator:
-    """增强版全面评估器"""
+def get_final_prompt(context: str, query: str) -> List[Dict[str, str]]:
+    """基于混合决策算法实现的最终Prompt路由"""
+    predicted_answer_source = hybrid_decision(context, query)
     
-    def __init__(self, model_name: str = "SUFE-AIFLM-Lab/Fin-R1", device: str = "cuda"):
-        self.tester = LLMTemplateTester(model_name, device)
-        # 增加max_length以支持更长的模板
-        self.tester.max_length = 4096
-        # 增加max_new_tokens以支持完整的Chain-of-Thought推理
-        self.tester.max_new_tokens = 4096
+    if predicted_answer_source == "table":
+        template_file = 'template_for_table_answer.txt'
+    elif predicted_answer_source == "text":
+        template_file = 'template_for_text_answer.txt'
+    else: # "table-text"
+        template_file = 'template_for_hybrid_answer.txt'
+    
+    # print(f"  [路由决策] Context: {determine_context_type(context)}, Query: '{query[:30]}...', 使用模板: {template_file}")
+    return load_and_format_template(template_file, context, query)
+
+# ===================================================================
+# 6. 核心评估类
+# ===================================================================
+
+class ComprehensiveEvaluator:
+    def __init__(self, model_name: str, device: str):
+        self.model_name = model_name
+        self.device = device
+        self.max_new_tokens = 2048
         print("🔄 加载模型...")
-        self.tester.load_model()
+        self.generator = LocalLLMGenerator(model_name=self.model_name, device=self.device)
         print("✅ 模型加载完成")
-        
-    def load_evaluation_data(self, sample_size: int = 100) -> List[Dict[str, Any]]:
-        """加载评估数据"""
-        print(f"📖 加载评估数据，目标样本数: {sample_size}")
-        
-        # 加载增强版评估数据
-        eval_data = []
-        data_file = 'evaluate_mrr/tatqa_eval_enhanced.jsonl'
-        
-        if not os.path.exists(data_file):
-            print(f"❌ 数据文件不存在: {data_file}")
-            return []
-        
-        # 使用tqdm显示文件读取进度
-        with open(data_file, 'r') as f:
-            lines = f.readlines()
-            for line in tqdm(lines, desc="📖 读取数据文件", unit="行", 
-                           bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]"):
-                eval_data.append(json.loads(line))
-        
-        print(f"✅ 读取了 {len(eval_data)} 行数据")
-        
-        # 随机采样指定数量的样本
-        if len(eval_data) > sample_size:
-            np.random.seed(42)  # 确保可重现性
-            eval_data = np.random.choice(eval_data, sample_size, replace=False).tolist()
-            print(f"✅ 随机采样了 {len(eval_data)} 个样本")
-        
-        return eval_data
-    
-    # 在 EnhancedComprehensiveEvaluator 类中
-    def evaluate_single_sample(self, sample: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        评估单个样本，包含提取最终答案的逻辑。
-        """
-        try:
-            # 1. 构建Prompt (这部分逻辑不变)
-            messages = get_detailed_english_prompt_messages(
-                context_content=sample["context"],
-                question_text=sample["query"],
-                summary_content=sample["context"]
-            )
-            
-            # 2. 生成完整回答 (模型会输出思考过程和<answer>标签) (这部分逻辑不变)
-            generation_result = self.tester.generate_response(messages)
-            
-            # 3. 从原始输出中提取<answer>标签内的最终答案
-            final_answer_to_evaluate = extract_final_answer(generation_result["generated_answer"])
-            
-            # 4. 使用提取出的干净答案进行质量评估
-            evaluation = self.tester.evaluate_answer_quality(
-                generated_answer=final_answer_to_evaluate,
-                expected_answer=sample["answer"],
-                context=sample["context"],
-                question=sample["query"],
-                raw_answer=generation_result["generated_answer"]
-            )
-            
-            # 5. 组装并返回结果
-            return {
-                "sample_id": sample.get("id", "unknown"),
-                "query": sample["query"],
-                "expected_answer": sample["answer"],
-                "generation": generation_result,
-                "evaluation": evaluation,
-                "context_type": "table" if "Table ID:" in sample["context"] else "paragraph",
-                "success": evaluation["exact_match"] or evaluation["contains_expected"]
-            }
-            
-        except Exception as e:
-            print(f"⚠️ 样本评估失败: {str(e)[:100]}...")
-            return {
-                "sample_id": sample.get("id", "unknown"),
-                "query": sample["query"],
-                "expected_answer": sample["answer"],
-                "error": str(e),
-                "success": False
-            }
-    
-    def run_comprehensive_evaluation(self, sample_size: int = 100) -> Dict[str, Any]:
-        """运行全面评估"""
-        print(f"\n🚀 开始全面评估，样本数: {sample_size}")
-        print("="*60)
-        
-        # 加载数据
-        eval_data = self.load_evaluation_data(sample_size)
-        
-        if not eval_data:
-            print("❌ 没有可用的评估数据")
-            return {"results": [], "analysis": {}, "timestamp": time.time()}
-        
-        # 评估所有样本
+
+    def run_evaluation(self, eval_data: List[Dict[str, Any]]) -> Dict[str, Any]:
         results = []
         start_time = time.time()
-        
-        print(f"🔍 开始评估 {len(eval_data)} 个样本...")
-        
-        # 使用tqdm进度条，确保显示
-        pbar = tqdm(eval_data, desc="🔍 评估样本", unit="样本", 
-                   bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]",
-                   ncols=100, leave=True)
-        
-        for i, sample in enumerate(pbar):
-            # 更新进度条描述
-            pbar.set_description(f"🔍 评估样本 {i+1}/{len(eval_data)}")
-            
-            result = self.evaluate_single_sample(sample)
-            results.append(result)
-            
-            # 每10个样本显示一次进度
-            if (i + 1) % 10 == 0:
-                success_count = sum(1 for r in results if r.get("success", False))
-                pbar.set_postfix({
-                    "成功": f"{success_count}/{i+1}",
-                    "成功率": f"{success_count/(i+1)*100:.1f}%"
-                })
-        
-        pbar.close()
+        pbar = tqdm(eval_data, desc="🔍 评估样本", unit="个")
+
+        for sample in pbar:
+            results.append(self._evaluate_single_sample(sample))
         
         total_time = time.time() - start_time
-        print(f"✅ 评估完成，耗时: {total_time:.2f}秒")
+        print(f"\n✅ 评估完成，总耗时: {total_time:.2f}秒")
         
-        # 分析结果
-        analysis = self.analyze_results(results, total_time)
-        
-        return {
-            "results": results,
-            "analysis": analysis,
-            "timestamp": time.time()
-        }
-    
-    def analyze_results(self, results: List[Dict[str, Any]], total_time: float) -> Dict[str, Any]:
-        """分析评估结果"""
-        # 基础统计
-        total_samples = len(results)
-        successful_samples = sum(1 for r in results if r.get("success", False))
-        failed_samples = total_samples - successful_samples
-        
-        # 质量指标
-        quality_scores = [r.get("evaluation", {}).get("quality_score", 0) for r in results]
-        exact_matches = sum(1 for r in results if r.get("evaluation", {}).get("exact_match", False))
-        contains_expected = sum(1 for r in results if r.get("evaluation", {}).get("contains_expected", False))
-        semantic_similarities = [r.get("evaluation", {}).get("semantic_similarity", 0) for r in results]
-        
-        # 新增：收集所有的f1_score
-        f1_scores = [r.get("evaluation", {}).get("f1_score", 0) for r in results]
+        analysis = self.analyze_results(results)
+        analysis['performance'] = {'total_time': total_time, 'avg_time_per_sample': total_time / len(results) if results else 0}
+        return {"results": results, "analysis": analysis}
 
-       
+    def _evaluate_single_sample(self, sample: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            messages = get_final_prompt(sample["context"], sample["query"])
+            prompt_text = self._convert_messages_to_text(messages)
 
-        # 生成时间统计
-        generation_times = [r.get("generation", {}).get("generation_time", 0) for r in results]
+            gen_start_time = time.time()
+            generation_result = self.generator.generate([prompt_text])[0]
+            gen_time = time.time() - gen_start_time
+            
+            final_answer_to_evaluate = extract_final_answer_with_rescue(generation_result)
+            evaluation = self._evaluate_quality(final_answer_to_evaluate, sample["answer"])
+            
+            return {
+                "query": sample["query"],
+                "expected_answer": sample["answer"],
+                "generated_answer": generation_result,
+                "extracted_answer": final_answer_to_evaluate,
+                "evaluation": evaluation,
+                "answer_from": sample.get("answer_from", "unknown"),
+                "predicted_answer_from": hybrid_decision(sample["context"], sample["query"]),
+                "generation_time": gen_time
+            }
+        except Exception as e:
+            return {"query": sample["query"], "expected_answer": sample["answer"], "error": str(e)}
+
+    def _evaluate_quality(self, generated: str, expected: str) -> Dict[str, Any]:
+        exact_match = generated.strip().lower() == expected.strip().lower()
+        f1 = calculate_f1_score(generated, expected)
+        return {"exact_match": exact_match, "f1_score": f1}
+
+    def _convert_messages_to_text(self, messages: List[Dict[str, str]]) -> str:
+        text = ""
+        for message in messages:
+            text += f'<{message["role"]}>\n{message["content"]}\n'
+        return text
+
+    def analyze_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
+        # 你的详细分析逻辑，可以复用之前脚本里的版本
+        # 这里提供一个简化的版本
+        if not results: return {}
         
-        # 按上下文类型分组
-        table_results = [r for r in results if r.get("context_type") == "table"]
-        paragraph_results = [r for r in results if r.get("context_type") == "paragraph"]
-        
-        # 计算MRR (Mean Reciprocal Rank) - 这里简化为精确匹配率
-        mrr = exact_matches / total_samples if total_samples > 0 else 0
-        
+        all_f1 = [r['evaluation']['f1_score'] for r in results if 'evaluation' in r]
+        all_em = [r['evaluation']['exact_match'] for r in results if 'evaluation' in r]
+
         analysis = {
             "overall_metrics": {
-                "total_samples": total_samples,
-                "successful_samples": successful_samples,
-                "failed_samples": failed_samples,
-                "success_rate": successful_samples / total_samples if total_samples > 0 else 0,
-                "exact_match_rate": exact_matches / total_samples if total_samples > 0 else 0,
-                "contains_expected_rate": contains_expected / total_samples if total_samples > 0 else 0,
-                "mrr": mrr,
-                "avg_quality_score": np.mean(quality_scores) if quality_scores else 0,
-                "avg_semantic_similarity": np.mean(semantic_similarities) if semantic_similarities else 0,
-                "avg_generation_time": np.mean(generation_times) if generation_times else 0,
-                "total_evaluation_time": total_time
+                "total_samples": len(results),
+                "exact_match_rate": (sum(all_em) / len(all_em) * 100) if all_em else 0,
+                "avg_f1_score": np.mean(all_f1) if all_f1 else 0
             },
-            "context_type_analysis": {
-                "table_samples": {
-                    "count": len(table_results),
-                    "success_rate": sum(1 for r in table_results if r.get("success", False)) / len(table_results) if table_results else 0,
-                    "exact_match_rate": sum(1 for r in table_results if r.get("evaluation", {}).get("exact_match", False)) / len(table_results) if table_results else 0,
-                    "avg_quality_score": np.mean([r.get("evaluation", {}).get("quality_score", 0) for r in table_results]) if table_results else 0
-                },
-                "paragraph_samples": {
-                    "count": len(paragraph_results),
-                    "success_rate": sum(1 for r in paragraph_results if r.get("success", False)) / len(paragraph_results) if paragraph_results else 0,
-                    "exact_match_rate": sum(1 for r in paragraph_results if r.get("evaluation", {}).get("exact_match", False)) / len(paragraph_results) if paragraph_results else 0,
-                    "avg_quality_score": np.mean([r.get("evaluation", {}).get("quality_score", 0) for r in paragraph_results]) if paragraph_results else 0
-                }
-            },
-            "quality_distribution": {
-                "excellent_quality": sum(1 for score in quality_scores if score >= 0.8),
-                "good_quality": sum(1 for score in quality_scores if 0.6 <= score < 0.8),
-                "fair_quality": sum(1 for score in quality_scores if 0.4 <= score < 0.6),
-                "poor_quality": sum(1 for score in quality_scores if score < 0.4)
-            },
-            "performance_insights": []
+            "by_answer_type": {}
         }
-        
-        # ... 你现有的 analysis 字典 ...
-        
-        # 在 analysis["overall_metrics"] 中添加 avg_f1_score
-        analysis["overall_metrics"]["avg_f1_score"] = np.mean(f1_scores) if f1_scores else 0
 
-        # 你也可以为表格和段落数据分别计算平均F1
-        table_f1_scores = [r.get("evaluation", {}).get("f1_score", 0) for r in table_results]
-        paragraph_f1_scores = [r.get("evaluation", {}).get("f1_score", 0) for r in paragraph_results]
-        analysis["context_type_analysis"]["table_samples"]["avg_f1_score"] = np.mean(table_f1_scores) if table_f1_scores else 0
-        analysis["context_type_analysis"]["paragraph_samples"]["avg_f1_score"] = np.mean(paragraph_f1_scores) if paragraph_f1_scores else 0
-
-
-        # 生成性能洞察
-        if analysis["overall_metrics"]["success_rate"] >= 0.8:
-            analysis["performance_insights"].append("🎉 整体表现优秀，成功率达到80%以上")
-        elif analysis["overall_metrics"]["success_rate"] >= 0.6:
-            analysis["performance_insights"].append("✅ 整体表现良好，成功率达到60%以上")
-        else:
-            analysis["performance_insights"].append("⚠️ 整体表现需要改进")
-        
-        if analysis["overall_metrics"]["exact_match_rate"] >= 0.7:
-            analysis["performance_insights"].append("🎯 精确匹配率很高，模型输出质量优秀")
-        
-        if analysis["context_type_analysis"]["table_samples"]["success_rate"] > analysis["context_type_analysis"]["paragraph_samples"]["success_rate"]:
-            analysis["performance_insights"].append("📊 表格数据表现优于段落数据")
-        else:
-            analysis["performance_insights"].append("📝 段落数据表现优于表格数据")
-        
+        types = set(r.get("answer_from") for r in results)
+        for t in types:
+            subset = [r for r in results if r.get("answer_from") == t]
+            subset_f1 = [r['evaluation']['f1_score'] for r in subset if 'evaluation' in r]
+            subset_em = [r['evaluation']['exact_match'] for r in subset if 'evaluation' in r]
+            analysis["by_answer_type"][t] = {
+                "count": len(subset),
+                "exact_match_rate": (sum(subset_em) / len(subset_em) * 100) if subset_em else 0,
+                "avg_f1_score": np.mean(subset_f1) if subset_f1 else 0
+            }
         return analysis
-    
-    def print_analysis_summary(self, analysis: Dict[str, Any]):
-        """打印分析摘要"""
-        print("\n" + "="*80)
-        print("📊 全面评估结果摘要")
-        print("="*80)
-        
-        metrics = analysis["overall_metrics"]
-        print(f"📈 整体指标:")
-        print(f"   总样本数: {metrics['total_samples']}")
-        print(f"   成功样本数: {metrics['successful_samples']}")
-        print(f"   成功率: {metrics['success_rate']:.3f} ({metrics['success_rate']*100:.1f}%)")
-        print(f"   精确匹配率: {metrics['exact_match_rate']:.3f} ({metrics['exact_match_rate']*100:.1f}%)")
-        print(f"   F1 Score (词语重叠): {metrics['avg_f1_score']:.3f}")
-        print(f"   包含期望答案率: {metrics['contains_expected_rate']:.3f} ({metrics['contains_expected_rate']*100:.1f}%)")
-        print(f"   MRR: {metrics['mrr']:.3f}")
-        print(f"   平均质量分数: {metrics['avg_quality_score']:.3f}")
-        print(f"   平均语义相似度: {metrics['avg_semantic_similarity']:.3f}")
-        print(f"   平均生成时间: {metrics['avg_generation_time']:.2f}s")
-        print(f"   总评估时间: {metrics['total_evaluation_time']:.2f}s")
-        
-        print(f"\n📊 上下文类型分析:")
-        table_analysis = analysis["context_type_analysis"]["table_samples"]
-        paragraph_analysis = analysis["context_type_analysis"]["paragraph_samples"]
-        print(f"   表格数据 ({table_analysis['count']} 样本):")
-        print(f"     成功率: {table_analysis['success_rate']:.3f} ({table_analysis['success_rate']*100:.1f}%)")
-        print(f"     精确匹配率: {table_analysis['exact_match_rate']:.3f} ({table_analysis['exact_match_rate']*100:.1f}%)")
-        print(f"     平均F1 Score: {table_analysis['avg_f1_score']:.3f}")
-        print(f"     平均质量分数: {table_analysis['avg_quality_score']:.3f}")
-        print(f"   段落数据 ({paragraph_analysis['count']} 样本):")
-        print(f"     成功率: {paragraph_analysis['success_rate']:.3f} ({paragraph_analysis['success_rate']*100:.1f}%)")
-        print(f"     精确匹配率: {paragraph_analysis['exact_match_rate']:.3f} ({paragraph_analysis['exact_match_rate']*100:.1f}%)")
-        print(f"     平均F1 Score: {paragraph_analysis['avg_f1_score']:.3f}")
-        print(f"     平均质量分数: {paragraph_analysis['avg_quality_score']:.3f}")
 
+    def print_summary(self, analysis: Dict[str, Any]):
+        print("\n" + "="*60)
+        print("📊 评估结果摘要")
+        print("="*60)
+        overall = analysis.get("overall_metrics", {})
+        print(f"📈 总体指标:")
+        print(f"  - 总样本数: {overall.get('total_samples', 0)}")
+        print(f"  - 精确匹配率: {overall.get('exact_match_rate', 0):.2f}%")
+        print(f"  - 平均F1分数: {overall.get('avg_f1_score', 0):.4f}")
 
-        print(f"\n📈 质量分布:")
-        quality_dist = analysis["quality_distribution"]
-        total = sum(quality_dist.values())
-        print(f"   优秀质量 (≥0.8): {quality_dist['excellent_quality']} ({quality_dist['excellent_quality']/total*100:.1f}%)")
-        print(f"   良好质量 (0.6-0.8): {quality_dist['good_quality']} ({quality_dist['good_quality']/total*100:.1f}%)")
-        print(f"   一般质量 (0.4-0.6): {quality_dist['fair_quality']} ({quality_dist['fair_quality']/total*100:.1f}%)")
-        print(f"   较差质量 (<0.4): {quality_dist['poor_quality']} ({quality_dist['poor_quality']/total*100:.1f}%)")
-        
-        print(f"\n💡 性能洞察:")
-        for insight in analysis["performance_insights"]:
-            print(f"   {insight}")
-        
-        print("="*80)
+        by_type = analysis.get("by_answer_type", {})
+        print("\n📊 按答案来源类型分析:")
+        for type_name, metrics in by_type.items():
+            print(f"  - {type_name.upper()} 类型 ({metrics.get('count', 0)} 样本):")
+            print(f"    - 精确匹配率: {metrics.get('exact_match_rate', 0):.2f}%")
+            print(f"    - 平均F1分数: {metrics.get('avg_f1_score', 0):.4f}")
+        print("="*60)
 
+# ===================================================================
+# 7. 主函数
+# ===================================================================
 def main():
-    """主函数"""
-    # 解析命令行参数
-    parser = argparse.ArgumentParser(description='增强版全面评估')
-    parser.add_argument('--n', type=int, default=100, help='评估样本数量 (默认: 100)')
+    parser = argparse.ArgumentParser(description="最终版全面评估脚本")
+    parser.add_argument("--model", type=str, default="SUFE-AIFLM-Lab/Fin-R1", help="要评估的LLM名称")
+    parser.add_argument("--data_path", type=str, required=True, help="评估数据集文件路径 (jsonl或json格式)")
+    parser.add_argument("--sample_size", type=int, default=None, help="随机采样的样本数量，不提供则评估全部")
+    parser.add_argument("--device", type=str, default="cuda", help="设备 (cuda/cpu/auto)")
     args = parser.parse_args()
+
+    # 设备选择逻辑
+    if args.device == "auto":
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+    elif args.device == "cuda":
+        if not torch.cuda.is_available():
+            print("❌ CUDA不可用，回退到CPU")
+            device = "cpu"
+        else:
+            device = "cuda"
+            print(f"✅ 使用GPU: {torch.cuda.get_device_name()}")
+            print(f"GPU内存: {torch.cuda.get_device_properties(0).total_memory / 1024**3:.1f} GB")
+    else:
+        device = args.device
+
+    # 1. 加载数据
+    print(f"📖 正在从 {args.data_path} 加载数据...")
+    eval_data = []
+    with open(args.data_path, 'r', encoding='utf-8') as f:
+        # 兼容 .json 和 .jsonl
+        content = f.read()
+        try:
+            # 尝试解析为单个JSON数组
+            data = json.loads(content)
+            if isinstance(data, list):
+                eval_data = data
+            # 如果是JSON对象，并且有 'results' 键
+            elif isinstance(data, dict) and 'results' in data:
+                eval_data = data['results']
+        except json.JSONDecodeError:
+            # 如果失败，按jsonl格式逐行解析
+            f.seek(0)
+            for line in f:
+                eval_data.append(json.loads(line))
     
-    print("🚀 增强版全面评估开始")
-    print(f"使用详细Chain-of-Thought模板进行{args.n}样本评估")
-    print("="*60)
+    if args.sample_size and args.sample_size < len(eval_data):
+        np.random.seed(42)
+        indices = np.random.choice(len(eval_data), args.sample_size, replace=False)
+        eval_data = [eval_data[i] for i in indices]
+        print(f"✅ 随机采样 {len(eval_data)} 个样本进行评估。")
+    else:
+        print(f"✅ 加载了全部 {len(eval_data)} 个样本进行评估。")
+
+    # 2. 初始化并运行评估器
+    evaluator = ComprehensiveEvaluator(model_name=args.model, device=args.device)
+    analysis_results = evaluator.run_evaluation(eval_data)
     
-    # 创建评估器
-    evaluator = EnhancedComprehensiveEvaluator()
-    
-    # 运行指定样本数量的评估
-    sample_size = args.n
-    print(f"\n📊 评估样本数: {sample_size}")
-    
-    # 运行评估
-    evaluation_results = evaluator.run_comprehensive_evaluation(sample_size)
-    
-    # 打印摘要
-    evaluator.print_analysis_summary(evaluation_results["analysis"])
-    
-    # 保存结果
-    output_file = f"comprehensive_evaluation_{sample_size}_samples_enhanced.json"
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(evaluation_results, f, indent=2, ensure_ascii=False)
-    print(f"\n✅ 详细结果已保存到: {output_file}")
-    
-    print("\n🎉 增强版全面评估完成！")
+    # 3. 打印和保存结果
+    evaluator.print_summary(analysis_results)
+    output_filename = f"final_evaluation_results_{time.strftime('%Y%m%d_%H%M%S')}.json"
+    with open(output_filename, 'w', encoding='utf-8') as f:
+        json.dump(analysis_results, f, indent=2, ensure_ascii=False)
+    print(f"\n🎉 评估完成！详细结果已保存到: {output_filename}")
+
 
 if __name__ == "__main__":
-    main() 
+    main()

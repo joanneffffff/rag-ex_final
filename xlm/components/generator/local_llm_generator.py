@@ -38,10 +38,14 @@ class LocalLLMGenerator(Generator):
             quantization_type = self.config.generator.quantization_type
         
         # 验证配置参数
-        self._validate_config(model_name, device or "cpu", use_quantization, quantization_type)
+        validated_device, validated_use_quantization, validated_quantization_type = self._validate_config(
+            model_name, device or "cpu", use_quantization, quantization_type
+        )
         
         super().__init__(model_name=model_name)
-        self.device = device
+        self.device = validated_device
+        self.use_quantization = validated_use_quantization
+        self.quantization_type = validated_quantization_type
         self.max_new_tokens = self.config.generator.max_new_tokens
         
         # 对于Fin-R1模型，不设置temperature和top_p属性以避免transformers自动注入
@@ -54,8 +58,6 @@ class LocalLLMGenerator(Generator):
             cache_dir = self.config.generator.cache_dir 
         
         self.cache_dir = cache_dir  
-        self.use_quantization = use_quantization
-        self.quantization_type = quantization_type
         self.use_flash_attention = use_flash_attention
         
         # 创建缓存目录
@@ -76,10 +78,14 @@ class LocalLLMGenerator(Generator):
         if not model_name:
             raise ValueError("model_name cannot be empty")
         
+        validated_device = device
+        validated_use_quantization = use_quantization
+        validated_quantization_type = quantization_type
+        
         if device and device.startswith('cuda'):
             if not torch.cuda.is_available():
                 print("⚠️  CUDA requested but not available, falling back to CPU")
-                self.device = "cpu"
+                validated_device = "cpu"
             else:
                 # 检查CUDA内存
                 cuda_memory = torch.cuda.get_device_properties(0).total_memory / 1024**3  # GB
@@ -87,13 +93,15 @@ class LocalLLMGenerator(Generator):
                 
                 if cuda_memory < 4 and use_quantization:
                     print("⚠️  CUDA memory < 4GB, enabling quantization")
-                    use_quantization = True
+                    validated_use_quantization = True
                     if quantization_type not in ['4bit', '8bit']:
-                        quantization_type = '4bit'
+                        validated_quantization_type = '4bit'
         
-        if use_quantization and quantization_type not in ['4bit', '8bit']:
-            print(f"⚠️  Invalid quantization type: {quantization_type}, falling back to 4bit")
-            quantization_type = '4bit'
+        if validated_use_quantization and validated_quantization_type not in ['4bit', '8bit']:
+            print(f"⚠️  Invalid quantization type: {validated_quantization_type}, falling back to 4bit")
+            validated_quantization_type = '4bit'
+            
+        return validated_device, validated_use_quantization, validated_quantization_type
     
     def _setup_memory_optimization(self):
         """设置内存优化"""
