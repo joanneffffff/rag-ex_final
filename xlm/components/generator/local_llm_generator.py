@@ -42,9 +42,12 @@ class LocalLLMGenerator(Generator):
         
         super().__init__(model_name=model_name)
         self.device = device
-        self.temperature = self.config.generator.temperature
         self.max_new_tokens = self.config.generator.max_new_tokens
-        self.top_p = self.config.generator.top_p
+        
+        # 对于Fin-R1模型，不设置temperature和top_p属性以避免transformers自动注入
+        if "Fin-R1" not in model_name:
+            self.temperature = self.config.generator.temperature
+            self.top_p = self.config.generator.top_p
         
         # 使用config中的平台感知配置
         if cache_dir is None:
@@ -387,6 +390,12 @@ class LocalLLMGenerator(Generator):
         
         # 获取模型特定配置
         model_config = self._get_model_specific_config()
+        
+        # 对于Fin-R1模型，删除不支持的属性以避免transformers自动注入
+        if model_config["model_type"] == "fin_r1":
+            for k in ["temperature", "top_p", "top_k"]:
+                if hasattr(self, k):
+                    delattr(self, k)
         
         # 打印调试信息
         print(f"🔧 生成参数调试:")
@@ -872,6 +881,12 @@ class LocalLLMGenerator(Generator):
         # 获取模型特定配置
         model_config = self._get_model_specific_config()
         
+        # 对于Fin-R1模型，删除不支持的属性以避免transformers自动注入
+        if model_config["model_type"] == "fin_r1":
+            for k in ["temperature", "top_p", "top_k"]:
+                if hasattr(self, k):
+                    delattr(self, k)
+        
         for attempt in range(max_attempts):
             # 计算当前尝试的token数量
             current_max_tokens = min(
@@ -880,28 +895,43 @@ class LocalLLMGenerator(Generator):
             )
             
             # 根据模型类型选择不同的生成参数
-            generation_kwargs = {
-                "input_ids": input_ids,
-                "attention_mask": attention_mask,
-                "max_new_tokens": current_max_tokens,
-                "do_sample": True,
-                "top_p": self.top_p,
-                "temperature": self.temperature,
-                "pad_token_id": model_config["pad_token_id"],
-                "repetition_penalty": 1.3,
-                "no_repeat_ngram_size": 3
-            }
-            
-            # 只为支持的模型添加这些参数
-            if model_config["model_type"] in ["fin_r1", "default"]:
-                generation_kwargs.update({
-                    "length_penalty": 0.8,
-                    "early_stopping": True,
-                    "eos_token_id": model_config["eos_token_id"]
-                })
+            if model_config["model_type"] == "fin_r1":
+                # Fin-R1 参数：只使用模型支持的参数，避免警告
+                generation_kwargs = {
+                    "input_ids": input_ids,
+                    "attention_mask": attention_mask,
+                    "max_new_tokens": current_max_tokens,
+                    "do_sample": False,  # 使用确定性生成
+                    "pad_token_id": model_config["pad_token_id"],
+                    "eos_token_id": model_config["eos_token_id"],
+                    "repetition_penalty": 1.1  # 防止重复
+                }
             else:
-                # Qwen模型不使用这些参数
-                generation_kwargs["eos_token_id"] = model_config["eos_token_id"]
+                # 其他模型：使用完整的生成参数
+                generation_kwargs = {
+                    "input_ids": input_ids,
+                    "attention_mask": attention_mask,
+                    "max_new_tokens": current_max_tokens,
+                    "do_sample": True,
+                    "pad_token_id": model_config["pad_token_id"],
+                    "eos_token_id": model_config["eos_token_id"],
+                    "repetition_penalty": 1.3,
+                    "no_repeat_ngram_size": 3
+                }
+                
+                # 只为非Fin-R1模型添加采样参数
+                if hasattr(self, 'top_p') and hasattr(self, 'temperature'):
+                    generation_kwargs.update({
+                        "top_p": self.top_p,
+                        "temperature": self.temperature,
+                    })
+                
+                # 只为支持的模型添加这些参数
+                if model_config["model_type"] in ["default"]:
+                    generation_kwargs.update({
+                        "length_penalty": 0.8,
+                        "early_stopping": True
+                    })
             
             with torch.no_grad():
                 outputs = self.model.generate(**generation_kwargs)

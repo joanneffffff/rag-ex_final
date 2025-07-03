@@ -92,8 +92,9 @@ class GeneratorConfig:
     use_quantization: bool = True  # 是否使用量化
     quantization_type: str = "4bit"  # 使用4bit量化以节省内存
     max_new_tokens: int = 150  # 与test_clean.py一致
-    temperature: float = 0.1  # 不使用temperature（do_sample=False时）
-    top_p: float = 0.7  # 不使用top_p（do_sample=False时）
+    # 对于Fin-R1模型，这些参数会被忽略，但保留在配置中以防其他模型使用
+    temperature: float = 0.1  # Fin-R1不使用此参数
+    top_p: float = 0.7  # Fin-R1不使用此参数
     do_sample: bool = False  # 使用确定性生成，与test_clean.py一致
     repetition_penalty: float = 1.1  # 与test_clean.py一致
     pad_token_id: int = 0  # 填充token ID

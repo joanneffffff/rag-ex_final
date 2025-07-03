@@ -1,0 +1,2 @@
+# evaluate tatqa_eval_enhanced.jsonl mrr
+nohup python encoder_finetune_evaluate/evaluate_encoder_reranker_mrr_rag_system_multi_gpu_fixed.py --encoder_model_name models/finetuned_finbert_tatqa --reranker_model_name Qwen/Qwen3-Reranker-0.6B --eval_jsonl evaluate_mrr/tatqa_eval_enhanced.jsonl --corpus_jsonl evaluate_mrr/tatqa_knowledge_base.jsonl --top_k_retrieval 50 --top_k_rerank 5 --batch_size 32 --num_gpus 2 --max_eval_samples 100 > tatqa_mrr_rag_system_fixed_quick_100samples.log 2>&1
