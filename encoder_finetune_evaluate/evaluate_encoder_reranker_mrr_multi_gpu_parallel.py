@@ -254,7 +254,8 @@ def gpu_worker(gpu_id, data_queue, result_queue, encoder_model_name, reranker_mo
                             continue
                         
                         # 1. 编码查询
-                        query_embedding = encoder_model.encode([query_text], convert_to_tensor=True, device=str(device))
+                        query_embedding = encoder_model.encode([query_text])
+                        query_embedding = torch.tensor(query_embedding, device=device)
                         
                         # 2. 检索相关文档
                         with torch.no_grad():

@@ -1,0 +1,461 @@
+{
+  "results": [
+    {
+      "sample_id": "unknown",
+      "query": "What is the net change in the total valuation allowance for the 12 months ended December 31, 2019?",
+      "expected_answer": "Increase of $1,816",
+      "generation": {
+        "generated_answer": "<think> Okay, let's tackle this question step by step. So, the user is asking for the net change in the total valuation allowance for the 12 months ended December 31, 2019. First, I need to recall what a valuation allowance is. From the context provided, it seems like the company has some deferred tax assetsthat they expect might not get fully realized because their temporary differencesmay not result in enough taxable income in the future. To account for this risk, they set up a valuation allowance against these DTAs. This allowance reduces the value of the deferred tax assets on the balance sheet if。",
+        "cleaned_answer": "<think> Okay, let's tackle this question step by step. So, the user is asking for the net change in the total valuation allowance for the 12 months ended December 31, 2019. First, I need to recall what a valuation allowance is. From the context provided, it seems like the company has some deferred tax assetsthat they expect might not get fully realized because their temporary differencesmay not result in enough taxable income in the future. To account for this risk, they set up a valuation allowance against these DTAs. This allowance reduces the value of the deferred tax assets on the balance sheet if。",
+        "generation_time": 4.597094774246216,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.0,
+        "exact_match": false,
+        "contains_expected": false,
+        "semantic_similarity": 0.03827751196172249,
+        "format_violations": [],
+        "f1_score": 0.018691588785046728,
+        "timeout_occurred": false
+      },
+      "context_type": "paragraph",
+      "success": false
+    },
+    {
+      "sample_id": "unknown",
+      "query": "What does the deferred income taxes reflect?",
+      "expected_answer": "the net effect of temporary differences between the carrying amounts of assets and liabilities for financial reporting purposes and amounts used for income tax purposes",
+      "generation": {
+        "generated_answer": "<think> Okay, let's try to figure out what deferred income taxes reflect based on the given context. So, the question is asking us to understand the meaning behind deferred income taxes according to the provided information. First, I'll start by reading through the context again to make sure I understand all the details. The text says that deferred income taxes represent the net effect of temporary differences between two sets of accounting measures: the carrying amounts of assets and liabilities for financial reporting versus those used for income tax purposes. That seems like a key point here. Let me break this down step by step. Deferred taxes are a type of liability or asset on a company's balance sheet. They arise when there are discrepancies between how the company accounts for its assets and。",
+        "cleaned_answer": "<think> Okay, let's try to figure out what deferred income taxes reflect based on the given context. So, the question is asking us to understand the meaning behind deferred income taxes according to the provided information. First, I'll start by reading through the context again to make sure I understand all the details. The text says that deferred income taxes represent the net effect of temporary differences between two sets of accounting measures: the carrying amounts of assets and liabilities for financial reporting versus those used for income tax purposes. That seems like a key point here. Let me break this down step by step. Deferred taxes are a type of liability or asset on a company's balance sheet. They arise when there are discrepancies between how the company accounts for its assets and。",
+        "generation_time": 4.112136363983154,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.2,
+        "exact_match": false,
+        "contains_expected": false,
+        "semantic_similarity": 0.310838445807771,
+        "format_violations": [],
+        "f1_score": 0.2893081761006289,
+        "timeout_occurred": false
+      },
+      "context_type": "paragraph",
+      "success": false
+    },
+    {
+      "sample_id": "unknown",
+      "query": "In which year was Total employee expenditure larger?",
+      "expected_answer": "FY19",
+      "generation": {
+        "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking whether the Total employee expenditure was larger in FY19 or FY18 based on the provided table. First, I need to locate the relevant data in the table. Looking at the headers, we have \"FY19\", \"FY18\", and \"Change\". The row labeled \"Total employee expenditure2\" has the values for each fiscal year. From the table: FY19 Total employee expenditure is $370.1 million. FY18 Total employee expenditure is $361.9 million. The question is straightforward—comparing these two numbers directly. Since $370.1 million (FY1。",
+        "cleaned_answer": "<think> Okay, let's tackle this question step by step. The user is asking whether the Total employee expenditure was larger in FY19 or FY18 based on the provided table. First, I need to locate the relevant data in the table. Looking at the headers, we have \"FY19\", \"FY18\", and \"Change\". The row labeled \"Total employee expenditure2\" has the values for each fiscal year. From the table: FY19 Total employee expenditure is $370.1 million. FY18 Total employee expenditure is $361.9 million. The question is straightforward—comparing these two numbers directly. Since $370.1 million (FY1。",
+        "generation_time": 4.177981376647949,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.8,
+        "exact_match": false,
+        "contains_expected": true,
+        "semantic_similarity": 0.013605442176870748,
+        "format_violations": [],
+        "f1_score": 0.02150537634408602,
+        "timeout_occurred": false
+      },
+      "context_type": "table",
+      "success": true
+    },
+    {
+      "sample_id": "unknown",
+      "query": "What is the average number of shares beneficially owned by Brian Kinion and Christopher Lien?",
+      "expected_answer": "171300",
+      "generation": {
+        "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the average number of shares beneficially owned by Brian Kinion and Christopher Lien. First, I need to locate their individual share counts from the provided table. Looking at the table headers, there's a column labeled \"Number of Shares Beneficially Owned.\" Let me scan through each entry to find Brian Kinion and Christopher Lien. Starting with the entries under the Category \"Directors and Named Executive Officers\": L Gordon Crovitzhas 53,819 shares. Donald P Hutchisonhas 88,205 shares. Brian Kinionhere we go。",
+        "cleaned_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the average number of shares beneficially owned by Brian Kinion and Christopher Lien. First, I need to locate their individual share counts from the provided table. Looking at the table headers, there's a column labeled \"Number of Shares Beneficially Owned.\" Let me scan through each entry to find Brian Kinion and Christopher Lien. Starting with the entries under the Category \"Directors and Named Executive Officers\": L Gordon Crovitzhas 53,819 shares. Donald P Hutchisonhas 88,205 shares. Brian Kinionhere we go。",
+        "generation_time": 4.666247367858887,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.0,
+        "exact_match": false,
+        "contains_expected": false,
+        "semantic_similarity": 0.00667779632721202,
+        "format_violations": [],
+        "f1_score": 0.0,
+        "timeout_occurred": false
+      },
+      "context_type": "table",
+      "success": false
+    },
+    {
+      "sample_id": "unknown",
+      "query": "What was the difference in restructuring expenses in 2019 and 2018?",
+      "expected_answer": "145",
+      "generation": {
+        "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the difference in restructuring expenses between 2019 and 2018. From the provided table data, I need to extract the relevant numbers and compute the difference. First, I'll look at the headers and rows given. The headers mention \"Year Ended May 31,\" which probably refers to the fiscal year ending on that date. There are two main columns here: one labeled \"is 2019\" and another \"is 2018.\" Wait, actually, looking back, the headers might be a bit confusing. Let me parse them again. The headers are: \"Year Ended May 31。",
+        "cleaned_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the difference in restructuring expenses between 2019 and 2018. From the provided table data, I need to extract the relevant numbers and compute the difference. First, I'll look at the headers and rows given. The headers mention \"Year Ended May 31,\" which probably refers to the fiscal year ending on that date. There are two main columns here: one labeled \"is 2019\" and another \"is 2018.\" Wait, actually, looking back, the headers might be a bit confusing. Let me parse them again. The headers are: \"Year Ended May 31。",
+        "generation_time": 4.190976619720459,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.0,
+        "exact_match": false,
+        "contains_expected": false,
+        "semantic_similarity": 0.0033333333333333335,
+        "format_violations": [],
+        "f1_score": 0.0,
+        "timeout_occurred": false
+      },
+      "context_type": "table",
+      "success": false
+    },
+    {
+      "sample_id": "unknown",
+      "query": "What does Cash and Cash Equivalents include?",
+      "expected_answer": "cash on hand, demand deposits and short-term investments with original maturities of three months or less",
+      "generation": {
+        "generated_answer": "<think> Okay, let's tackle this question step by step. So, the user is asking what Cash and Cash Equivalentsincludes based on the provided context. Let me start by recalling the information given. First, the context states that Cash and Cash Equivalents include cash on hand, demand deposits, and short-term investments with original maturities of three months or less. That seems straightforward. But I need to make sure I'm interpreting this correctly. Let me break it down. \"Cash on hand\" would be physical currency that the company holds. This could be in their offices or other secure locations. Then there's \"demand deposits,\" which are bank accounts where the funds can be withdrawn without prior notice。",
+        "cleaned_answer": "<think> Okay, let's tackle this question step by step. So, the user is asking what Cash and Cash Equivalentsincludes based on the provided context. Let me start by recalling the information given. First, the context states that Cash and Cash Equivalents include cash on hand, demand deposits, and short-term investments with original maturities of three months or less. That seems straightforward. But I need to make sure I'm interpreting this correctly. Let me break it down. \"Cash on hand\" would be physical currency that the company holds. This could be in their offices or other secure locations. Then there's \"demand deposits,\" which are bank accounts where the funds can be withdrawn without prior notice。",
+        "generation_time": 4.131770133972168,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.0,
+        "exact_match": false,
+        "contains_expected": false,
+        "semantic_similarity": 0.25735294117647056,
+        "format_violations": [],
+        "f1_score": 0.24615384615384614,
+        "timeout_occurred": false
+      },
+      "context_type": "paragraph",
+      "success": false
+    },
+    {
+      "sample_id": "unknown",
+      "query": "What is the percentage change of devices sold from 2018 to 2019?",
+      "expected_answer": "14.7",
+      "generation": {
+        "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the percentage change in devices sold from 2018 to 2019. First, I need to locate the relevant data points from the provided table. Looking at the table headers, there are three years mentioned: 2019, 2018, and 2017. Each row corresponds to different metrics. The second row is labeled \"Devices sold,\" which has values for each year. From the table: Devices sold in 2019: $15,988Devices sold in 2018: $13,939。",
+        "cleaned_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the percentage change in devices sold from 2018 to 2019. First, I need to locate the relevant data points from the provided table. Looking at the table headers, there are three years mentioned: 2019, 2018, and 2017. Each row corresponds to different metrics. The second row is labeled \"Devices sold,\" which has values for each year. From the table: Devices sold in 2019: $15,988Devices sold in 2018: $13,939。",
+        "generation_time": 4.333814859390259,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.0,
+        "exact_match": false,
+        "contains_expected": false,
+        "semantic_similarity": 0.00816326530612245,
+        "format_violations": [],
+        "f1_score": 0.0,
+        "timeout_occurred": false
+      },
+      "context_type": "table",
+      "success": false
+    },
+    {
+      "sample_id": "unknown",
+      "query": "What is the net value of the unrealized gains and losses of the company's municipal bonds?",
+      "expected_answer": "-97",
+      "generation": {
+        "generated_answer": "<think> Okay, let me try to figure this out. The question is asking for the net value of the unrealized gains and losses of the company's municipal bonds. So I need to look at the data provided in the table. First, I'll recall the structure of the table. The headers are \"December 31, 2018\", \"\", followed by columns labeled \"Amortized Cost\", \"Unrealized Gains\", \"Unrealized Losses\", and \"Fair Value\". Then there are rows for Municipal Bonds, Corporate Bonds, and a total row. Looking at the Municipal Bonds row, the values given are: Amortized Cost: $44,8。",
+        "cleaned_answer": "<think> Okay, let me try to figure this out. The question is asking for the net value of the unrealized gains and losses of the company's municipal bonds. So I need to look at the data provided in the table. First, I'll recall the structure of the table. The headers are \"December 31, 2018\", \"\", followed by columns labeled \"Amortized Cost\", \"Unrealized Gains\", \"Unrealized Losses\", and \"Fair Value\". Then there are rows for Municipal Bonds, Corporate Bonds, and a total row. Looking at the Municipal Bonds row, the values given are: Amortized Cost: $44,8。",
+        "generation_time": 4.280339002609253,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.0,
+        "exact_match": false,
+        "contains_expected": false,
+        "semantic_similarity": 0.0,
+        "format_violations": [],
+        "f1_score": 0.0,
+        "timeout_occurred": false
+      },
+      "context_type": "table",
+      "success": false
+    },
+    {
+      "sample_id": "unknown",
+      "query": "What is the percentage change between Accounts Payable to Supplier A from 2018 to 2019?",
+      "expected_answer": "-10",
+      "generation": {
+        "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the percentage change in Accounts Payable to Supplier A from 2018 to 2019. First, I need to locate the relevant data in the provided table. Let me look through the information given. The table has several rows and categories. The key here is to find the row related to Accounts Payable and then identify the percentages for Supplier A in the years 2018 and 2019. Looking at the headers, there's a category labeled \"Accounts Payable\" which should contain the necessary data. Scanning down, under the Accounts Payable section, we see entries for Supplier A. From。",
+        "cleaned_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the percentage change in Accounts Payable to Supplier A from 2018 to 2019. First, I need to locate the relevant data in the provided table. Let me look through the information given. The table has several rows and categories. The key here is to find the row related to Accounts Payable and then identify the percentages for Supplier A in the years 2018 and 2019. Looking at the headers, there's a category labeled \"Accounts Payable\" which should contain the necessary data. Scanning down, under the Accounts Payable section, we see entries for Supplier A. From。",
+        "generation_time": 4.329726696014404,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.0,
+        "exact_match": false,
+        "contains_expected": false,
+        "semantic_similarity": 0.003115264797507788,
+        "format_violations": [],
+        "f1_score": 0.0,
+        "timeout_occurred": false
+      },
+      "context_type": "table",
+      "success": false
+    },
+    {
+      "sample_id": "unknown",
+      "query": "What is the average restructuring costs for 2018 and 2019?",
+      "expected_answer": "9551",
+      "generation": {
+        "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the average restructuring costs for the years 2018 and 2019. First, I need to locate the relevant data from the provided table. Looking at the headers, there are two columns labeled \"2019\" and \"2018\". The row titled \"Restructuring costs\" has values of $8,455 for 2019 and $10,647 for 2018. So those are the numbers we need to work with. To find the average, I should add both amounts together and then divide by 2. Let me write that out: Average。",
+        "cleaned_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the average restructuring costs for the years 2018 and 2019. First, I need to locate the relevant data from the provided table. Looking at the headers, there are two columns labeled \"2019\" and \"2018\". The row titled \"Restructuring costs\" has values of $8,455 for 2019 and $10,647 for 2018. So those are the numbers we need to work with. To find the average, I should add both amounts together and then divide by 2. Let me write that out: Average。",
+        "generation_time": 4.297214031219482,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.0,
+        "exact_match": false,
+        "contains_expected": false,
+        "semantic_similarity": 0.015151515151515152,
+        "format_violations": [],
+        "f1_score": 0.0,
+        "timeout_occurred": false
+      },
+      "context_type": "table",
+      "success": false
+    },
+    {
+      "sample_id": "unknown",
+      "query": "Which groups of people are generally issued with Nonvested restricted stock units (\"RSUs\")?",
+      "expected_answer": "Executives, non-management directors and certain other members of management and employees",
+      "generation": {
+        "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking which groups of people are generally issued with Nonvested Restricted Stock Units. First, I need to look back at the provided context. The text mentions that RSUs are \"generally issued to executives, non-management directors and certain other members of management and employees.\" That seems straightforward. But wait, there's more. Let me parse through it again carefully. The paragraph starts by stating that RSUs are issued to these groups. Then it adds a historical note: prior to fiscal 2011, RSUs were specifically granted to certain Executive and Senior Vice Presidents under their share ownership guidelines. These awards would vest upon retirement or termination。",
+        "cleaned_answer": "<think> Okay, let's tackle this question step by step. The user is asking which groups of people are generally issued with Nonvested Restricted Stock Units. First, I need to look back at the provided context. The text mentions that RSUs are \"generally issued to executives, non-management directors and certain other members of management and employees.\" That seems straightforward. But wait, there's more. Let me parse through it again carefully. The paragraph starts by stating that RSUs are issued to these groups. Then it adds a historical note: prior to fiscal 2011, RSUs were specifically granted to certain Executive and Senior Vice Presidents under their share ownership guidelines. These awards would vest upon retirement or termination。",
+        "generation_time": 4.188750267028809,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.8,
+        "exact_match": false,
+        "contains_expected": true,
+        "semantic_similarity": 0.215311004784689,
+        "format_violations": [],
+        "f1_score": 0.17460317460317462,
+        "timeout_occurred": false
+      },
+      "context_type": "paragraph",
+      "success": true
+    },
+    {
+      "sample_id": "unknown",
+      "query": "What was the Technology Development revenue in 2019 and 2018 respectively?",
+      "expected_answer": "26,024,674; 20,967,556",
+      "generation": {
+        "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the Technology Development revenue in both 2019 and 2018. Let me start by looking at the provided data to locate where the relevant information is. First, I'll scan through the headers and rows listed. The table has several entries, including \"Years ended December 31,\" which probably indicates the fiscal years for each row. The headers mention \"is 2019\" and \"is 2018,\" so those should correspond to the two years we need. Looking at the rows, there's one labeled \"Technology Development revenue.\" That must be the key row here. Let me check the entries under。",
+        "cleaned_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the Technology Development revenue in both 2019 and 2018. Let me start by looking at the provided data to locate where the relevant information is. First, I'll scan through the headers and rows listed. The table has several entries, including \"Years ended December 31,\" which probably indicates the fiscal years for each row. The headers mention \"is 2019\" and \"is 2018,\" so those should correspond to the two years we need. Looking at the rows, there's one labeled \"Technology Development revenue.\" That must be the key row here. Let me check the entries under。",
+        "generation_time": 4.4908287525177,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.0,
+        "exact_match": false,
+        "contains_expected": false,
+        "semantic_similarity": 0.018154311649016642,
+        "format_violations": [],
+        "f1_score": 0.0,
+        "timeout_occurred": false
+      },
+      "context_type": "table",
+      "success": false
+    },
+    {
+      "sample_id": "unknown",
+      "query": "What does the loss from discounted operations represent?",
+      "expected_answer": "the net of losses incurred by Netsmart for the years ended December 31, 2018 and 2017 partly offset by earnings attributable to two solutions acquired during the fourth quarter of 2017 as part of the EIS Business that we no longer support effective as of March 31, 2018.",
+      "generation": {
+        "generated_answer": "<think> Okay, let's try to figure out what the loss from discontinued operations represents based on the given context. First, I need to parse through the information provided. The user mentioned that on December 31, 2018, they sold all Class A Common Units of Netsmart owned by the company. Before the sale, Netsmart was a separate reportable segment but is now classified as a discontinued operation because it's significant to their historical financials. So, when they present their financial statements, they have to account for this separately. The key sentence here is: \"the loss from discontinued operations represents the net of losses incurred by Netsmart for the years ended December 31, 2018 and。",
+        "cleaned_answer": "<think> Okay, let's try to figure out what the loss from discontinued operations represents based on the given context. First, I need to parse through the information provided. The user mentioned that on December 31, 2018, they sold all Class A Common Units of Netsmart owned by the company. Before the sale, Netsmart was a separate reportable segment but is now classified as a discontinued operation because it's significant to their historical financials. So, when they present their financial statements, they have to account for this separately. The key sentence here is: \"the loss from discontinued operations represents the net of losses incurred by Netsmart for the years ended December 31, 2018 and。",
+        "generation_time": 4.3076841831207275,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.0,
+        "exact_match": false,
+        "contains_expected": false,
+        "semantic_similarity": 0.012269938650306749,
+        "format_violations": [],
+        "f1_score": 0.2981366459627329,
+        "timeout_occurred": false
+      },
+      "context_type": "paragraph",
+      "success": false
+    },
+    {
+      "sample_id": "unknown",
+      "query": "What is the Allowance for returns and doubtful accounts for 2019 and 2018 respectively?",
+      "expected_answer": "(265 ); (277 )",
+      "generation": {
+        "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the \"Allowance for returns and doubtful accounts\" for both 2019 and 2018 based on the provided table. First, I need to locate where the relevant data is in the table. Let me look at the headers and rows again. The table has several rows, each corresponding to different financial metrics. The headers mention \"December 31,\" which indicates the year-end figures for those years. Looking at row 1, it says \"December 31, is 2019; is 2018.\" That seems a bit confusing because usually, a single cell would have the year。",
+        "cleaned_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the \"Allowance for returns and doubtful accounts\" for both 2019 and 2018 based on the provided table. First, I need to locate where the relevant data is in the table. Let me look at the headers and rows again. The table has several rows, each corresponding to different financial metrics. The headers mention \"December 31,\" which indicates the year-end figures for those years. Looking at row 1, it says \"December 31, is 2019; is 2018.\" That seems a bit confusing because usually, a single cell would have the year。",
+        "generation_time": 4.317034482955933,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.0,
+        "exact_match": false,
+        "contains_expected": false,
+        "semantic_similarity": 0.013179571663920923,
+        "format_violations": [],
+        "f1_score": 0.0,
+        "timeout_occurred": false
+      },
+      "context_type": "table",
+      "success": false
+    },
+    {
+      "sample_id": "unknown",
+      "query": "What is included in Tax fees?",
+      "expected_answer": "Tax fees include fees billed for professional services rendered by Ernst & Young, primarily in connection with our tax compliance activities.",
+      "generation": {
+        "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking what's included in \"Tax fees.\" From the context provided, there's a mention of tax fees including fees billed for professional services rendered by Ernst & Young, mainly related to tax compliance activities. First, I need to parse the information given. The key point here is that the tax fees encompass two main components: fees billed for professional services and these services are specifically from Ernst & Young. Additionally, the primary purpose of these services is tax compliance activities. So, breaking it down further, the inclusion would be: Professional Services: This refers to any work or assistance provided by Ernst & Young as part of their role as tax advisors or。",
+        "cleaned_answer": "<think> Okay, let's tackle this question step by step. The user is asking what's included in \"Tax fees.\" From the context provided, there's a mention of tax fees including fees billed for professional services rendered by Ernst & Young, mainly related to tax compliance activities. First, I need to parse the information given. The key point here is that the tax fees encompass two main components: fees billed for professional services and these services are specifically from Ernst & Young. Additionally, the primary purpose of these services is tax compliance activities. So, breaking it down further, the inclusion would be: Professional Services: This refers to any work or assistance provided by Ernst & Young as part of their role as tax advisors or。",
+        "generation_time": 4.116480350494385,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.0,
+        "exact_match": false,
+        "contains_expected": false,
+        "semantic_similarity": 0.2561247216035635,
+        "format_violations": [],
+        "f1_score": 0.21428571428571427,
+        "timeout_occurred": false
+      },
+      "context_type": "paragraph",
+      "success": false
+    },
+    {
+      "sample_id": "unknown",
+      "query": "In what situations can the tax rate fluctuate?",
+      "expected_answer": "if business changes are implemented in response to legislation arising from the OECD’s Base Erosion & Profit Shifting Project.",
+      "generation": {
+        "generated_answer": "<think> Okay, let's try to figure out when the tax rate might fluctuate based on the given context. So, the question is asking in what situations the tax rate can fluctuate. Let me start by reading through the provided information again carefully. The text says that over the medium term, the tax rate is expected to stabilize once the integration of acquisitions in higher-rate jurisdictions is finished. But there's a possibility of fluctuations if business changes are made in response to certain legislation. Specifically, it mentions the OECD's Base Erosion & Profit ShiftingProject. Additionally, they're monitoring legislative changes in key territories and taking action on them. So, breaking this down step by step. The main factors here are。",
+        "cleaned_answer": "<think> Okay, let's try to figure out when the tax rate might fluctuate based on the given context. So, the question is asking in what situations the tax rate can fluctuate. Let me start by reading through the provided information again carefully. The text says that over the medium term, the tax rate is expected to stabilize once the integration of acquisitions in higher-rate jurisdictions is finished. But there's a possibility of fluctuations if business changes are made in response to certain legislation. Specifically, it mentions the OECD's Base Erosion & Profit ShiftingProject. Additionally, they're monitoring legislative changes in key territories and taking action on them. So, breaking this down step by step. The main factors here are。",
+        "generation_time": 4.169724702835083,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.0,
+        "exact_match": false,
+        "contains_expected": false,
+        "semantic_similarity": 0.24401368301026224,
+        "format_violations": [],
+        "f1_score": 0.1925925925925926,
+        "timeout_occurred": false
+      },
+      "context_type": "paragraph",
+      "success": false
+    },
+    {
+      "sample_id": "unknown",
+      "query": "What percentage of the decrease in total revenue is from the loss in Zyla (Oxaydo)?",
+      "expected_answer": "92.11",
+      "generation": {
+        "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the percentage of the decrease in total revenue that's attributed to the loss in Zyla. First, I need to figure out what the total revenue was for both years and then determine the decrease. Then, find out how much of that decrease came specifically from Zyla's decline. Finally, calculate the percentage contribution of Zyla's loss to the overall revenue decrease. Looking at the table provided, the headers indicate that the data is for the years ended 2019 and 2018. Let me parse the rows carefully. Row 1 mentions \"For the Year Ended\" followed by December 3。",
+        "cleaned_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the percentage of the decrease in total revenue that's attributed to the loss in Zyla. First, I need to figure out what the total revenue was for both years and then determine the decrease. Then, find out how much of that decrease came specifically from Zyla's decline. Finally, calculate the percentage contribution of Zyla's loss to the overall revenue decrease. Looking at the table provided, the headers indicate that the data is for the years ended 2019 and 2018. Let me parse the rows carefully. Row 1 mentions \"For the Year Ended\" followed by December 3。",
+        "generation_time": 4.245619297027588,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.0,
+        "exact_match": false,
+        "contains_expected": false,
+        "semantic_similarity": 0.009316770186335404,
+        "format_violations": [],
+        "f1_score": 0.0,
+        "timeout_occurred": false
+      },
+      "context_type": "table",
+      "success": false
+    },
+    {
+      "sample_id": "unknown",
+      "query": "What does the table show?",
+      "expected_answer": "As of December 31, 2019 and 2018, loans payable",
+      "generation": {
+        "generated_answer": "<think> Okay, let's try to figure out what this table is showing. The user provided information about loans payable for two years: 2019 and 2018. Let me start by understanding the context given. First, looking at the question, they're asking \"what does the table show?\" So, I need to look at the data presented and interpret it. The table here has two columns labeled \"December 31\" with values for 2019 and 2018. Since the question is about loans payable, these numbers probably represent the amounts owed for those years. Wait, but the user mentioned \"loans payable\" in the context. Loans payable typically refer to the total amount。",
+        "cleaned_answer": "<think> Okay, let's try to figure out what this table is showing. The user provided information about loans payable for two years: 2019 and 2018. Let me start by understanding the context given. First, looking at the question, they're asking \"what does the table show?\" So, I need to look at the data presented and interpret it. The table here has two columns labeled \"December 31\" with values for 2019 and 2018. Since the question is about loans payable, these numbers probably represent the amounts owed for those years. Wait, but the user mentioned \"loans payable\" in the context. Loans payable typically refer to the total amount。",
+        "generation_time": 4.1168739795684814,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.0,
+        "exact_match": false,
+        "contains_expected": false,
+        "semantic_similarity": 0.07342143906020558,
+        "format_violations": [],
+        "f1_score": 0.12068965517241378,
+        "timeout_occurred": false
+      },
+      "context_type": "paragraph",
+      "success": false
+    },
+    {
+      "sample_id": "unknown",
+      "query": "How many years did Accrued expenses and other liabilities exceed $200 million?",
+      "expected_answer": "1",
+      "generation": {
+        "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking how many years the \"Accrued expenses and other liabilities\" exceeded $200 million based on the provided table. First, I need to locate the relevant data in the table. Looking at the headers, there are two columns for each row: one labeled \"March 31, is 2019\" and another labeled \"is 2018\". This suggests that the table compares two fiscal years ending in March. The specific line item we're interested in is \"Accrued expenses and other liabilities.\" Scanning through the rows, I see。",
+        "cleaned_answer": "<think> Okay, let's tackle this question step by step. The user is asking how many years the \"Accrued expenses and other liabilities\" exceeded $200 million based on the provided table. First, I need to locate the relevant data in the table. Looking at the headers, there are two columns for each row: one labeled \"March 31, is 2019\" and another labeled \"is 2018\". This suggests that the table compares two fiscal years ending in March. The specific line item we're interested in is \"Accrued expenses and other liabilities.\" Scanning through the rows, I see。",
+        "generation_time": 4.297596454620361,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.8,
+        "exact_match": false,
+        "contains_expected": true,
+        "semantic_similarity": 0.0035842293906810036,
+        "format_violations": [],
+        "f1_score": 0.0,
+        "timeout_occurred": false
+      },
+      "context_type": "table",
+      "success": true
+    },
+    {
+      "sample_id": "unknown",
+      "query": "What is the excluded potential common shares for 2018?",
+      "expected_answer": "0.5 million",
+      "generation": {
+        "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking about the excluded potential common shares for 2018 based on the provided context. First, I need to locate where the relevant information is given. The context states: \"Diluted EPS attributable to common shareholders for the years ended December 31, 2019, 2018 and 2017 excludes 1.1 million, 0.5 million and 0.3 million potential common shares, respectively, that could be issued under our share-based compensation plan...\" So, they're listing the numbers for each year. The key here is to match the correct year with its corresponding number.",
+        "cleaned_answer": "<think> Okay, let's tackle this question step by step. The user is asking about the excluded potential common shares for 2018 based on the provided context. First, I need to locate where the relevant information is given. The context states: \"Diluted EPS attributable to common shareholders for the years ended December 31, 2019, 2018 and 2017 excludes 1.1 million, 0.5 million and 0.3 million potential common shares, respectively, that could be issued under our share-based compensation plan...\" So, they're listing the numbers for each year. The key here is to match the correct year with its corresponding number.",
+        "generation_time": 4.184321641921997,
+        "timeout_occurred": false
+      },
+      "evaluation": {
+        "quality_score": 0.8,
+        "exact_match": false,
+        "contains_expected": true,
+        "semantic_similarity": 0.03503184713375796,
+        "format_violations": [],
+        "f1_score": 0.039999999999999994,
+        "timeout_occurred": false
+      },
+      "context_type": "paragraph",
+      "success": true
+    }
+  ],
+  "analysis": {
+    "overall_metrics": {
+      "total_samples": 20,
+      "successful_samples": 4,
+      "timeout_samples": 0,
+      "success_rate": 0.2,
+      "timeout_rate": 0.0,
+      "exact_match_rate": 0.0,
+      "contains_expected_rate": 0.2,
+      "avg_quality_score": 0.17,
+      "avg_semantic_similarity": 0.07684615165856323,
+      "avg_f1_score": 0.0807983385000118,
+      "avg_generation_time": 4.277610766887665,
+      "total_evaluation_time": 85.57559967041016
+    }
+  },
+  "timestamp": 1751508219.0691063
+}

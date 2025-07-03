@@ -86,12 +86,12 @@ class GeneratorConfig:
     # model_name: str = "Qwen/Qwen3-8B"  # Qwen3-8B基础版本，更大的模型，替代Fin-R1
     model_name: str = "SUFE-AIFLM-Lab/Fin-R1"  # 上海财经大学金融推理大模型，专门针对金融领域优化
     cache_dir: str = GENERATOR_CACHE_DIR
-    device: Optional[str] = "cuda:1"  # 改为cuda:1，避免与其他组件冲突
+    device: Optional[str] = "cuda:1"
     
     # 模型特定配置 - 与test_clean.py保持一致
-    use_quantization: bool = True  # 是否使用量化
+    use_quantization: bool = True  # 启用量化
     quantization_type: str = "4bit"  # 使用4bit量化以节省内存
-    max_new_tokens: int = 150  # 与test_clean.py一致
+    max_new_tokens: int = 2048  # 150增加到2048以生成完整答案
     # 对于Fin-R1模型，这些参数会被忽略，但保留在配置中以防其他模型使用
     temperature: float = 0.1  # Fin-R1不使用此参数
     top_p: float = 0.7  # Fin-R1不使用此参数
@@ -104,7 +104,7 @@ class GeneratorConfig:
     enable_sentence_completion: bool = False  # 暂时禁用句子完整性检测以解决停滞问题
     max_completion_attempts: int = 2  # 最大重试次数
     token_increment: int = 100  # 每次重试增加的token数量
-    max_total_tokens: int = 1000  # 从1000增加到1500
+    max_total_tokens: int = 3000  # 增加到3000以支持更长的生成
     
     # 语言一致性检查配置
     enable_language_consistency_check: bool = True  # 是否启用语言一致性检查
@@ -112,7 +112,7 @@ class GeneratorConfig:
     enable_company_name_correction: bool = True  # 是否启用公司名称修正
     
     # 回答长度控制
-    max_response_chars: int = 600  # 最大回答字符数，避免过长回答
+    max_response_chars: int = 1200  # 增加最大回答字符数，支持更长的答案
     enable_response_length_limit: bool = False  # 是否启用回答长度限制，设为False以测试回答质量
     
     # 性能优化配置
@@ -120,7 +120,7 @@ class GeneratorConfig:
     enable_performance_monitoring: bool = True  # 启用性能监控
 
     # 超时和性能配置
-    max_generation_time: int = 30  # 生成超时时间（秒）
+    max_generation_time: int = 300  # 生成超时时间（秒），增加到5分钟
 
 @dataclass
 class Config:

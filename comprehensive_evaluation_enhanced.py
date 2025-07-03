@@ -58,18 +58,15 @@ except ImportError:
 
 import re # 确保你的脚本顶部有 import re
 
+# 你脚本中的这个函数现在是完美的，因为它做的就是这件事
 def extract_final_answer(raw_output: str) -> str:
     """从模型的原始输出中提取<answer>标签内的内容"""
     match = re.search(r'<answer>(.*?)</answer>', raw_output, re.DOTALL)
     if match:
-        # 如果找到标签，返回标签内的干净内容
+        # 完整地返回标签内的所有内容
         return match.group(1).strip()
-    
-    # 如果没找到，作为备用方案，返回整个输出的最后一行，这可能包含答案
-    lines = raw_output.strip().split('\n')
-    if lines:
-        return lines[-1].strip()
-    return "" # 如果连最后一行都没有，返回空字符串
+    # 如果没找到标签，返回空字符串或整个输出作为备用
+    return ""
 
 
 def calculate_f1_score(prediction: str, ground_truth: str) -> float:
@@ -106,12 +103,12 @@ def calculate_f1_score(prediction: str, ground_truth: str) -> float:
 class LLMTemplateTester:
     """LLM模板测试器"""
     
-    def __init__(self, model_name: str = "SUFE-AIFLM-Lab/Fin-R1", device: str = "auto"):
+    def __init__(self, model_name: str = "SUFE-AIFLM-Lab/Fin-R1", device: str = "cuda"):
         self.model_name = model_name
         self.device = self._setup_device(device)
         self.llm_generator = None  # 使用RAG的LocalLLMGenerator
-        self.max_length = 2048 # Increased context window for complex prompts
-        self.max_new_tokens = 150  # 默认token限制
+        self.max_length = 4096 # Increased context window for complex prompts
+        self.max_new_tokens = 2048  # 默认token限制
         
     def _setup_device(self, device: str) -> str:
         """设置设备"""
@@ -205,10 +202,7 @@ class LLMTemplateTester:
         # 移除多余的空白字符
         cleaned = answer.strip()
         
-        # 如果回答太长，截断到合理长度
-        if len(cleaned) > 1000:
-            cleaned = cleaned[:1000] + "..."
-        
+        # 移除长度限制，让LLM自由生成
         return cleaned
     
     def evaluate_answer_quality(self, generated_answer: str, expected_answer: str, 
@@ -241,8 +235,7 @@ class LLMTemplateTester:
         
         # 格式违规检查
         format_violations = []
-        if len(generated_answer) > 500:
-            format_violations.append("回答过长")
+        # 移除长度限制，让LLM自由生成
         if not generated_answer.strip():
             format_violations.append("空回答")
         
@@ -300,12 +293,12 @@ def get_detailed_english_prompt_messages(context_content: str, question_text: st
 class EnhancedComprehensiveEvaluator:
     """增强版全面评估器"""
     
-    def __init__(self, model_name: str = "SUFE-AIFLM-Lab/Fin-R1", device: str = "auto"):
+    def __init__(self, model_name: str = "SUFE-AIFLM-Lab/Fin-R1", device: str = "cuda"):
         self.tester = LLMTemplateTester(model_name, device)
         # 增加max_length以支持更长的模板
         self.tester.max_length = 4096
         # 增加max_new_tokens以支持完整的Chain-of-Thought推理
-        self.tester.max_new_tokens = 1024
+        self.tester.max_new_tokens = 4096
         print("🔄 加载模型...")
         self.tester.load_model()
         print("✅ 模型加载完成")
