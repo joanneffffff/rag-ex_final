@@ -11,3 +11,4 @@ data/unified/*.json filter=lfs diff=lfs merge=lfs -text
 data/unified/*.jsonl filter=lfs diff=lfs merge=lfs -text
 *.json filter=lfs diff=lfs merge=lfs -text
 data/alphafin/alphafin_final_clean.json filter=lfs diff=lfs merge=lfs -text
+data/unified/tatqa_knowledge_base_unified.jsonl filter=lfs diff=lfs merge=lfs -text
