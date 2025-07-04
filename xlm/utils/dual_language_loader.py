@@ -229,7 +229,9 @@ class DualLanguageLoader:
                 for idx, line in enumerate(f):
                     try:
                         item = json.loads(line.strip())
-                        context = item.get('context', '').strip()
+                        # 尝试获取text字段，如果不存在则尝试context字段
+                        context = item.get('text', '') or item.get('context', '')
+                        context = context.strip()
                         if context:
                             metadata = DocumentMetadata(
                                 source="tatqa",

@@ -236,7 +236,14 @@ class EnhancedRetriever(Retriever):
             else:
                 return []
         
+        # 添加详细的FAISS和重排序器日志
+        use_faiss = self.config.retriever.use_faiss and index is not None
+        has_reranker = self.reranker is not None
+        print(f"FAISS检索器: {'启用' if use_faiss else '禁用'}")
+        print(f"重排序器: {'启用' if has_reranker else '禁用'}")
+        
         # 1. 初始检索
+        print(f"开始FAISS初始检索，检索数量: {self.config.retriever.retrieval_top_k}")
         initial_results = self._initial_retrieval(
             text, 
             encoder, 
@@ -244,6 +251,7 @@ class EnhancedRetriever(Retriever):
             index, 
             self.config.retriever.retrieval_top_k
         )
+        print(f"FAISS初始检索完成，找到 {len(initial_results)} 个候选文档")
         
         if not initial_results:
             if return_scores:
@@ -253,9 +261,15 @@ class EnhancedRetriever(Retriever):
         
         # 2. 重排序（如果启用）
         if self.reranker and len(initial_results) > 1:
+            print(f"开始重排序，候选文档数量: {len(initial_results)}")
             final_results = self._rerank_documents(text, initial_results, top_k)
+            print(f"重排序完成，返回 {len(final_results)} 个文档")
         else:
             final_results = initial_results[:top_k]
+            if not self.reranker:
+                print("重排序器未启用，使用FAISS原始结果")
+            else:
+                print("候选文档数量不足，跳过重排序")
         
         # 3. 提取文档和分数
         result_documents = [documents[result['corpus_id']] for result in final_results]
@@ -269,28 +283,36 @@ class EnhancedRetriever(Retriever):
     def _initial_retrieval(self, text: str, encoder: Encoder, embeddings: np.ndarray, index, top_k: int) -> List[Dict]:
         """初始检索"""
         # 编码查询
+        print(f"编码查询文本，嵌入维度: {embeddings.shape[1] if embeddings is not None else 'unknown'}")
         query_embeddings = encoder.encode([text])
         
         if self.config.retriever.use_faiss and index:
             # 使用FAISS检索
+            print(f"使用FAISS索引检索，索引类型: {type(index).__name__}")
             query_np = np.array(query_embeddings).astype('float32')
             distances, indices = index.search(query_np, top_k)
             
             results = []
+            valid_results = 0
             for score, idx in zip(distances[0], indices[0]):
                 if idx != -1 and idx < embeddings.shape[0]:
                     results.append({
                         'corpus_id': int(idx),
                         'score': float(1.0 / (1.0 + score))
                     })
+                    valid_results += 1
+            
+            print(f"FAISS检索完成，有效结果: {valid_results}/{len(distances[0])}")
             return results
         else:
             # 使用语义搜索
+            print("使用语义搜索（非FAISS）")
             hits = semantic_search(
                 torch.tensor(query_embeddings),
                 torch.tensor(embeddings),
                 top_k=top_k
             )
+            print(f"语义搜索完成，返回 {len(hits[0])} 个结果")
             return hits[0]
     
     def _rerank_documents(self, text: str, initial_results: List[Dict], top_k: int) -> List[Dict]:
@@ -311,7 +333,10 @@ class EnhancedRetriever(Retriever):
                 doc_texts.append(doc_text)
         
         if not doc_texts:
+            print("没有可重排序的文档文本")
             return initial_results[:top_k]
+        
+        print(f"重排序器处理 {len(doc_texts)} 个文档，批次大小: {self.config.reranker.batch_size}")
         
         # 使用重排序器
         reranked_results = self.reranker.rerank(
@@ -319,6 +344,8 @@ class EnhancedRetriever(Retriever):
             documents=doc_texts,
             batch_size=self.config.reranker.batch_size
         )
+        
+        print(f"重排序器返回 {len(reranked_results)} 个结果")
         
         # 将重排序结果映射回原始索引
         final_results = []

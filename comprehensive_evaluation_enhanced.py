@@ -212,16 +212,33 @@ def calculate_f1_score(prediction: str, ground_truth: str) -> float:
 # ===================================================================
 
 def determine_context_type(context: str) -> str:
-    """根据context内容判断结构类型"""
-    has_table = "Table ID:" in context
-    text_content = re.sub(r'Table ID:.*?\n(Headers:.*?\n)?', '', context, flags=re.DOTALL)
-    text_content = re.sub(r'Row \d+:.*?\n', '', text_content)
-    text_content = re.sub(r'Category:.*?\n', '', text_content)
-    has_meaningful_text = any(len(line.strip()) > 20 for line in text_content.split('\n'))
-
-    if has_table and has_meaningful_text: return "table-text"
-    elif has_table: return "table"
-    else: return "text"
+    """根据context内容判断结构类型，基于Table ID和Paragraph ID"""
+    has_table_id = "Table ID:" in context
+    has_paragraph_id = "Paragraph ID:" in context
+    
+    # 移除ID标识行，获取纯内容
+    content_without_ids = re.sub(r'(Table ID|Paragraph ID):.*?\n', '', context, flags=re.DOTALL)
+    # 移除表格结构标识
+    content_without_ids = re.sub(r'Headers:.*?\n', '', content_without_ids, flags=re.DOTALL)
+    content_without_ids = re.sub(r'Row \d+:.*?\n', '', content_without_ids)
+    content_without_ids = re.sub(r'Category:.*?\n', '', content_without_ids)
+    
+    # 检查是否有有意义的文本内容（长度>20的行）
+    has_meaningful_text = any(len(line.strip()) > 20 for line in content_without_ids.split('\n') if line.strip())
+    
+    # 基于ID存在性进行精确判断
+    if has_table_id and has_paragraph_id:
+        return "table-text"  # 同时包含表格和段落ID
+    elif has_table_id:
+        return "table"  # 只有表格ID
+    elif has_paragraph_id:
+        return "text"   # 只有段落ID
+    else:
+        # 没有ID标识的情况，回退到内容分析
+        if has_meaningful_text:
+            return "text"
+        else:
+            return "unknown"
 
 def analyze_query_features(query: str) -> Dict[str, Any]:
     """分析query特征，更细致地识别问题意图"""
@@ -251,27 +268,35 @@ def analyze_query_features(query: str) -> Dict[str, Any]:
     return {'is_calc': is_calc, 'is_textual': is_textual, 'is_list': is_list}
 
 def hybrid_decision(context: str, query: str) -> str:
-    """混合决策算法，预测答案来源，优化优先级"""
+    """混合决策算法，基于Table ID和Paragraph ID进行精确路由"""
     context_type = determine_context_type(context)
     query_features = analyze_query_features(query)
+    
+    # 调试信息
+    # print(f"  [路由分析] Context类型: {context_type}, Query: '{query[:50]}...'")
 
-    # 优先级最高：如果问题明确是列表/枚举，通常直接从表格行名或文本枚举中提取
+    # 优先级最高：如果问题明确是列表/枚举
     if query_features['is_list']:
         if context_type == "table":
             return "table" 
         elif context_type == "text":
             return "text"
-        else: # "table-text"
-            # 列表问题在混合上下文中，更可能偏向表格的行/列名，或者文本中的枚举
-            # 这里的决策可以根据实际数据集中 "list" 答案的来源进行调整
-            return "table-text" # 或者 'table' 如果列表主要来自表格
+        elif context_type == "table-text":
+            # 列表问题在混合上下文中，优先从表格获取结构化信息
+            return "table-text"
+        else: # "unknown"
+            return "text"  # 默认回退到文本处理
 
     # 第二优先级：计算性问题，强烈依赖数值数据
     if query_features['is_calc']:
-        if context_type == "table" or context_type == "table-text":
-            return "table-text" # 即使是纯表格，计算也通常需要更通用的表格处理逻辑
-        else: # 纯文本，但问计算，这可能是一个复杂问题或需要从文本中解析数值进行计算
-            return "text" # 回退到文本处理，让模型尝试从文本中提取数字并计算
+        if context_type == "table":
+            return "table"  # 纯表格，直接使用表格模板
+        elif context_type == "table-text":
+            return "table-text"  # 混合内容，使用混合模板
+        elif context_type == "text":
+            return "text"  # 纯文本，尝试从文本中提取数字计算
+        else: # "unknown"
+            return "text"  # 默认回退
 
     # 第三优先级：解释性/事实性问题
     if query_features['is_textual']:
@@ -280,12 +305,26 @@ def hybrid_decision(context: str, query: str) -> str:
         elif context_type == "table-text":
             # 解释性问题在混合上下文中，优先从文本获取详细描述
             return "text" 
-        else: # 纯表格，但问解释，可能来自表格的描述性行/列或表格标题/备注
-            return "table" # 这种情况需要你的 'table' 模板能处理描述性问题
+        elif context_type == "table":
+            # 纯表格的解释性问题，可能来自表格标题、行名等
+            return "table"
+        else: # "unknown"
+            return "text"  # 默认回退
 
-    # 默认回退：如果以上规则都不匹配
-    # 根据上下文类型进行默认路由
-    return context_type # 直接返回识别到的上下文类型，让相应模板处理
+    # 默认回退：根据上下文类型进行路由
+    if context_type == "unknown":
+        # 如果没有明确的ID标识，进行内容分析
+        has_table_content = any(keyword in context.lower() for keyword in ['headers:', 'row', 'column'])
+        has_text_content = any(len(line.strip()) > 20 for line in context.split('\n') if line.strip())
+        
+        if has_table_content and has_text_content:
+            return "table-text"
+        elif has_table_content:
+            return "table"
+        else:
+            return "text"
+    
+    return context_type  # 直接返回识别到的上下文类型
 
 # ===================================================================
 # 5. 动态Prompt加载与路由

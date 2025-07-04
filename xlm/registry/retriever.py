@@ -27,16 +27,14 @@ def load_bilingual_retriever(
         cache_dir=cache_dir,
     )
 
-    # 加载双语言数据 - 使用QCA格式数据
-    chinese_docs, english_docs = data_loader.load_dual_language_data(
-        jsonl_data_path="evaluate_mrr/alphafin_train_qc.jsonl"  # 中文QCA数据
-    )
+    # 使用配置文件中的数据路径
+    config = Config()
     
-    # 加载英文QCA数据
-    _, english_docs_temp = data_loader.load_dual_language_data(
-        jsonl_data_path="evaluate_mrr/tatqa_train_qc.jsonl"  # 英文QCA数据
+    # 加载双语言数据 - 使用配置文件中的路径
+    chinese_docs, english_docs = data_loader.load_dual_language_data(
+        chinese_data_path=config.data.chinese_data_path,
+        english_data_path=config.data.english_data_path
     )
-    english_docs.extend(english_docs_temp)
 
     retriever = BilingualRetriever(
         encoder_en=encoder_en,

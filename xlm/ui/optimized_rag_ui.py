@@ -184,8 +184,8 @@ class OptimizedRagUI:
         print("\nStep 1.0. Initializing Multi-Stage Retrieval System for Chinese queries...")
         if MULTI_STAGE_AVAILABLE:
             try:
-                # 中文数据路径
-                chinese_data_path = Path("data/alphafin/alphafin_merged_generated_qa.json")
+                # 使用配置文件中的中文数据路径
+                chinese_data_path = Path(config.data.chinese_data_path)
                 
                 if chinese_data_path.exists():
                     print("✅ 初始化中文多阶段检索系统...")
@@ -567,12 +567,13 @@ class OptimizedRagUI:
             language=language
         )
         
+        print(f"FAISS召回数量: {len(retrieved_documents)}")
         if not retrieved_documents:
             return "未找到相关文档", ""
         
         # 3. 可选的重排序（如果启用）
         if reranker_checkbox and self.reranker:
-            print("应用重排序器...")
+            print(f"应用重排序器... 输入数量: {len(retrieved_documents)}")
             reranked_docs = []
             reranked_scores = []
             
@@ -597,6 +598,7 @@ class OptimizedRagUI:
             sorted_pairs = sorted(zip(reranked_docs, reranked_scores), key=lambda x: x[1], reverse=True)
             retrieved_documents = [doc for doc, _ in sorted_pairs[:self.config.retriever.rerank_top_k]]  # 使用配置的重排序top-k
             retriever_scores = [score for _, score in sorted_pairs[:self.config.retriever.rerank_top_k]]
+            print(f"重排序后数量: {len(retrieved_documents)}")
         else:
             print("跳过重排序器...")
         
@@ -797,27 +799,92 @@ class OptimizedRagUI:
             cursor: pointer;
             font-size: 12px;
             color: white;
+            transition: background-color 0.3s ease;
         }
-        .expand-btn { background-color: #4caf50; }
-        .collapse-btn { background-color: #757575; }
-        .content-section { margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; padding: 15px; background-color: #f9f9f9; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .score { background-color: #ff9800; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
-        .short-content, .full-content { margin: 0; line-height: 1.6; }
-        .short-content { color: #555; }
-        .full-content { color: #333; white-space: pre-wrap; }
+        .expand-btn { 
+            background-color: #4caf50; 
+        }
+        .expand-btn:hover { 
+            background-color: #45a049; 
+        }
+        .collapse-btn { 
+            background-color: #757575; 
+        }
+        .collapse-btn:hover { 
+            background-color: #616161; 
+        }
+        .content-section { 
+            margin-bottom: 20px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            padding: 15px; 
+            background-color: #f9f9f9; 
+            transition: box-shadow 0.3s ease;
+        }
+        .content-section:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 10px; 
+        }
+        .score { 
+            background-color: #ff9800; 
+            color: #fff; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 12px; 
+            font-weight: bold;
+        }
+        .short-content, .full-content { 
+            margin: 0; 
+            line-height: 1.6; 
+        }
+        .short-content { 
+            color: #555; 
+        }
+        .full-content { 
+            color: #333; 
+        }
+        .full-content p {
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            margin: 10px 0;
+            font-size: 13px;
+            line-height: 1.5;
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
         </style>
         """)
 
         for i, (doc, score) in enumerate(unique_docs):
+            # 获取完整的原始内容
             content = doc.content
             if not isinstance(content, str):
                 if isinstance(content, dict):
                     content = content.get('context', content.get('content', str(content)))
                 else:
                     content = str(content)
+            
+            # 确保内容不为空
+            if not content or not content.strip():
+                content = "内容为空"
+            
+            # 短内容预览（前300字符）
             short_content = content[:300] + "..." if len(content) > 300 else content
-            full_content = content.replace('\n', '<br>')  # 保证完整内容
+            
+            # 完整内容，保持原始格式
+            # 使用HTML实体转义，保持换行和格式
+            full_content = content.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            full_content = full_content.replace('\n', '<br>').replace('  ', '&nbsp;&nbsp;')
 
             html_parts.append(f"""
             <div class='content-section'>

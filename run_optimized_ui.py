@@ -47,9 +47,9 @@ def main():
                 ["用友网络2019年的每股经营活动产生的现金流量净额是多少？"],
                 ["首钢股份的业绩表现如何？"],
                 ["钢铁行业发展趋势"],
-                ["How was internally developed software capitalised?"],
-                ["Why did the Operating revenues decreased from 2018 to 2019?"],
-                ["What are the key financial ratios for investment analysis?"]
+                ["How was internally developed software capitalised?"], # text query
+                ["Which years does the table provide information for net sales by region?"], # table+text query
+                ["What was the total cost for 2019?"] # table query
             ]
         )
         

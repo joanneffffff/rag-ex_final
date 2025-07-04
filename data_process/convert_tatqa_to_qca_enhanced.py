@@ -144,12 +144,17 @@ def process_tatqa_to_qca_enhanced(input_paths, output_path):
                     # rel_paragraphs是字符串索引，需要转换为整数
                     p_idx = int(rel_paragraphs[0]) - 1  # 转换为0-based索引
                     if p_idx < len(doc_paragraphs):
-                        correct_chunk_content = doc_paragraphs[p_idx].get("text", "")
+                        paragraph_text = doc_paragraphs[p_idx].get("text", "")
                         # 使用段落的真实uid作为relevant_doc_ids
                         para_uid = doc_paragraphs[p_idx].get("uid")
+                        
+                        # 添加段落ID到context开头
                         if para_uid:
+                            correct_chunk_content = f"Paragraph ID: {para_uid}\n{paragraph_text}"
                             # 归一化ID
                             relevant_doc_ids.append(para_uid.replace('-', '').lower())
+                        else:
+                            correct_chunk_content = paragraph_text
                 except (ValueError, IndexError):
                     pass
             elif answer_type in ["table-text", "table"]:  # 优化：同时处理table-text和table

@@ -8,6 +8,14 @@ import re
 from langdetect import detect, LangDetectException
 from typing import List, Union, Optional, Dict, Any
 
+# 导入增强版英文prompt集成器
+try:
+    from xlm.components.prompts.enhanced_english_prompt_integrator import EnhancedEnglishPromptIntegrator, extract_final_answer_with_rescue
+    ENHANCED_ENGLISH_AVAILABLE = True
+except ImportError:
+    ENHANCED_ENGLISH_AVAILABLE = False
+    print("⚠️ 增强版英文prompt集成器不可用，将使用基础模板")
+
 # Define the robust "Golden Prompts" directly in the code (only for English)
 PROMPT_TEMPLATE_EN = """You are a highly analytical and precise financial expert. Your task is to answer the user's question **strictly based on the provided <context> information**.
 
@@ -108,6 +116,7 @@ class RagSystem:
         prompt_template: Optional[str] = None, # No longer used, but kept for compatibility
         use_cot: bool = False,  # 是否使用Chain-of-Thought
         use_simple: bool = False,  # 是否使用超简洁模式
+        use_enhanced_english: bool = True,  # 是否使用增强版英文prompt
     ):
         self.retriever = retriever
         self.generator = generator
@@ -115,6 +124,13 @@ class RagSystem:
         self.retriever_top_k = retriever_top_k
         self.use_cot = use_cot
         self.use_simple = use_simple
+        self.use_enhanced_english = use_enhanced_english and ENHANCED_ENGLISH_AVAILABLE
+        
+        # 初始化增强版英文prompt集成器
+        if self.use_enhanced_english:
+            self.enhanced_english_integrator = EnhancedEnglishPromptIntegrator()
+        else:
+            self.enhanced_english_integrator = None
 
     def run(self, user_input: str, language: Optional[str] = None) -> RagOutput:
         # 1. Detect language of the user's question
@@ -129,9 +145,38 @@ class RagSystem:
             is_chinese_q = (language == 'zh')
         
         # 2. Retrieve relevant documents
+        print(f"开始统一RAG检索...")
+        print(f"查询: {user_input}")
+        print(f"语言: {language}")
+        
+        # 检查检索器类型和配置
+        use_faiss = getattr(self.retriever, 'use_faiss', False)
+        has_reranker = hasattr(self.retriever, 'reranker') and getattr(self.retriever, 'reranker', None) is not None
+        
+        # 获取详细的配置信息
+        config_obj = getattr(self.retriever, 'config', None)
+        if config_obj and hasattr(config_obj, 'retriever'):
+            retrieval_top_k = config_obj.retriever.retrieval_top_k
+            rerank_top_k = config_obj.retriever.rerank_top_k
+        else:
+            retrieval_top_k = 100  # 默认值
+            rerank_top_k = 10      # 默认值
+        
+        print(f"使用FAISS: {use_faiss}")
+        print(f"启用重排序器: {has_reranker}")
+        print(f"FAISS检索数量: {retrieval_top_k}")
+        print(f"重排序器数量: {rerank_top_k}")
+        
         retrieved_documents, retriever_scores = self.retriever.retrieve(
             text=user_input, top_k=self.retriever_top_k, return_scores=True
         )
+        
+        # 安全地获取文档数量
+        doc_count = len(retrieved_documents) if isinstance(retrieved_documents, list) else 1
+        print(f"FAISS检索完成，找到 {doc_count} 个文档")
+        if has_reranker:
+            print(f"重排序器处理完成，返回 {doc_count} 个文档")
+        print(f"使用生成器生成答案...")
 
         # 3. For Chinese queries, we should use multi-stage retrieval system
         # For now, we'll use a simple fallback for Chinese queries
@@ -177,26 +222,41 @@ class RagSystem:
         else:
             context_str = str(retrieved_documents)
         
-        # 4. Create the final prompt using template
+        # 4. Create the final prompt using enhanced logic for English queries
         try:
             if is_chinese_q:
                 # 中文查询使用多阶段检索系统，这里只是回退
                 prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{user_input}\n\n回答："
+                template_type = "ZH-MULTI-STAGE"
             else:
-                # 英文查询使用模板
-                prompt = template_loader.format_template(
-                    template_name,
-                    context=context_str, 
-                    question=user_input
-                )
-                if prompt is None:
-                    raise Exception("Template formatting failed")
+                # 英文查询使用增强版逻辑
+                if self.use_enhanced_english and self.enhanced_english_integrator:
+                    # 使用增强版英文prompt集成器
+                    enhanced_prompt, metadata = self.enhanced_english_integrator.create_enhanced_prompt(
+                        context=context_str, 
+                        question=user_input
+                    )
+                    prompt = enhanced_prompt
+                    template_type = f"EN-ENHANCED-{metadata.get('content_type', 'UNKNOWN').upper()}"
+                    print(f"使用增强版英文prompt，内容类型: {metadata.get('content_type', 'unknown')}")
+                else:
+                    # 使用基础模板
+                    prompt = template_loader.format_template(
+                        template_name,
+                        context=context_str, 
+                        question=user_input
+                    )
+                    if prompt is None:
+                        raise Exception("Template formatting failed")
+                    template_type = "EN-BASIC"
         except Exception as e:
             # 回退到简单prompt
             if is_chinese_q:
                 prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{user_input}\n\n回答："
+                template_type = "ZH-FALLBACK"
             else:
                 prompt = f"Context: {context_str}\nQuestion: {user_input}\nAnswer:"
+                template_type = "EN-FALLBACK"
         
         # 5. Generate the response
         try:
@@ -204,20 +264,37 @@ class RagSystem:
         except Exception as e:
             raise e
         
-        # 6. Gather metadata
+        # 6. 对英文查询进行答案提取处理
+        if not is_chinese_q and self.use_enhanced_english and self.enhanced_english_integrator:
+            try:
+                # 提取最终答案
+                raw_response = generated_responses[0] if generated_responses else ""
+                extracted_answer = extract_final_answer_with_rescue(raw_response)
+                
+                # 如果提取成功，替换原始响应
+                if extracted_answer and extracted_answer.strip():
+                    generated_responses = [extracted_answer]
+                    print(f"答案提取成功: {extracted_answer[:100]}...")
+                else:
+                    print("答案提取失败，使用原始响应")
+            except Exception as e:
+                print(f"答案提取过程出错: {e}，使用原始响应")
+        
+        # 7. Gather metadata
         retriever_model_name = ""
-        # 检查retriever是否有encoder属性
-        if hasattr(self.retriever, 'encoder_ch') and hasattr(self.retriever, 'encoder_en'):
-            if is_chinese_q:
-                retriever_model_name = getattr(self.retriever.encoder_ch, 'model_name', 'unknown')
-            else:
-                retriever_model_name = getattr(self.retriever.encoder_en, 'model_name', 'unknown')
-
-        # 确定prompt模板类型
-        if is_chinese_q:
-            template_type = "ZH-MULTI-STAGE"
-        else:
-            template_type = "EN"
+        # 安全地检查retriever是否有encoder属性
+        try:
+            if hasattr(self.retriever, 'encoder_ch') and hasattr(self.retriever, 'encoder_en'):
+                if is_chinese_q:
+                    encoder_ch = getattr(self.retriever, 'encoder_ch', None)
+                    if encoder_ch and hasattr(encoder_ch, 'model_name'):
+                        retriever_model_name = getattr(encoder_ch, 'model_name', 'unknown')
+                else:
+                    encoder_en = getattr(self.retriever, 'encoder_en', None)
+                    if encoder_en and hasattr(encoder_en, 'model_name'):
+                        retriever_model_name = getattr(encoder_en, 'model_name', 'unknown')
+        except Exception:
+            retriever_model_name = "unknown"
 
         # 确保retrieved_documents是列表类型
         if not isinstance(retrieved_documents, list):
@@ -235,19 +312,34 @@ class RagSystem:
             else:
                 float_scores.append(0.0)
 
+        # 构建增强的metadata
+        metadata_dict = dict(
+            retriever_model_name=retriever_model_name,
+            top_k=self.retriever_top_k,
+            generator_model_name=self.generator.model_name,
+            prompt_template=f"Template-{template_type}",
+            question_language="zh" if is_chinese_q else "en",
+            use_cot=self.use_cot,
+            use_simple=self.use_simple,
+            use_enhanced_english=self.use_enhanced_english
+        )
+        
+        # 如果是增强版英文处理，添加额外metadata
+        if not is_chinese_q and self.use_enhanced_english and self.enhanced_english_integrator:
+            try:
+                enhanced_metadata = self.enhanced_english_integrator.get_template_info()
+                metadata_dict.update({
+                    "enhanced_features": enhanced_metadata.get("features", []),
+                    "enhanced_version": enhanced_metadata.get("version", "unknown")
+                })
+            except Exception as e:
+                print(f"获取增强metadata失败: {e}")
+
         result = RagOutput(
             retrieved_documents=retrieved_documents,
             retriever_scores=float_scores,
             prompt=prompt,
             generated_responses=generated_responses,
-            metadata=dict(
-                retriever_model_name=retriever_model_name,
-                top_k=self.retriever_top_k,
-                generator_model_name=self.generator.model_name,
-                prompt_template=f"Template-{template_type}",
-                question_language="zh" if is_chinese_q else "en",
-                use_cot=self.use_cot,
-                use_simple=self.use_simple
-            ),
+            metadata=metadata_dict,
         )
         return result

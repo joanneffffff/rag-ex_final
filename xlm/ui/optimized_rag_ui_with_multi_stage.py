@@ -193,7 +193,7 @@ class OptimizedRagUIWithMultiStage:
         if MULTI_STAGE_AVAILABLE:
             try:
                 # 中文数据路径
-                chinese_data_path = Path("data/alphafin/alphafin_merged_generated_qa.json")
+                chinese_data_path = Path(config.data.chinese_data_path)
                 
                 if chinese_data_path.exists():
                     print("✅ 初始化中文多阶段检索系统...")
