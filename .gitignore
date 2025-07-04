@@ -61,6 +61,9 @@ data/alphafin/*
 data/prompt_templates/*
 !data/prompt_templates/multi_stage_chinese_template.txt
 !data/prompt_templates/rag_english_template.txt
+!data/prompt_templates/template_for_text_answer.txt
+!data/prompt_templates/template_for_table_answer.txt
+!data/prompt_templates/template_for_hybrid_answer.txt
 
 # --- Other Specific Ignores ---
 models/

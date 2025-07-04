@@ -199,20 +199,9 @@ class OptimizedRagUI:
                     print(f"❌ 中文数据文件不存在: {chinese_data_path}")
                     self.chinese_retrieval_system = None
                 
-                # 英文数据路径（如果有的话）
-                english_data_path = Path(config.data.english_data_path)  # 使用配置文件中的路径
-                if english_data_path.exists():
-                    print("✅ 初始化英文多阶段检索系统...")
-                    self.english_retrieval_system = MultiStageRetrievalSystem(
-                        data_path=english_data_path,
-                        dataset_type="english",
-                        use_existing_config=True
-                    )
-                    print("✅ 英文多阶段检索系统初始化完成")
-                else:
-                    print(f"⚠️ 英文数据文件不存在: {english_data_path}")
-                    print(f"配置的英文数据路径: {config.data.english_data_path}")
-                    self.english_retrieval_system = None
+                # 英文数据使用传统RAG系统，不初始化多阶段检索
+                print("ℹ️ 英文数据使用传统RAG系统，跳过多阶段检索初始化")
+                self.english_retrieval_system = None
                 
             except Exception as e:
                 print(f"❌ 多阶段检索系统初始化失败: {e}")
@@ -354,27 +343,9 @@ class OptimizedRagUI:
     
     def _init_faiss(self):
         """Initialize FAISS index"""
-        # 对于双空间检索器，我们需要合并英文和中文嵌入向量
-        if hasattr(self.retriever, 'corpus_embeddings_en') and hasattr(self.retriever, 'corpus_embeddings_ch'):
-            # 双空间检索器
-            embeddings_en = self.retriever.corpus_embeddings_en
-            embeddings_ch = self.retriever.corpus_embeddings_ch
-            
-            if embeddings_en is not None and embeddings_ch is not None:
-                # 合并嵌入向量
-                all_embeddings = np.vstack([embeddings_en, embeddings_ch])
-                self.dimension = all_embeddings.shape[1]
-                self.index = faiss.IndexFlatL2(self.dimension)
-                # 确保数据类型正确
-                embeddings_float32 = all_embeddings.astype('float32')
-                self.index.add(embeddings_float32)
-                print(f"Step 3.1. Initializing FAISS index with {all_embeddings.shape[0]} embeddings...")
-            else:
-                print("Warning: No embeddings available for FAISS initialization")
-        else:
-            # 单空间检索器 - 对于BilingualRetriever，跳过FAISS初始化
-            print("Warning: BilingualRetriever detected, skipping FAISS initialization")
-            print("FAISS index will not be available for this retriever type")
+        # BilingualRetriever已经处理了FAISS索引，这里不需要额外的FAISS初始化
+        print("FAISS索引已在BilingualRetriever中处理，跳过UI层的FAISS初始化")
+        self.index = None
     
     def _create_interface(self) -> gr.Blocks:
         """Create optimized Gradio interface"""
@@ -464,7 +435,7 @@ class OptimizedRagUI:
         reranker_checkbox: bool
     ) -> tuple[str, str]:
         if not question.strip():
-            return "请输入问题", "<p>请输入问题</p>"
+            return "请输入问题", ""
         
         # 检测语言
         try:
@@ -473,183 +444,165 @@ class OptimizedRagUI:
         except:
             language = 'en'
         
-        # 打印查询信息
-        print(f"\n=== 查询信息 ===")
-        print(f"查询语言: {language}")
-        print(f"查询内容: {question}")
-        print(f"数据源: {datasource}")
-        print(f"重排序器: {'启用' if reranker_checkbox else '禁用'}")
+        # 根据语言选择检索系统
+        if language == 'zh' and self.chinese_retrieval_system:
+            return self._process_chinese_with_multi_stage(question, reranker_checkbox)
+        else:
+            # 英文查询或中文查询但多阶段检索不可用时，使用传统RAG系统
+            return self._fallback_retrieval(question, language)
+    
+    def _process_chinese_with_multi_stage(self, question: str, reranker_checkbox: bool) -> tuple[str, str]:
+        """
+        使用多阶段检索系统处理中文查询
+        """
+        # 使用通用的股票信息提取函数
+        company_name, stock_code = extract_stock_info(question)
+        report_date = extract_report_date(question)
+        if company_name:
+            print(f"提取到公司名称: {company_name}")
+        if stock_code:
+            print(f"提取到股票代码: {stock_code}")
+        if report_date:
+            print(f"提取到报告日期: {report_date}")
         
-        # 检测数据源
-        detected_data_source = self._detect_data_source(question, language)
+        # 执行多阶段检索
+        if self.chinese_retrieval_system is None:
+            return "多阶段检索系统未初始化", ""
         
-        # 使用重排序器
-        use_reranker = reranker_checkbox
+        results = self.chinese_retrieval_system.search(
+            query=question,
+            company_name=company_name,
+            stock_code=stock_code,
+            report_date=report_date,
+            top_k=20
+        )
         
-        try:
-            # 根据语言选择检索系统
-            if language == 'zh' and hasattr(self, 'chinese_retrieval_system') and self.chinese_retrieval_system:
-                # 使用多阶段检索系统处理中文查询
-                print("使用多阶段检索系统处理中文查询...")
-                
-                # 使用通用的股票信息提取函数
-                company_name, stock_code = extract_stock_info(question)
-                report_date = extract_report_date(question)
-                if company_name:
-                    print(f"提取到公司名称: {company_name}")
-                if stock_code:
-                    print(f"提取到股票代码: {stock_code}")
-                if report_date:
-                    print(f"提取到报告日期: {report_date}")
-                
-                # 执行多阶段检索
-                results = self.chinese_retrieval_system.search(
-                    query=question,
-                    company_name=company_name,
-                    stock_code=stock_code,
-                    report_date=report_date,
-                    top_k=20
+        # 转换为DocumentWithMetadata格式
+        unique_docs = []
+        
+        if isinstance(results, dict) and 'retrieved_documents' in results:
+            documents = results['retrieved_documents']
+            llm_answer = results.get('llm_answer', '')
+            
+            for result in documents:
+                content = result.get('original_context', result.get('summary', ''))
+                # 健壮source
+                source = str(
+                    result.get('company_name') or
+                    result.get('stock_code') or
+                    result.get('question') or
+                    result.get('context') or
+                    result.get('content') or
+                    "unknown"
                 )
-                
-                # 转换为DocumentWithMetadata格式
-                unique_docs = []
-                
-                if isinstance(results, dict) and 'retrieved_documents' in results:
-                    documents = results['retrieved_documents']
-                    llm_answer = results.get('llm_answer', '')
-                    
-                    for result in documents:
-                        content = result.get('original_context', result.get('summary', ''))
-                        # 健壮source
-                        source = str(
-                            result.get('company_name') or
-                            result.get('stock_code') or
-                            result.get('question') or
-                            result.get('context') or
-                            result.get('content') or
-                            "unknown"
-                        )
-                        doc = DocumentWithMetadata(
-                            content=content,
-                            metadata=DocumentMetadata(
-                                source=source,
-                                created_at="",
-                                author="",
-                                language="chinese"
-                            )
-                        )
-                        unique_docs.append((doc, result.get('combined_score', 0.0)))
-                    
-                    # 如果多阶段检索系统已经生成了答案，直接使用
-                    if llm_answer:
-                        answer = f"{llm_answer}"
-                    else:
-                        answer = "多阶段检索系统未生成答案"
-                else:
-                    answer = "多阶段检索系统返回格式错误"
-                
-            elif language == 'en' and hasattr(self, 'english_retrieval_system') and self.english_retrieval_system:
-                print("使用多阶段检索系统处理英文查询...")
-                results = self.english_retrieval_system.search(
-                    query=question,
-                    top_k=20
+                doc = DocumentWithMetadata(
+                    content=content,
+                    metadata=DocumentMetadata(
+                        source=source,
+                        created_at="",
+                        author="",
+                        language="chinese"
+                    )
                 )
-                # 去重逻辑
-                unique_docs = []
-                seen_hashes = set()
-                if isinstance(results, dict) and 'retrieved_documents' in results:
-                    documents = results['retrieved_documents']
-                    llm_answer = results.get('llm_answer', '')
-                    for result in documents:
-                        content = result.get('context', result.get('content', ''))
-                        h = hashlib.md5(content.encode('utf-8')).hexdigest()
-                        if h not in seen_hashes:
-                            # 健壮source
-                            source = str(
-                                result.get('company_name') or
-                                result.get('stock_code') or
-                                result.get('question') or
-                                result.get('context') or
-                                result.get('content') or
-                                "unknown"
-                            )
-                            doc = DocumentWithMetadata(
-                                content=content,
-                                metadata=DocumentMetadata(
-                                    source=source,
-                                    created_at="",
-                                    author="",
-                                    language="english"
-                                )
-                            )
-                            unique_docs.append((doc, result.get('combined_score', 0.0)))
-                            seen_hashes.add(h)
-                    if llm_answer:
-                        answer = f"{llm_answer}"
-                    else:
-                        answer = "多阶段检索系统未生成答案"
+                unique_docs.append((doc, result.get('combined_score', 0.0)))
+            
+            # 如果多阶段检索系统已经生成了答案，直接使用
+            if llm_answer:
+                answer = f"{llm_answer}"
+            else:
+                answer = "多阶段检索系统未生成答案"
+        else:
+            answer = "多阶段检索系统返回格式错误"
+        
+        # 打印检索到的原始上下文
+        print(f"\n=== 检索到的原始上下文 ===")
+        print(f"检索到 {len(unique_docs)} 个唯一文档")
+        for i, (doc, score) in enumerate(unique_docs[:5]):  # 只显示前5个
+            content = doc.content
+            if not isinstance(content, str):
+                if isinstance(content, dict):
+                    content = content.get('context', content.get('content', str(content)))
                 else:
-                    answer = "多阶段检索系统返回格式错误"
-                    
-            else:
-                # 回退到传统RAG系统
-                print("回退到传统RAG系统...")
-                rag_output = self.rag_system.run(user_input=question, language=language)
-                
-                # 去重处理
-                unique_docs = []
-                seen_hashes = set()
-                
-                for doc, score in zip(rag_output.retrieved_documents, rag_output.retriever_scores):
-                    content = doc.content
-                    h = hashlib.md5(content.encode('utf-8')).hexdigest()
-                    if h not in seen_hashes:
-                        unique_docs.append((doc, score))
-                        seen_hashes.add(h)
-                    if len(unique_docs) >= 20:
-                        break
-                
-                answer = rag_output.generated_responses[0] if rag_output.generated_responses else "Unable to generate answer"
+                    content = str(content)
             
-            # 打印检索到的原始上下文
-            print(f"\n=== 检索到的原始上下文 ===")
-            print(f"检索到 {len(unique_docs)} 个唯一文档")
-            for i, (doc, score) in enumerate(unique_docs[:5]):  # 只显示前5个
-                content = doc.content
-                if not isinstance(content, str):
-                    if isinstance(content, dict):
-                        content = content.get('context', content.get('content', str(content)))
-                    else:
-                        content = str(content)
-                
-                # 截断显示
-                display_content = content[:300] + "..." if len(content) > 300 else content
-                print(f"文档 {i+1} (分数: {score:.4f}): {display_content}")
+            # 截断显示
+            display_content = content[:300] + "..." if len(content) > 300 else content
+            print(f"文档 {i+1} (分数: {score:.4f}): {display_content}")
+        
+        if len(unique_docs) > 5:
+            print(f"... 还有 {len(unique_docs) - 5} 个文档")
+        
+        # 打印LLM响应
+        print(f"\n=== LLM响应 ===")
+        print(f"生成答案: {answer}")
+        print(f"检索文档数: {len(unique_docs)}")
+        
+        # Add reranker info to answer if used
+        if reranker_checkbox:
+            answer = f"[Reranker: Enabled] {answer}"
+        else:
+            answer = f"[Reranker: Disabled] {answer}"
+        
+        # 生成HTML格式的可点击上下文
+        html_content = self._generate_clickable_context_html(unique_docs)
+        
+        print(f"=== 查询处理完成 ===\n")
+        return answer, html_content
+    
+    def _fallback_retrieval(self, question: str, language: str) -> tuple[str, str]:
+        """
+        回退到传统RAG系统处理英文查询
+        """
+        print("回退到传统RAG系统处理英文查询...")
+        rag_output = self.rag_system.run(user_input=question, language=language)
+        
+        # 去重处理
+        unique_docs = []
+        seen_hashes = set()
+        
+        for doc, score in zip(rag_output.retrieved_documents, rag_output.retriever_scores):
+            content = doc.content
+            h = hashlib.md5(content.encode('utf-8')).hexdigest()
+            if h not in seen_hashes:
+                unique_docs.append((doc, score))
+                seen_hashes.add(h)
+            if len(unique_docs) >= 20:
+                break
+        
+        answer = rag_output.generated_responses[0] if rag_output.generated_responses else "Unable to generate answer"
+        
+        # 打印检索到的原始上下文
+        print(f"\n=== 检索到的原始上下文 ===")
+        print(f"检索到 {len(unique_docs)} 个唯一文档")
+        for i, (doc, score) in enumerate(unique_docs[:5]):  # 只显示前5个
+            content = doc.content
+            if not isinstance(content, str):
+                if isinstance(content, dict):
+                    content = content.get('context', content.get('content', str(content)))
+                else:
+                    content = str(content)
             
-            if len(unique_docs) > 5:
-                print(f"... 还有 {len(unique_docs) - 5} 个文档")
-            
-            # 打印LLM响应
-            print(f"\n=== LLM响应 ===")
-            print(f"生成答案: {answer}")
-            print(f"检索文档数: {len(unique_docs)}")
-            
-            # Add reranker info to answer if used
-            if use_reranker:
-                answer = f"[Reranker: Enabled] {answer}"
-            else:
-                answer = f"[Reranker: Disabled] {answer}"
-            
-            # 生成HTML格式的可点击上下文
-            html_content = self._generate_clickable_context_html(unique_docs)
-            
-            print(f"=== 查询处理完成 ===\n")
-            return answer, html_content
-            
-        except Exception as e:
-            error_msg = f"处理问题时出错: {str(e)}"
-            print(f"错误: {error_msg}")
-            return error_msg, f"<p style='color: red;'>{error_msg}</p>"
+            # 截断显示
+            display_content = content[:300] + "..." if len(content) > 300 else content
+            print(f"文档 {i+1} (分数: {score:.4f}): {display_content}")
+        
+        if len(unique_docs) > 5:
+            print(f"... 还有 {len(unique_docs) - 5} 个文档")
+        
+        # 打印LLM响应
+        print(f"\n=== LLM响应 ===")
+        print(f"生成答案: {answer}")
+        print(f"检索文档数: {len(unique_docs)}")
+        
+        # Add reranker info to answer if used
+        # 传统RAG系统不支持重排序，所以这里不添加
+        answer = f"[Reranker: Disabled] {answer}"
+        
+        # 生成HTML格式的可点击上下文
+        html_content = self._generate_clickable_context_html(unique_docs)
+        
+        print(f"=== 查询处理完成 ===\n")
+        return answer, html_content
     
     def _generate_clickable_context_html(self, unique_docs: List[Tuple[DocumentWithMetadata, float]]) -> str:
         if not unique_docs:

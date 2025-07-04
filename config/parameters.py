@@ -40,6 +40,7 @@ class RerankerConfig:
     device: Optional[str] = "cuda:0"  # 重排序器使用cuda:0
     use_quantization: bool = True
     quantization_type: str = "4bit"  # 改为4bit量化以节省GPU内存
+    use_flash_attention: bool = False  # 关闭Flash Attention优化
     batch_size: int = 4
     enabled: bool = True  # 是否启用重排序器
 
@@ -91,7 +92,8 @@ class GeneratorConfig:
     # 模型特定配置 - 与test_clean.py保持一致
     use_quantization: bool = True  # 启用量化
     quantization_type: str = "4bit"  # 使用4bit量化以节省内存
-    max_new_tokens: int = 2048  # 150增加到2048以生成完整答案
+    use_flash_attention: bool = False  # 启用Flash Attention优化
+    max_new_tokens: int = 4096  # 增加到4096以生成更完整的答案
     # 对于Fin-R1模型，这些参数会被忽略，但保留在配置中以防其他模型使用
     temperature: float = 0.1  # Fin-R1不使用此参数
     top_p: float = 0.7  # Fin-R1不使用此参数
@@ -104,7 +106,7 @@ class GeneratorConfig:
     enable_sentence_completion: bool = False  # 暂时禁用句子完整性检测以解决停滞问题
     max_completion_attempts: int = 2  # 最大重试次数
     token_increment: int = 100  # 每次重试增加的token数量
-    max_total_tokens: int = 3000  # 增加到3000以支持更长的生成
+    max_total_tokens: int = 5000  # 增加到5000以支持更长的生成
     
     # 语言一致性检查配置
     enable_language_consistency_check: bool = True  # 是否启用语言一致性检查

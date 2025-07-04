@@ -87,12 +87,24 @@ class LocalLLMGenerator(Generator):
                 print("⚠️  CUDA requested but not available, falling back to CPU")
                 validated_device = "cpu"
             else:
-                # 检查CUDA内存
-                cuda_memory = torch.cuda.get_device_properties(0).total_memory / 1024**3  # GB
-                print(f"CUDA memory available: {cuda_memory:.1f} GB")
+                # 解析指定的GPU设备ID
+                if ":" in device:
+                    gpu_id = int(device.split(":")[1])
+                else:
+                    gpu_id = 0
+                
+                # 检查指定的GPU是否存在
+                if gpu_id >= torch.cuda.device_count():
+                    print(f"⚠️  GPU {gpu_id} does not exist, falling back to GPU 0")
+                    gpu_id = 0
+                    validated_device = "cuda:0"
+                
+                # 检查指定GPU的内存
+                cuda_memory = torch.cuda.get_device_properties(gpu_id).total_memory / 1024**3  # GB
+                print(f"GPU {gpu_id} memory available: {cuda_memory:.1f} GB")
                 
                 if cuda_memory < 4 and use_quantization:
-                    print("⚠️  CUDA memory < 4GB, enabling quantization")
+                    print(f"⚠️  GPU {gpu_id} memory < 4GB, enabling quantization")
                     validated_use_quantization = True
                     if quantization_type not in ['4bit', '8bit']:
                         validated_quantization_type = '4bit'
@@ -106,9 +118,24 @@ class LocalLLMGenerator(Generator):
     def _setup_memory_optimization(self):
         """设置内存优化"""
         # 设置PyTorch内存分配器
-        if torch.cuda.is_available():
-            # 启用内存缓存
-            torch.cuda.empty_cache()
+        if torch.cuda.is_available() and self.device and self.device.startswith('cuda'):
+            # 解析指定的GPU设备ID
+            if ":" in self.device:
+                gpu_id = int(self.device.split(":")[1])
+            else:
+                gpu_id = 0
+            
+            # 检查指定的GPU是否存在
+            if gpu_id < torch.cuda.device_count():
+                # 设置当前设备
+                torch.cuda.set_device(gpu_id)
+                # 启用内存缓存
+                torch.cuda.empty_cache()
+                print(f"✅ 设置GPU {gpu_id} 为当前设备")
+            else:
+                print(f"⚠️  GPU {gpu_id} 不存在，使用GPU 0")
+                torch.cuda.set_device(0)
+                torch.cuda.empty_cache()
             
             # 设置更激进的内存分配策略
             os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True,max_split_size_mb:64'
