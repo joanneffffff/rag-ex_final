@@ -136,16 +136,16 @@ class OptimizedRagUI:
         examples: Optional[List[List[str]]] = None,
     ):
         # 使用config中的平台感知配置
-        config = Config()
+        self.config = Config()
         self.cache_dir = EMBEDDING_CACHE_DIR if (not cache_dir or not isinstance(cache_dir, str)) else cache_dir
         self.encoder_model_name = encoder_model_name
         # 从config读取生成器模型名称，而不是硬编码
-        self.generator_model_name = config.generator.model_name
+        self.generator_model_name = self.config.generator.model_name
         self.use_faiss = use_faiss
         self.enable_reranker = enable_reranker
         # 从config读取参数，如果传入None则使用config默认值
-        self.use_existing_embedding_index = use_existing_embedding_index if use_existing_embedding_index is not None else config.retriever.use_existing_embedding_index
-        self.max_alphafin_chunks = max_alphafin_chunks if max_alphafin_chunks is not None else config.retriever.max_alphafin_chunks
+        self.use_existing_embedding_index = use_existing_embedding_index if use_existing_embedding_index is not None else self.config.retriever.use_existing_embedding_index
+        self.max_alphafin_chunks = max_alphafin_chunks if max_alphafin_chunks is not None else self.config.retriever.max_alphafin_chunks
         self.window_title = window_title
         self.title = title
         self.examples = examples or [
@@ -240,6 +240,7 @@ class OptimizedRagUI:
         self.encoder_ch = FinbertEncoder(
             model_name=config.encoder.chinese_model_path,
             cache_dir=config.encoder.cache_dir,
+            device=config.encoder.device  # 使用配置文件中的设备设置
         )
         
         print("\nStep 3. Loading English encoder...")
@@ -247,6 +248,7 @@ class OptimizedRagUI:
         self.encoder_en = FinbertEncoder(
             model_name=config.encoder.english_model_path,
             cache_dir=config.encoder.cache_dir,
+            device=config.encoder.device  # 使用配置文件中的设备设置
         )
         
         # 清理内存
@@ -444,88 +446,258 @@ class OptimizedRagUI:
         except:
             language = 'en'
         
-        # 根据语言选择检索系统
-        if language == 'zh' and self.chinese_retrieval_system:
-            return self._process_chinese_with_multi_stage(question, reranker_checkbox)
-        else:
-            # 英文查询或中文查询但多阶段检索不可用时，使用传统RAG系统
-            return self._fallback_retrieval(question, language)
+        # 统一使用相同的RAG系统处理
+        return self._unified_rag_processing(question, language, reranker_checkbox)
     
-    def _process_chinese_with_multi_stage(self, question: str, reranker_checkbox: bool) -> tuple[str, str]:
+    def _unified_rag_processing(self, question: str, language: str, reranker_checkbox: bool) -> tuple[str, str]:
         """
-        使用多阶段检索系统处理中文查询
+        统一的RAG处理流程 - 中文和英文使用相同的FAISS、重排序器和生成器
         """
-        # 使用通用的股票信息提取函数
-        company_name, stock_code = extract_stock_info(question)
-        report_date = extract_report_date(question)
-        if company_name:
-            print(f"提取到公司名称: {company_name}")
-        if stock_code:
-            print(f"提取到股票代码: {stock_code}")
-        if report_date:
-            print(f"提取到报告日期: {report_date}")
+        print(f"开始统一RAG检索...")
+        print(f"查询: {question}")
+        print(f"语言: {language}")
+        print(f"使用FAISS: {self.use_faiss}")
+        print(f"启用重排序器: {reranker_checkbox}")
         
-        # 执行多阶段检索
-        if self.chinese_retrieval_system is None:
-            return "多阶段检索系统未初始化", ""
+                # 1. 中文查询：关键词提取 -> 元数据过滤 -> FAISS检索 -> chunk重排序
+        if language == 'zh' and self.chinese_retrieval_system:
+            print("检测到中文查询，尝试使用元数据过滤...")
+            try:
+                # 1.1 提取关键词
+                company_name, stock_code = extract_stock_info(question)
+                report_date = extract_report_date(question)
+                if company_name:
+                    print(f"提取到公司名称: {company_name}")
+                if stock_code:
+                    print(f"提取到股票代码: {stock_code}")
+                if report_date:
+                    print(f"提取到报告日期: {report_date}")
+                
+                # 1.2 元数据过滤
+                candidate_indices = self.chinese_retrieval_system.pre_filter(
+                    company_name=company_name,
+                    stock_code=stock_code,
+                    report_date=report_date,
+                    max_candidates=1000
+                )
+                
+                if candidate_indices:
+                    print(f"元数据过滤成功，找到 {len(candidate_indices)} 个候选文档")
+                    
+                    # 1.3 使用已有的FAISS索引在过滤后的文档中进行检索
+                    faiss_results = self.chinese_retrieval_system.faiss_search(
+                        query=question,
+                        candidate_indices=candidate_indices,
+                        top_k=self.config.retriever.retrieval_top_k  # 使用配置的检索数量
+                    )
+                    
+                    if faiss_results:
+                        print(f"FAISS检索成功，找到 {len(faiss_results)} 个相关文档")
+                        
+                        # 1.4 转换为DocumentWithMetadata格式（content是chunk）
+                        unique_docs = []
+                        for doc_idx, faiss_score in faiss_results:
+                            original_doc = self.chinese_retrieval_system.data[doc_idx]
+                            chunks = self.chinese_retrieval_system.doc_to_chunks_mapping.get(doc_idx, [])
+                            if chunks:
+                                content = chunks[0]  # 使用chunk作为content
+                                doc = DocumentWithMetadata(
+                                    content=content,
+                                    metadata=DocumentMetadata(
+                                        source=str(original_doc.get('company_name', '')),
+                                        created_at="",
+                                        author="",
+                                        language="chinese",
+                                        doc_id=str(doc_idx)
+                                    )
+                                )
+                                unique_docs.append((doc, faiss_score))
+                        
+                        # 1.5 对chunk应用重排序器
+                        if reranker_checkbox and self.reranker:
+                            print("对chunk应用重排序器...")
+                            reranked_docs = []
+                            reranked_scores = []
+                            
+                            # 提取文档内容
+                            doc_texts = [doc.content for doc, _ in unique_docs]
+                            
+                            # 使用QwenReranker的rerank方法
+                            reranked_items = self.reranker.rerank(
+                                query=question,
+                                documents=doc_texts,
+                                batch_size=4
+                            )
+                            
+                            # 将重排序结果映射回文档
+                            content_to_doc_map = {doc.content: doc for doc, _ in unique_docs}
+                            for doc_text, rerank_score in reranked_items:
+                                if doc_text in content_to_doc_map:
+                                    reranked_docs.append(content_to_doc_map[doc_text])
+                                    reranked_scores.append(rerank_score)
+                            
+                            try:
+                                sorted_pairs = sorted(zip(reranked_docs, reranked_scores), key=lambda x: x[1], reverse=True)
+                                unique_docs = [(doc, score) for doc, score in sorted_pairs[:self.config.retriever.rerank_top_k]]
+                                print(f"chunk重排序完成，保留前 {len(unique_docs)} 个文档")
+                            except Exception as e:
+                                print(f"重排序异常: {e}")
+                                unique_docs = []
+                        else:
+                            print("跳过重排序器...")
+                            unique_docs = unique_docs[:10]
+                        
+                        # 1.6 使用chunk生成答案
+                        answer = self._generate_answer_with_context(question, unique_docs)
+                        return self._format_and_return_result(answer, unique_docs, reranker_checkbox, "中文完整流程")
+                    else:
+                        print("FAISS检索未找到相关文档，回退到统一FAISS检索...")
+                else:
+                    print("元数据过滤未找到候选文档，回退到统一FAISS检索...")
+                    
+            except Exception as e:
+                print(f"中文处理流程失败: {e}，回退到统一RAG处理")
         
-        results = self.chinese_retrieval_system.search(
-            query=question,
-            company_name=company_name,
-            stock_code=stock_code,
-            report_date=report_date,
-            top_k=20
+        # 2. 使用统一的检索器进行FAISS检索
+        # 中文使用summary，英文使用chunk
+        retrieved_documents, retriever_scores = self.retriever.retrieve(
+            text=question, 
+            top_k=self.config.retriever.retrieval_top_k,  # 使用配置的检索数量
+            return_scores=True,
+            language=language
         )
         
-        # 转换为DocumentWithMetadata格式
-        unique_docs = []
+        if not retrieved_documents:
+            return "未找到相关文档", ""
         
-        if isinstance(results, dict) and 'retrieved_documents' in results:
-            documents = results['retrieved_documents']
-            llm_answer = results.get('llm_answer', '')
+        # 3. 可选的重排序（如果启用）
+        if reranker_checkbox and self.reranker:
+            print("应用重排序器...")
+            reranked_docs = []
+            reranked_scores = []
             
-            for result in documents:
-                content = result.get('original_context', result.get('summary', ''))
-                # 健壮source
-                source = str(
-                    result.get('company_name') or
-                    result.get('stock_code') or
-                    result.get('question') or
-                    result.get('context') or
-                    result.get('content') or
-                    "unknown"
-                )
-                doc = DocumentWithMetadata(
-                    content=content,
-                    metadata=DocumentMetadata(
-                        source=source,
-                        created_at="",
-                        author="",
-                        language="chinese"
-                    )
-                )
-                unique_docs.append((doc, result.get('combined_score', 0.0)))
+            # 提取文档内容
+            doc_texts = [doc.content if hasattr(doc, 'content') else str(doc) for doc in retrieved_documents]
             
-            # 如果多阶段检索系统已经生成了答案，直接使用
-            if llm_answer:
-                answer = f"{llm_answer}"
-            else:
-                answer = "多阶段检索系统未生成答案"
+            # 使用QwenReranker的rerank方法
+            reranked_items = self.reranker.rerank(
+                query=question,
+                documents=doc_texts,
+                batch_size=1  # 减小到1以避免GPU内存不足
+            )
+            
+            # 将重排序结果映射回文档
+            content_to_doc_map = {doc.content if hasattr(doc, 'content') else str(doc): doc for doc in retrieved_documents}
+            for doc_text, rerank_score in reranked_items:
+                if doc_text in content_to_doc_map:
+                    reranked_docs.append(content_to_doc_map[doc_text])
+                    reranked_scores.append(rerank_score)
+            
+            # 按重排序分数排序
+            sorted_pairs = sorted(zip(reranked_docs, reranked_scores), key=lambda x: x[1], reverse=True)
+            retrieved_documents = [doc for doc, _ in sorted_pairs[:self.config.retriever.rerank_top_k]]  # 使用配置的重排序top-k
+            retriever_scores = [score for _, score in sorted_pairs[:self.config.retriever.rerank_top_k]]
         else:
-            answer = "多阶段检索系统返回格式错误"
+            print("跳过重排序器...")
         
-        # 打印检索到的原始上下文
-        print(f"\n=== 检索到的原始上下文 ===")
+        # 4. 去重处理
+        unique_docs = []
+        seen_hashes = set()
+        
+        for doc, score in zip(retrieved_documents, retriever_scores):
+            if hasattr(doc, 'content'):
+                content = doc.content
+            else:
+                content = str(doc)
+            h = hashlib.md5(content.encode('utf-8')).hexdigest()
+            if h not in seen_hashes:
+                unique_docs.append((doc, score))
+                seen_hashes.add(h)
+            if len(unique_docs) >= self.config.retriever.rerank_top_k:
+                break
+        
+        # 5. 使用统一的生成器生成答案
+        answer = self._generate_answer_with_context(question, unique_docs)
+        
+        # 6. 打印结果并返回
+        return self._format_and_return_result(answer, unique_docs, reranker_checkbox, "统一RAG")
+    
+    def _generate_answer_with_context(self, question: str, unique_docs: List[Tuple[DocumentWithMetadata, float]]) -> str:
+        """使用上下文生成答案"""
+        # 构建上下文
+        context_parts = []
+        for doc, _ in unique_docs:
+            if hasattr(doc, 'content'):
+                content = doc.content
+            else:
+                content = str(doc)
+            
+            if not isinstance(content, str):
+                if isinstance(content, dict):
+                    content = content.get('context', content.get('content', str(content)))
+                else:
+                    content = str(content)
+            context_parts.append(content)
+        
+        context_str = "\n\n".join(context_parts)
+        
+        # 使用生成器生成答案
+        print("使用生成器生成答案...")
+        
+        # 根据查询语言选择prompt模板
+        try:
+            from langdetect import detect
+            query_language = detect(question)
+            is_chinese_query = query_language.startswith('zh')
+        except:
+            # 如果语言检测失败，根据查询内容判断
+            is_chinese_query = any('\u4e00' <= char <= '\u9fff' for char in question)
+        
+        if is_chinese_query:
+            # 中文查询使用中文prompt
+            prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question}\n\n回答："
+        else:
+            # 英文查询使用英文prompt模板
+            try:
+                from xlm.components.prompt_templates.template_loader import template_loader
+                prompt = template_loader.format_template(
+                    "rag_english_template",
+                    context=context_str,
+                    question=question
+                )
+                if prompt is None:
+                    # 回退到简单英文prompt
+                    prompt = f"Context: {context_str}\nQuestion: {question}\nAnswer:"
+            except Exception as e:
+                print(f"英文模板加载失败: {e}，使用简单英文prompt")
+                prompt = f"Context: {context_str}\nQuestion: {question}\nAnswer:"
+        
+        try:
+            answer = self.generator.generate(texts=[prompt])[0]
+        except Exception as e:
+            print(f"生成器调用失败: {e}")
+            answer = "生成器调用失败"
+        
+        return answer
+    
+    def _format_and_return_result(self, answer: str, unique_docs: List[Tuple[DocumentWithMetadata, float]], 
+                                 reranker_checkbox: bool, method: str) -> tuple[str, str]:
+        """格式化并返回结果"""
+        # 打印检索结果
+        print(f"\n=== 检索到的原始上下文 ({method}) ===")
         print(f"检索到 {len(unique_docs)} 个唯一文档")
-        for i, (doc, score) in enumerate(unique_docs[:5]):  # 只显示前5个
-            content = doc.content
+        for i, (doc, score) in enumerate(unique_docs[:5]):
+            if hasattr(doc, 'content'):
+                content = doc.content
+            else:
+                content = str(doc)
+            
             if not isinstance(content, str):
                 if isinstance(content, dict):
                     content = content.get('context', content.get('content', str(content)))
                 else:
                     content = str(content)
             
-            # 截断显示
             display_content = content[:300] + "..." if len(content) > 300 else content
             print(f"文档 {i+1} (分数: {score:.4f}): {display_content}")
         
@@ -537,8 +709,8 @@ class OptimizedRagUI:
         print(f"生成答案: {answer}")
         print(f"检索文档数: {len(unique_docs)}")
         
-        # Add reranker info to answer if used
-        if reranker_checkbox:
+        # 添加重排序器信息
+        if reranker_checkbox and self.reranker:
             answer = f"[Reranker: Enabled] {answer}"
         else:
             answer = f"[Reranker: Disabled] {answer}"
@@ -553,7 +725,12 @@ class OptimizedRagUI:
         """
         回退到传统RAG系统处理英文查询
         """
-        print("回退到传统RAG系统处理英文查询...")
+        print(f"开始传统RAG检索...")
+        print(f"查询: {question}")
+        print(f"语言: {language}")
+        print(f"使用FAISS: {self.use_faiss}")
+        print(f"启用重排序器: {self.enable_reranker}")
+        
         rag_output = self.rag_system.run(user_input=question, language=language)
         
         # 去重处理

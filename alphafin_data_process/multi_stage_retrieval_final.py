@@ -598,7 +598,7 @@ class MultiStageRetrievalSystem:
     def rerank(self, 
                query: str, 
                candidate_results: List[Tuple[int, float]], 
-               top_k: int = 20) -> List[Tuple[int, float, float]]:
+               top_k: int = 10) -> List[Tuple[int, float, float]]:  # 改为10，与配置文件一致
         """
         使用Qwen重排序器对候选结果进行重排序
         
@@ -647,7 +647,7 @@ class MultiStageRetrievalSystem:
         
         # 使用Qwen重排序器进行重排序
         try:
-            reranked_results = self.qwen_reranker.rerank(query, docs_for_rerank, batch_size=4)
+            reranked_results = self.qwen_reranker.rerank(query, docs_for_rerank, batch_size=1)  # 减小到1以避免GPU内存不足
             print(f"重排序器处理完成，返回 {len(reranked_results)} 个结果")
         except Exception as e:
             print(f"重排序失败: {e}")
@@ -797,7 +797,7 @@ class MultiStageRetrievalSystem:
                company_name: Optional[str] = None,
                stock_code: Optional[str] = None,
                report_date: Optional[str] = None,
-               top_k: int = 20) -> Dict:
+               top_k: int = 10) -> Dict:  # 改为10，与配置文件中的rerank_top_k一致
         """
         完整的多阶段检索流程
         
@@ -843,13 +843,17 @@ class MultiStageRetrievalSystem:
             candidate_indices = list(range(len(self.data)))
             print(f"回退到全量检索，候选文档数: {len(candidate_indices)}")
         
-        # 2. FAISS检索
-        faiss_results = self.faiss_search(query, candidate_indices, top_k=min(retrieval_top_k, len(candidate_indices)))
+        # 2. FAISS检索 - 基于预过滤结果，但确保检索到配置的候选数量
+        print("第二步：基于预过滤结果进行FAISS检索...")
+        # 如果预过滤结果少于配置的检索数量，使用预过滤结果；否则使用配置的检索数量
+        actual_top_k = min(retrieval_top_k, len(candidate_indices))
+        faiss_results = self.faiss_search(query, candidate_indices, top_k=actual_top_k)
         print(f"FAISS检索结果: {len(faiss_results)} 个文档")
+        final_faiss_results = faiss_results
         
         # 3. Qwen Reranker
-        print("开始重排序...")
-        final_results = self.rerank(query, faiss_results, top_k=rerank_top_k)
+        print("第三步：开始重排序...")
+        final_results = self.rerank(query, final_faiss_results, top_k=rerank_top_k)
         print(f"重排序完成: {len(final_results)} 个chunks")
         print("重排序器处理完成")
         

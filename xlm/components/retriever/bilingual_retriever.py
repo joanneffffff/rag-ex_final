@@ -205,12 +205,12 @@ class BilingualRetriever(Retriever):
                 self.index_ch = self._init_faiss(self.encoder_ch, len(self.corpus_documents_ch))
 
         if self.corpus_documents_en:
-            self.corpus_embeddings_en = self._batch_encode_corpus(self.corpus_documents_en, self.encoder_en)
+            self.corpus_embeddings_en = self._batch_encode_corpus(self.corpus_documents_en, self.encoder_en, 'en')
             if self.use_faiss and self.corpus_embeddings_en is not None:
                 self._add_to_faiss(self.index_en, self.corpus_embeddings_en)
 
         if self.corpus_documents_ch:
-            self.corpus_embeddings_ch = self._batch_encode_corpus(self.corpus_documents_ch, self.encoder_ch)
+            self.corpus_embeddings_ch = self._batch_encode_corpus(self.corpus_documents_ch, self.encoder_ch, 'zh')
             if self.use_faiss and self.corpus_embeddings_ch is not None:
                 self._add_to_faiss(self.index_ch, self.corpus_embeddings_ch)
         
@@ -238,9 +238,16 @@ class BilingualRetriever(Retriever):
                 index = faiss.IndexIVFFlat(quantizer, dimension, nlist)
                 return index
 
-    def _batch_encode_corpus(self, documents: List[DocumentWithMetadata], encoder: FinbertEncoder) -> np.ndarray:
+    def _batch_encode_corpus(self, documents: List[DocumentWithMetadata], encoder: FinbertEncoder, language: str = None) -> np.ndarray:
         """Encode corpus documents in batches with a progress bar."""
-        batch_texts = [doc.content for doc in documents]
+        batch_texts = []
+        for doc in documents:
+            if language == 'zh' and hasattr(doc.metadata, 'summary') and doc.metadata.summary:
+                # 中文使用summary字段进行FAISS索引
+                batch_texts.append(doc.metadata.summary)
+            else:
+                # 英文使用content字段
+                batch_texts.append(doc.content)
         return encoder.encode(texts=batch_texts, batch_size=self.batch_size, show_progress_bar=True)
     
     def _add_to_faiss(self, index, embeddings: np.ndarray):
@@ -301,9 +308,12 @@ class BilingualRetriever(Retriever):
                 if idx != -1:
                     results.append({'corpus_id': idx, 'score': 1 - score / 2})
         else:
+            # 确保tensor在正确的设备上
+            query_tensor = torch.tensor(query_embeddings, device=encoder.device)
+            corpus_tensor = torch.tensor(corpus_embeddings, device=encoder.device)
             hits = semantic_search(
-                torch.tensor(query_embeddings),
-                torch.tensor(corpus_embeddings),
+                query_tensor,
+                corpus_tensor,
                 top_k=top_k
             )
             results = hits[0]

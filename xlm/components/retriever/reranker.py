@@ -6,7 +6,8 @@ Following official implementation guidelines
 from typing import List, Dict, Tuple, Optional, Union
 import torch
 import numpy as np
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers.utils.quantization_config import BitsAndBytesConfig
 from tqdm import tqdm
 
 class QwenReranker:
@@ -76,14 +77,15 @@ class QwenReranker:
             **model_kwargs
         )
         
-        # 移动到设备 - 量化模型不需要手动移动
+        # 移动到设备
         if quantization_config:
-            # 量化模型已经自动设置到正确设备，不需要手动移动
-            print("量化模型已自动设置到设备，跳过手动移动")
+            # 量化模型需要明确指定设备
+            print(f"量化模型设置到设备: {self.device}")
+            self.model = self.model.to(self.device)
         else:
             # 非量化模型需要手动移动到设备
-            if self.device == "cuda":
-                self.model = self.model.cuda()
+            if self.device.startswith("cuda"):
+                self.model = self.model.to(self.device)
             else:
                 self.model = self.model.to(self.device)
         

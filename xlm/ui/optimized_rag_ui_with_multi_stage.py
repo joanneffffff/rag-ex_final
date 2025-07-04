@@ -129,12 +129,12 @@ class OptimizedRagUIWithMultiStage:
         examples: Optional[List[List[str]]] = None,
     ):
         # 使用config中的平台感知配置
-        config = Config()
+        self.config = Config()
         self.cache_dir = EMBEDDING_CACHE_DIR if (not cache_dir or not isinstance(cache_dir, str)) else cache_dir
         self.use_faiss = use_faiss
         self.enable_reranker = enable_reranker
-        self.use_existing_embedding_index = use_existing_embedding_index if use_existing_embedding_index is not None else config.retriever.use_existing_embedding_index
-        self.max_alphafin_chunks = max_alphafin_chunks if max_alphafin_chunks is not None else config.retriever.max_alphafin_chunks
+        self.use_existing_embedding_index = use_existing_embedding_index if use_existing_embedding_index is not None else self.config.retriever.use_existing_embedding_index
+        self.max_alphafin_chunks = max_alphafin_chunks if max_alphafin_chunks is not None else self.config.retriever.max_alphafin_chunks
         self.window_title = window_title
         self.title = title
         self.examples = examples or [
@@ -161,31 +161,28 @@ class OptimizedRagUIWithMultiStage:
         """Initialize RAG system components with multi-stage retrieval"""
         print("\nStep 1. Initializing Multi-Stage Retrieval System...")
         
-        # 使用config中的平台感知配置
-        config = Config()
-        
         # 初始化传统RAG系统作为回退
         print("Step 2. Initializing Traditional RAG System as fallback...")
         try:
             # 加载检索器
             self.retriever = load_enhanced_retriever(
-                config=config
+                config=self.config
             )
             
             # 加载生成器
             self.generator = load_generator(
-                generator_model_name=config.generator.model_name,
+                generator_model_name=self.config.generator.model_name,
                 use_local_llm=True,
                 use_gpu=True,
                 gpu_device="cuda:1",
-                cache_dir=config.generator.cache_dir
+                cache_dir=self.config.generator.cache_dir
             )
             
             # 初始化RAG系统
             self.rag_system = RagSystem(
                 retriever=self.retriever,
                 generator=self.generator,
-                retriever_top_k=20
+                retriever_top_k=self.config.retriever.retrieval_top_k  # 使用配置中的设置
             )
             print("✅ 传统RAG系统初始化完成")
         except Exception as e:
@@ -341,14 +338,21 @@ class OptimizedRagUIWithMultiStage:
             return self._fallback_retrieval(question, 'zh')
         
         try:
+            print(f"🔍 开始中文多阶段检索...")
+            print(f"📋 查询: {question}")
             company_name, stock_code = extract_stock_info(question)
             report_date = extract_report_date(question)
+            print(f"🏢 公司名称: {company_name}")
+            print(f"📈 股票代码: {stock_code}")
+            print(f"📅 报告日期: {report_date}")
+            print(f"⚙️ 配置参数: retrieval_top_k={self.config.retriever.retrieval_top_k}, rerank_top_k={self.config.retriever.rerank_top_k}")
+            
             results = self.chinese_retrieval_system.search(
                 query=question,
                 company_name=company_name,
                 stock_code=stock_code,
                 report_date=report_date,
-                top_k=20
+                top_k=self.config.retriever.rerank_top_k  # 使用配置中的重排序top-k
             )
             
             # 转换为DocumentWithMetadata格式
@@ -356,9 +360,12 @@ class OptimizedRagUIWithMultiStage:
             retriever_scores = []
             
             # 检查results的格式
+            print(f"📊 检索结果类型: {type(results)}")
             if isinstance(results, dict) and 'retrieved_documents' in results:
                 documents = results['retrieved_documents']
                 llm_answer = results.get('llm_answer', '')
+                print(f"📄 检索到 {len(documents)} 个文档")
+                print(f"🤖 LLM答案: {'已生成' if llm_answer else '未生成'}")
                 for result in documents:
                     doc = DocumentWithMetadata(
                         content=result.get('original_context', result.get('summary', '')),
@@ -375,7 +382,7 @@ class OptimizedRagUIWithMultiStage:
                 # 如果多阶段检索系统已经生成了答案，直接使用
                 if llm_answer:
                     context_data = []
-                    for doc, score in zip(retrieved_documents[:20], retriever_scores[:20]):
+                    for doc, score in zip(retrieved_documents[:self.config.retriever.rerank_top_k], retriever_scores[:self.config.retriever.rerank_top_k]):
                         context_data.append([f"{score:.4f}", doc.content[:500] + "..." if len(doc.content) > 500 else doc.content])
                     answer = f"[Multi-Stage Retrieval: ZH] {llm_answer}"
                     return answer, context_data
@@ -431,7 +438,7 @@ class OptimizedRagUIWithMultiStage:
                 generated_responses = self.generator.generate(texts=[prompt])
                 answer = generated_responses[0] if generated_responses else "Unable to generate answer"
                 context_data = []
-                for doc, score in zip(retrieved_documents[:20], retriever_scores[:20]):
+                for doc, score in zip(retrieved_documents[:self.config.retriever.rerank_top_k], retriever_scores[:self.config.retriever.rerank_top_k]):
                     context_data.append([f"{score:.4f}", doc.content[:500] + "..." if len(doc.content) > 500 else doc.content])
                 answer = f"[Multi-Stage Retrieval: ZH] {answer}"
                 return answer, context_data
@@ -447,10 +454,14 @@ class OptimizedRagUIWithMultiStage:
             return self._fallback_retrieval(question, 'en')
         
         try:
+            print(f"🔍 开始英文多阶段检索...")
+            print(f"📋 查询: {question}")
+            print(f"⚙️ 配置参数: retrieval_top_k={self.config.retriever.retrieval_top_k}, rerank_top_k={self.config.retriever.rerank_top_k}")
+            
             # 执行多阶段检索
             results = self.english_retrieval_system.search(
                 query=question,
-                top_k=20
+                top_k=self.config.retriever.rerank_top_k  # 使用配置中的重排序top-k
             )
             
             # 转换为DocumentWithMetadata格式
@@ -508,7 +519,7 @@ class OptimizedRagUIWithMultiStage:
                 generated_responses = self.generator.generate(texts=[prompt])
                 answer = generated_responses[0] if generated_responses else "Unable to generate answer"
                 context_data = []
-                for doc, score in zip(retrieved_documents[:20], retriever_scores[:20]):
+                for doc, score in zip(retrieved_documents[:self.config.retriever.rerank_top_k], retriever_scores[:self.config.retriever.rerank_top_k]):
                     context_data.append([f"{score:.4f}", doc.content[:500] + "..." if len(doc.content) > 500 else doc.content])
                 answer = f"[Multi-Stage Retrieval: EN] {answer}"
                 return answer, context_data
@@ -570,7 +581,7 @@ class OptimizedRagUIWithMultiStage:
                 
                 # 准备上下文数据
                 context_data = []
-                for doc, score in zip(rag_output.retrieved_documents[:20], rag_output.retriever_scores[:20]):
+                for doc, score in zip(rag_output.retrieved_documents[:self.config.retriever.rerank_top_k], rag_output.retriever_scores[:self.config.retriever.rerank_top_k]):
                     # 统一只显示content字段，不显示question和answer
                     content = doc.content
                     # 确保content是字符串类型

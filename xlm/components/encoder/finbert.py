@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 import torch
 from torch import nn
 from transformers import AutoModel, AutoTokenizer
@@ -10,13 +10,13 @@ class FinbertEncoder(nn.Module):
     def __init__(
         self,
         model_name: str,
-        cache_dir: str = None,
-        device: str = None,
+        cache_dir: str = "",
+        device: Optional[str] = None,
         batch_size: int = 32,
         max_length: int = 512
     ):
         # 使用config中的平台感知配置
-        if cache_dir is None:
+        if not cache_dir:
             config = Config()
             cache_dir = config.cache_dir
             
@@ -54,7 +54,9 @@ class FinbertEncoder(nn.Module):
         with torch.no_grad():
             for i in iterator:
                 batch_texts = texts[i:i+batch_size]
-                encoded_input = self.tokenizer(batch_texts, padding=True, truncation=True, max_length=512, return_tensors="pt").to(self.device)
+                encoded_input = self.tokenizer(batch_texts, padding=True, truncation=True, max_length=512, return_tensors="pt")
+                # 确保输入tensor在正确的设备上
+                encoded_input = {k: v.to(self.device) for k, v in encoded_input.items()}
                 model_output = self.model(**encoded_input)
                 sentence_embeddings = self._mean_pooling(model_output, encoded_input['attention_mask'])
                 all_embeddings.append(sentence_embeddings.cpu().numpy())

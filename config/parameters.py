@@ -41,7 +41,7 @@ class RerankerConfig:
     use_quantization: bool = True
     quantization_type: str = "4bit"  # 改为4bit量化以节省GPU内存
     use_flash_attention: bool = False  # 关闭Flash Attention优化
-    batch_size: int = 4
+    batch_size: int = 1  # 已经是1了，如果还不够可以尝试CPU模式
     enabled: bool = True  # 是否启用重排序器
 
 @dataclass
