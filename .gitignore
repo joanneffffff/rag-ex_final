@@ -67,5 +67,5 @@ data/prompt_templates/*
 
 # --- Other Specific Ignores ---
 models/
-checkpoints/data/unified/alphafin_unified.json
-checkpoints/
+data/unified/alphafin_unified.json
+checkpoints/*
