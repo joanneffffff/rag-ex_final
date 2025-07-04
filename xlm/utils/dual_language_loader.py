@@ -63,7 +63,7 @@ class DualLanguageLoader:
                 metadata = DocumentMetadata(
                     source="alphafin",
                     language="chinese",
-                    doc_id=f"alphafin_{idx}",
+                    doc_id=str(item.get('doc_id', f"alphafin_{idx}")),  # 使用原始数据文件的doc_id
                     question=question,
                     answer=answer,
                     company_name=company_name,

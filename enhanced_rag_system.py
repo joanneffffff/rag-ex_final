@@ -124,12 +124,20 @@ class EnhancedRAGSystem:
             
             # 1. 创建英文Prompt
             if self.english_prompt_integrator:
-                messages = self.english_prompt_integrator.create_english_prompt(
+                # 从context中提取summary（如果有的话）
+                summary = None
+                if "Summary:" in context and "Full Context:" in context:
+                    # 如果context已经包含summary格式，提取出来
+                    parts = context.split("Full Context:", 1)
+                    if len(parts) == 2:
+                        summary = parts[0].replace("Summary:", "").strip()
+                        context = parts[1].strip()
+                
+                prompt = self.english_prompt_integrator.create_english_prompt(
                     context=context,
-                    question=query
+                    question=query,
+                    summary=summary
                 )
-                # 转换为文本格式
-                prompt = self._convert_messages_to_text(messages)
             else:
                 # 备用方案：简单prompt
                 prompt = f"Context: {context}\\n\\nQuestion: {query}\\n\\nAnswer:"

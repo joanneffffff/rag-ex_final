@@ -167,7 +167,24 @@ class OptimizedRagUI:
         
         # Create Gradio interface
         self.interface = self._create_interface()
-    
+        self.docid2context = self._load_docid2context(self.config.data.chinese_data_path)
+
+    def _load_docid2context(self, data_path):
+        import json
+        docid2context = {}
+        try:
+            with open(data_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                for item in data:
+                    doc_id = str(item.get("doc_id", ""))
+                    context = item.get("context", "")
+                    if doc_id and context:  # 只添加有效的映射
+                        docid2context[doc_id] = context
+            print(f"成功加载 {len(docid2context)} 个doc_id到context的映射")
+        except Exception as e:
+            print(f"加载doc_id到context映射失败: {e}")
+        return docid2context
+
     def _init_components(self):
         """Initialize RAG system components"""
         print("\nStep 1. Loading bilingual retriever with dual encoders...")
@@ -501,6 +518,8 @@ class OptimizedRagUI:
                             chunks = self.chinese_retrieval_system.doc_to_chunks_mapping.get(doc_idx, [])
                             if chunks:
                                 content = chunks[0]  # 使用chunk作为content
+                                # 使用原始数据文件的doc_id，而不是索引号
+                                original_doc_id = original_doc.get('doc_id', str(doc_idx))
                                 doc = DocumentWithMetadata(
                                     content=content,
                                     metadata=DocumentMetadata(
@@ -508,7 +527,8 @@ class OptimizedRagUI:
                                         created_at="",
                                         author="",
                                         language="chinese",
-                                        doc_id=str(doc_idx)
+                                        doc_id=str(original_doc_id),
+                                        origin_doc_id=str(original_doc_id)  # 确保origin_doc_id也使用原始doc_id
                                     )
                                 )
                                 unique_docs.append((doc, faiss_score))
@@ -519,8 +539,36 @@ class OptimizedRagUI:
                             reranked_docs = []
                             reranked_scores = []
                             
-                            # 提取文档内容
-                            doc_texts = [doc.content for doc, _ in unique_docs]
+                            # 提取文档内容（中文数据：summary + context，英文数据：context）
+                            doc_texts = []
+                            doc_id_to_original_map = {}  # 使用doc_id进行映射
+                            for doc, _ in unique_docs:
+                                # 获取doc_id
+                                doc_id = getattr(doc.metadata, 'doc_id', None)
+                                if doc_id is None:
+                                    # 如果没有doc_id，使用content的hash作为唯一标识
+                                    doc_id = hashlib.md5(doc.content.encode('utf-8')).hexdigest()[:16]
+                                
+                                if hasattr(doc, 'metadata') and hasattr(doc.metadata, 'language') and doc.metadata.language == 'chinese':
+                                    # 中文数据：尝试组合summary和context
+                                    summary = ""
+                                    if hasattr(doc.metadata, 'summary') and doc.metadata.summary:
+                                        summary = doc.metadata.summary
+                                    else:
+                                        # 如果没有summary，使用context的前200字符作为summary
+                                        summary = doc.content[:200] + "..." if len(doc.content) > 200 else doc.content
+                                    
+                                    # 组合summary和context，避免过长
+                                    combined_text = f"摘要：{summary}\n\n详细内容：{doc.content}"
+                                    # 限制总长度，避免超出重排序器的token限制
+                                    if len(combined_text) > 4000:  # 假设重排序器限制为4000字符
+                                        combined_text = f"摘要：{summary}\n\n详细内容：{doc.content[:3500]}..."
+                                    doc_texts.append(combined_text)
+                                    doc_id_to_original_map[doc_id] = doc  # 使用doc_id映射
+                                else:
+                                    # 英文数据：只使用context
+                                    doc_texts.append(doc.content)
+                                    doc_id_to_original_map[doc_id] = doc  # 使用doc_id映射
                             
                             # 使用QwenReranker的rerank方法
                             reranked_items = self.reranker.rerank(
@@ -529,12 +577,17 @@ class OptimizedRagUI:
                                 batch_size=4
                             )
                             
-                            # 将重排序结果映射回文档
-                            content_to_doc_map = {doc.content: doc for doc, _ in unique_docs}
-                            for doc_text, rerank_score in reranked_items:
-                                if doc_text in content_to_doc_map:
-                                    reranked_docs.append(content_to_doc_map[doc_text])
-                                    reranked_scores.append(rerank_score)
+                            # 将重排序结果映射回文档（使用索引位置映射）
+                            for i, (doc_text, rerank_score) in enumerate(reranked_items):
+                                if i < len(unique_docs):
+                                    # 使用索引位置获取对应的doc_id
+                                    doc_id = getattr(unique_docs[i][0].metadata, 'doc_id', None)
+                                    if doc_id is None:
+                                        doc_id = hashlib.md5(unique_docs[i][0].content.encode('utf-8')).hexdigest()[:16]
+                                    
+                                    if doc_id in doc_id_to_original_map:
+                                        reranked_docs.append(doc_id_to_original_map[doc_id])
+                                        reranked_scores.append(rerank_score)
                             
                             try:
                                 sorted_pairs = sorted(zip(reranked_docs, reranked_scores), key=lambda x: x[1], reverse=True)
@@ -560,12 +613,19 @@ class OptimizedRagUI:
         
         # 2. 使用统一的检索器进行FAISS检索
         # 中文使用summary，英文使用chunk
-        retrieved_documents, retriever_scores = self.retriever.retrieve(
+        retrieval_result = self.retriever.retrieve(
             text=question, 
             top_k=self.config.retriever.retrieval_top_k,  # 使用配置的检索数量
             return_scores=True,
             language=language
         )
+        
+        # 处理返回结果
+        if isinstance(retrieval_result, tuple):
+            retrieved_documents, retriever_scores = retrieval_result
+        else:
+            retrieved_documents = retrieval_result
+            retriever_scores = [1.0] * len(retrieved_documents)  # 默认分数
         
         print(f"FAISS召回数量: {len(retrieved_documents)}")
         if not retrieved_documents:
@@ -577,8 +637,45 @@ class OptimizedRagUI:
             reranked_docs = []
             reranked_scores = []
             
-            # 提取文档内容
-            doc_texts = [doc.content if hasattr(doc, 'content') else str(doc) for doc in retrieved_documents]
+            # 检测查询语言
+            try:
+                from langdetect import detect
+                query_language = detect(question)
+                is_chinese_query = query_language.startswith('zh')
+            except:
+                # 如果语言检测失败，根据查询内容判断
+                is_chinese_query = any('\u4e00' <= char <= '\u9fff' for char in question)
+            
+            # 提取文档内容（只有中文查询使用智能内容选择）
+            doc_texts = []
+            doc_id_to_original_map = {}  # 使用doc_id进行映射
+            for doc in retrieved_documents:
+                # 获取doc_id
+                doc_id = getattr(doc.metadata, 'doc_id', None)
+                if doc_id is None:
+                    # 如果没有doc_id，使用content的hash作为唯一标识
+                    doc_id = hashlib.md5(doc.content.encode('utf-8')).hexdigest()[:16]
+                
+                if is_chinese_query and hasattr(doc, 'metadata') and hasattr(doc.metadata, 'language') and doc.metadata.language == 'chinese':
+                    # 中文数据：尝试组合summary和context
+                    summary = ""
+                    if hasattr(doc.metadata, 'summary') and doc.metadata.summary:
+                        summary = doc.metadata.summary
+                    else:
+                        # 如果没有summary，使用context的前200字符作为summary
+                        summary = doc.content[:200] + "..." if len(doc.content) > 200 else doc.content
+                    
+                    # 组合summary和context，避免过长
+                    combined_text = f"摘要：{summary}\n\n详细内容：{doc.content}"
+                    # 限制总长度，避免超出重排序器的token限制
+                    if len(combined_text) > 4000:  # 假设重排序器限制为4000字符
+                        combined_text = f"摘要：{summary}\n\n详细内容：{doc.content[:3500]}..."
+                    doc_texts.append(combined_text)
+                    doc_id_to_original_map[doc_id] = doc  # 使用doc_id映射
+                else:
+                    # 英文数据或非中文数据：只使用context
+                    doc_texts.append(doc.content if hasattr(doc, 'content') else str(doc))
+                    doc_id_to_original_map[doc_id] = doc  # 使用doc_id映射
             
             # 使用QwenReranker的rerank方法
             reranked_items = self.reranker.rerank(
@@ -587,12 +684,17 @@ class OptimizedRagUI:
                 batch_size=1  # 减小到1以避免GPU内存不足
             )
             
-            # 将重排序结果映射回文档
-            content_to_doc_map = {doc.content if hasattr(doc, 'content') else str(doc): doc for doc in retrieved_documents}
-            for doc_text, rerank_score in reranked_items:
-                if doc_text in content_to_doc_map:
-                    reranked_docs.append(content_to_doc_map[doc_text])
-                    reranked_scores.append(rerank_score)
+            # 将重排序结果映射回文档（使用索引位置映射）
+            for i, (doc_text, rerank_score) in enumerate(reranked_items):
+                if i < len(retrieved_documents):
+                    # 使用索引位置获取对应的doc_id
+                    doc_id = getattr(retrieved_documents[i].metadata, 'doc_id', None)
+                    if doc_id is None:
+                        doc_id = hashlib.md5(retrieved_documents[i].content.encode('utf-8')).hexdigest()[:16]
+                    
+                    if doc_id in doc_id_to_original_map:
+                        reranked_docs.append(doc_id_to_original_map[doc_id])
+                        reranked_scores.append(rerank_score)
             
             # 按重排序分数排序
             sorted_pairs = sorted(zip(reranked_docs, reranked_scores), key=lambda x: x[1], reverse=True)
@@ -626,8 +728,19 @@ class OptimizedRagUI:
     
     def _generate_answer_with_context(self, question: str, unique_docs: List[Tuple[DocumentWithMetadata, float]]) -> str:
         """使用上下文生成答案"""
-        # 构建上下文
+        # 构建上下文和提取摘要
         context_parts = []
+        summary_parts = []
+        
+        # 根据查询语言选择prompt模板
+        try:
+            from langdetect import detect
+            query_language = detect(question)
+            is_chinese_query = query_language.startswith('zh')
+        except:
+            # 如果语言检测失败，根据查询内容判断
+            is_chinese_query = any('\u4e00' <= char <= '\u9fff' for char in question)
+        
         for doc, _ in unique_docs:
             if hasattr(doc, 'content'):
                 content = doc.content
@@ -639,27 +752,63 @@ class OptimizedRagUI:
                     content = content.get('context', content.get('content', str(content)))
                 else:
                     content = str(content)
-            context_parts.append(content)
+            
+            if is_chinese_query:
+                # 中文查询：使用智能内容选择
+                if hasattr(doc, 'metadata') and hasattr(doc.metadata, 'language') and doc.metadata.language == 'chinese':
+                    # 中文数据：尝试组合summary和context
+                    summary = ""
+                    if hasattr(doc.metadata, 'summary') and doc.metadata.summary:
+                        summary = doc.metadata.summary
+                    else:
+                        # 如果没有summary，使用context的前200字符作为summary
+                        summary = content[:200] + "..." if len(content) > 200 else content
+                    
+                    # 组合summary和context，避免过长
+                    combined_text = f"摘要：{summary}\n\n详细内容：{content}"
+                    # 限制总长度，避免超出prompt的token限制
+                    if len(combined_text) > 4000:  # 假设prompt限制为4000字符
+                        combined_text = f"摘要：{summary}\n\n详细内容：{content[:3500]}..."
+                    
+                    context_parts.append(combined_text)
+                    summary_parts.append(summary)
+                else:
+                    # 非中文数据：只使用context
+                    context_parts.append(content)
+            else:
+                # 英文查询：只使用context
+                context_parts.append(content)
         
         context_str = "\n\n".join(context_parts)
+        summary_str = "\n\n".join(summary_parts) if summary_parts else None
         
         # 使用生成器生成答案
         print("使用生成器生成答案...")
         
-        # 根据查询语言选择prompt模板
-        try:
-            from langdetect import detect
-            query_language = detect(question)
-            is_chinese_query = query_language.startswith('zh')
-        except:
-            # 如果语言检测失败，根据查询内容判断
-            is_chinese_query = any('\u4e00' <= char <= '\u9fff' for char in question)
-        
         if is_chinese_query:
-            # 中文查询使用中文prompt
-            prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question}\n\n回答："
+            # 中文查询：使用中文prompt模板，同时提供summary和context
+            try:
+                from xlm.components.prompt_templates.template_loader import template_loader
+                prompt = template_loader.format_template(
+                    "multi_stage_chinese_template",
+                    summary=summary_str if summary_str else "无摘要信息",
+                    context=context_str,
+                    query=question
+                )
+                if prompt is None:
+                    # 回退到简单中文prompt
+                    if summary_str:
+                        prompt = f"摘要：{summary_str}\n\n完整上下文：{context_str}\n\n问题：{question}\n\n回答："
+                    else:
+                        prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question}\n\n回答："
+            except Exception as e:
+                print(f"中文模板加载失败: {e}，使用简单中文prompt")
+                if summary_str:
+                    prompt = f"摘要：{summary_str}\n\n完整上下文：{context_str}\n\n问题：{question}\n\n回答："
+                else:
+                    prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question}\n\n回答："
         else:
-            # 英文查询使用英文prompt模板
+            # 英文查询：只使用context
             try:
                 from xlm.components.prompt_templates.template_loader import template_loader
                 prompt = template_loader.format_template(
@@ -700,7 +849,7 @@ class OptimizedRagUI:
                 else:
                     content = str(content)
             
-            display_content = content[:300] + "..." if len(content) > 300 else content
+            display_content = content[:800] + "..." if len(content) > 800 else content
             print(f"文档 {i+1} (分数: {score:.4f}): {display_content}")
         
         if len(unique_docs) > 5:
@@ -717,74 +866,26 @@ class OptimizedRagUI:
         else:
             answer = f"[Reranker: Disabled] {answer}"
         
-        # 生成HTML格式的可点击上下文
-        html_content = self._generate_clickable_context_html(unique_docs)
+        # 构建UI专用结构（只影响展示，不影响RAG主流程）
+        ui_docs = []
+        for doc, score in unique_docs:
+            if getattr(doc.metadata, 'language', '') == 'chinese':
+                doc_id = str(getattr(doc.metadata, 'origin_doc_id', '') or getattr(doc.metadata, 'doc_id', '')).strip()
+                raw_context = self.docid2context.get(doc_id, "")
+                if not raw_context:
+                    print(f"[UI DEBUG] doc_id未命中: {doc_id}，文档内容前50字: {doc.content[:50] if hasattr(doc, 'content') else str(doc)[:50]}")
+            else:
+                raw_context = doc.content
+            preview_content = raw_context[:200] + "..." if len(raw_context) > 200 else raw_context
+            ui_docs.append((doc, score, preview_content, raw_context))
+        html_content = self._generate_clickable_context_html(ui_docs)
         
         print(f"=== 查询处理完成 ===\n")
         return answer, html_content
-    
-    def _fallback_retrieval(self, question: str, language: str) -> tuple[str, str]:
-        """
-        回退到传统RAG系统处理英文查询
-        """
-        print(f"开始传统RAG检索...")
-        print(f"查询: {question}")
-        print(f"语言: {language}")
-        print(f"使用FAISS: {self.use_faiss}")
-        print(f"启用重排序器: {self.enable_reranker}")
-        
-        rag_output = self.rag_system.run(user_input=question, language=language)
-        
-        # 去重处理
-        unique_docs = []
-        seen_hashes = set()
-        
-        for doc, score in zip(rag_output.retrieved_documents, rag_output.retriever_scores):
-            content = doc.content
-            h = hashlib.md5(content.encode('utf-8')).hexdigest()
-            if h not in seen_hashes:
-                unique_docs.append((doc, score))
-                seen_hashes.add(h)
-            if len(unique_docs) >= 20:
-                break
-        
-        answer = rag_output.generated_responses[0] if rag_output.generated_responses else "Unable to generate answer"
-        
-        # 打印检索到的原始上下文
-        print(f"\n=== 检索到的原始上下文 ===")
-        print(f"检索到 {len(unique_docs)} 个唯一文档")
-        for i, (doc, score) in enumerate(unique_docs[:5]):  # 只显示前5个
-            content = doc.content
-            if not isinstance(content, str):
-                if isinstance(content, dict):
-                    content = content.get('context', content.get('content', str(content)))
-                else:
-                    content = str(content)
-            
-            # 截断显示
-            display_content = content[:300] + "..." if len(content) > 300 else content
-            print(f"文档 {i+1} (分数: {score:.4f}): {display_content}")
-        
-        if len(unique_docs) > 5:
-            print(f"... 还有 {len(unique_docs) - 5} 个文档")
-        
-        # 打印LLM响应
-        print(f"\n=== LLM响应 ===")
-        print(f"生成答案: {answer}")
-        print(f"检索文档数: {len(unique_docs)}")
-        
-        # Add reranker info to answer if used
-        # 传统RAG系统不支持重排序，所以这里不添加
-        answer = f"[Reranker: Disabled] {answer}"
-        
-        # 生成HTML格式的可点击上下文
-        html_content = self._generate_clickable_context_html(unique_docs)
-        
-        print(f"=== 查询处理完成 ===\n")
-        return answer, html_content
-    
-    def _generate_clickable_context_html(self, unique_docs: List[Tuple[DocumentWithMetadata, float]]) -> str:
-        if not unique_docs:
+
+    def _generate_clickable_context_html(self, ui_docs):
+        # ui_docs: List[Tuple[DocumentWithMetadata, float, str, str]]
+        if not ui_docs:
             return "<p>没有检索到相关文档。</p>"
 
         html_parts = []
@@ -864,28 +965,11 @@ class OptimizedRagUI:
         }
         </style>
         """)
-
-        for i, (doc, score) in enumerate(unique_docs):
-            # 获取完整的原始内容
-            content = doc.content
-            if not isinstance(content, str):
-                if isinstance(content, dict):
-                    content = content.get('context', content.get('content', str(content)))
-                else:
-                    content = str(content)
-            
-            # 确保内容不为空
-            if not content or not content.strip():
-                content = "内容为空"
-            
-            # 短内容预览（前300字符）
-            short_content = content[:300] + "..." if len(content) > 300 else content
-            
-            # 完整内容，保持原始格式
-            # 使用HTML实体转义，保持换行和格式
-            full_content = content.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-            full_content = full_content.replace('\n', '<br>').replace('  ', '&nbsp;&nbsp;')
-
+        for i, (doc, score, preview_content, raw_context) in enumerate(ui_docs):
+            short_content = preview_content
+            full_content = raw_context
+            def html_escape(text):
+                return text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('\n', '<br>').replace('  ', '&nbsp;&nbsp;')
             html_parts.append(f"""
             <div class='content-section'>
                 <div class='header'>
@@ -893,14 +977,14 @@ class OptimizedRagUI:
                     <span class='score'>score: {score:.4f}</span>
                 </div>
                 <div class='short-content' id='short_{i}'>
-                    <p>{short_content}</p>
-                    <button class='expand-btn' onclick='document.getElementById("short_{i}").style.display="none"; document.getElementById("full_{i}").style.display="block";'>
+                    <p>{html_escape(short_content)}</p>
+                    <button class='expand-btn' onclick='document.getElementById(\"short_{i}\").style.display=\"none\"; document.getElementById(\"full_{i}\").style.display=\"block\";'>
                         Read more
                     </button>
                 </div>
                 <div class='full-content' id='full_{i}' style='display: none;'>
-                    <p>{full_content}</p>
-                    <button class='collapse-btn' onclick='document.getElementById("full_{i}").style.display="none"; document.getElementById("short_{i}").style.display="block";'>
+                    <p>{html_escape(full_content)}</p>
+                    <button class='collapse-btn' onclick='document.getElementById(\"full_{i}\").style.display=\"none\"; document.getElementById(\"short_{i}\").style.display=\"block\";'>
                         Show less 
                     </button>
                 </div>
@@ -963,7 +1047,8 @@ class OptimizedRagUI:
                             source=f"{doc.metadata.source}_chunk_{chunk_id}",
                             created_at=doc.metadata.created_at,
                             author=doc.metadata.author,
-                            language=doc.metadata.language
+                            language=doc.metadata.language,
+                            origin_doc_id=getattr(doc.metadata, 'doc_id', None) if doc.metadata.language == 'chinese' else None
                         )
                         
                         # 创建新的文档对象
@@ -1245,7 +1330,8 @@ class OptimizedRagUI:
                         source=f"{doc.metadata.source}_advanced_chunk_{i}",
                         created_at=doc.metadata.created_at,
                         author=doc.metadata.author,
-                        language=doc.metadata.language
+                        language=doc.metadata.language,
+                        origin_doc_id=getattr(doc.metadata, 'doc_id', None) if doc.metadata.language == 'chinese' else None
                     )
                     
                     chunk_doc = DocumentWithMetadata(

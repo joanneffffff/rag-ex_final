@@ -313,8 +313,8 @@ You MUST respond in the following two-part format:
         else:
             return context_type
 
-    def create_enhanced_prompt(self, context: str, question: str) -> Tuple[str, Dict]:
-        """创建增强版prompt"""
+    def create_enhanced_prompt(self, context: str, question: str, summary: Optional[str] = None) -> Tuple[str, Dict]:
+        """创建增强版prompt，同时使用summary和context"""
         # 1. 内容类型判断
         context_type = self.determine_context_type(context)
         
@@ -334,19 +334,28 @@ You MUST respond in the following two-part format:
         else:
             template = self.templates["default"]
         
-        # 5. 格式化prompt
+        # 5. 准备完整上下文（包含summary和context）
+        full_context = context
+        if summary and summary.strip():
+            # 如果有summary，将其添加到context前面
+            full_context = f"Summary: {summary}\n\nFull Context: {context}"
+        
+        # 6. 格式化prompt
         formatted_prompt = template.format(
-            context=context,
+            context=full_context,
             question=question
         )
         
-        # 6. 返回结果和元数据
+        # 7. 返回结果和元数据
         metadata = {
             "context_type": context_type.value,
             "decision_type": decision_type.value,
             "query_features": query_features,
             "template_used": list(self.templates.keys())[list(self.templates.values()).index(template)],
-            "enhanced_logic": True
+            "enhanced_logic": True,
+            "has_summary": bool(summary and summary.strip()),
+            "summary_length": len(summary) if summary else 0,
+            "context_length": len(context)
         }
         
         return formatted_prompt, metadata

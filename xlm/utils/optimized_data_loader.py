@@ -236,8 +236,15 @@ class OptimizedDataLoader:
                 # 处理不同的数据格式
                 if isinstance(record, dict):
                     if 'question' in record and 'context' in record:
-                        # 问答格式：使用context作为内容
-                        content = record.get("context")
+                        # 问答格式：优先使用context，如果太短则使用original_content
+                        content = record.get("context", "")
+                        original_content = record.get("original_content", "")
+                        
+                        # 如果context太短（可能是摘要），且original_content存在且更长，则使用original_content
+                        if len(content) < 500 and len(original_content) > len(content):
+                            content = original_content
+                            print(f"使用original_content替代短context，长度: {len(content)} vs {len(record.get('context', ''))}")
+                        
                         assert isinstance(content, str), f"content类型错误: {type(content)}, 内容: {content}"
                         metadata = {
                             "source": "alphafin_qa",
@@ -245,8 +252,18 @@ class OptimizedDataLoader:
                             "language": "chinese"
                         }
                     else:
-                        # 其他格式：尝试找到文本内容
-                        content = str(record)
+                        # 其他格式：尝试找到文本内容，优先使用context或original_content
+                        content = record.get("context", "")
+                        original_content = record.get("original_content", "")
+                        
+                        # 如果context太短且original_content更长，使用original_content
+                        if len(content) < 500 and len(original_content) > len(content):
+                            content = original_content
+                        
+                        # 如果都没有，使用整个record的字符串表示
+                        if not content:
+                            content = str(record)
+                        
                         assert isinstance(content, str), f"content类型错误: {type(content)}, 内容: {content}"
                         metadata = {"source": "alphafin", "language": "chinese"}
                 else:

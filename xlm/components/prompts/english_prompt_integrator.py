@@ -21,7 +21,7 @@ class EnglishPromptIntegrator:
         """创建英文Prompt字符串"""
         if self.use_enhanced_logic:
             # 使用增强版逻辑
-            enhanced_prompt, metadata = self.enhanced_integrator.create_enhanced_prompt(context, question)
+            enhanced_prompt, metadata = self.enhanced_integrator.create_enhanced_prompt(context, question, summary)
             return enhanced_prompt
         else:
             # 使用原始模板逻辑
@@ -41,7 +41,7 @@ class EnglishPromptIntegrator:
         """创建英文Prompt消息列表（JSON聊天格式）"""
         if self.use_enhanced_logic:
             # 使用增强版逻辑
-            enhanced_prompt, metadata = self.enhanced_integrator.create_enhanced_prompt(context, question)
+            enhanced_prompt, metadata = self.enhanced_integrator.create_enhanced_prompt(context, question, summary)
             
             # 解析prompt为system和user部分
             if "<system>" in enhanced_prompt and "<user>" in enhanced_prompt:
@@ -119,10 +119,10 @@ class EnglishPromptIntegrator:
         """设置是否使用增强逻辑"""
         self.use_enhanced_logic = enabled
     
-    def get_enhanced_metadata(self, context: str, question: str) -> Dict[str, Any]:
+    def get_enhanced_metadata(self, context: str, question: str, summary: Optional[str] = None) -> Dict[str, Any]:
         """获取增强逻辑的元数据"""
         if self.use_enhanced_logic:
-            _, metadata = self.enhanced_integrator.create_enhanced_prompt(context, question)
+            _, metadata = self.enhanced_integrator.create_enhanced_prompt(context, question, summary)
             return metadata
         else:
             return {"enhanced_logic": False}

@@ -19,6 +19,7 @@ class DocumentMetadata(BaseModel):
     company_name: Optional[str] = None
     stock_code: Optional[str] = None
     report_date: Optional[str] = None
+    origin_doc_id: Optional[str] = None
 
 
 class DocumentWithMetadata(BaseModel):
