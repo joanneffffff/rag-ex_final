@@ -6,3 +6,6 @@
 *.npy filter=lfs diff=lfs merge=lfs -text
 *.pkl filter=lfs diff=lfs merge=lfs -text
 data/alphafin/alphafin_merged_generated_qa.json filter=lfs diff=lfs merge=lfs -text
+data/unified/alphafin_unified.json filter=lfs diff=lfs merge=lfs -text
+data/unified/*.json filter=lfs diff=lfs merge=lfs -text
+data/unified/*.jsonl filter=lfs diff=lfs merge=lfs -text
