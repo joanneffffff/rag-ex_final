@@ -51,7 +51,10 @@ class DualLanguageLoader:
             for idx, item in enumerate(tqdm(data, desc="处理AlphaFin数据")):
                 question = item.get('generated_question', '').strip()
                 answer = item.get('original_answer', '').strip()
-                context = item.get('original_context', '').strip()
+                # 比较original_content和context的长度，使用更长的那个
+                original_content = item.get('original_content', '').strip()
+                context_content = item.get('context', '').strip()
+                context = original_content if len(original_content) > len(context_content) else context_content
                 summary = item.get('summary', '').strip()
                 company_name = item.get('company_name', '')
                 stock_code = item.get('stock_code', '')

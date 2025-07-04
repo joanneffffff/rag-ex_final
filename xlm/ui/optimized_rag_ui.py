@@ -177,7 +177,10 @@ class OptimizedRagUI:
                 data = json.load(f)
                 for item in data:
                     doc_id = str(item.get("doc_id", ""))
-                    context = item.get("context", "")
+                    # 比较original_content和context的长度，使用更长的那个
+                    original_content = item.get("original_content", "")
+                    context_content = item.get("context", "")
+                    context = original_content if len(original_content) > len(context_content) else context_content
                     if doc_id and context:  # 只添加有效的映射
                         docid2context[doc_id] = context
             print(f"成功加载 {len(docid2context)} 个doc_id到context的映射")

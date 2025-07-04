@@ -63,7 +63,7 @@ class DataConfig:
     data_dir: str = "data"  # Unified root data directory
     max_samples: int = -1  # -1表示加载所有数据，500表示限制样本数
     # 数据路径配置
-    chinese_data_path: str = "data/unified/alphafin_unified.json"  # 中文数据路径
+    chinese_data_path: str = "data/alphafin/alphafin_final_clean.json"  # 中文数据路径
     english_data_path: str = "data/unified/tatqa_knowledge_base_unified.jsonl"     # 英文数据路径
     prompt_template_dir: str = "data/prompt_templates"  # prompt模板目录
 
