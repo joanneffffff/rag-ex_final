@@ -56,7 +56,7 @@ def analyze_alphafin_processed_data():
     print("\n=== AlphaFin LLM处理后数据分析 ===\n")
     
     try:
-        with open('data/alphafin/alphafin_merged_generated_qa_full_dedup.json', 'r', encoding='utf-8') as f:
+        with open('data/alphafin/alphafin_final_clean.json', 'r', encoding='utf-8') as f:
             processed_data = json.load(f)
         
         print(f"📊 LLM处理后样本数: {len(processed_data):,} 个样本")
@@ -154,7 +154,7 @@ def analyze_tatqa_converted_data():
             eval_converted = [json.loads(line) for line in f if line.strip()]
         
         total_converted = len(train_converted) + len(eval_converted)
-        print(f"📊 转换后样本总数: {total_converted:,} 个样本")
+        print(f"📊 QCA评估样本总数: {total_converted:,} 个样本")
         print(f"  训练集: {len(train_converted):,} 个样本")
         print(f"  评估集: {len(eval_converted):,} 个样本")
         
@@ -193,6 +193,48 @@ def analyze_tatqa_converted_data():
         print(f"❌ 读取TatQA转换后数据失败: {e}")
         return 0, 0
 
+def analyze_tatqa_knowledge_base():
+    """分析TatQA知识库数据"""
+    print("\n=== TatQA知识库数据分析 ===\n")
+    
+    try:
+        # 读取知识库数据
+        with open('data/unified/tatqa_knowledge_base_unified.jsonl', 'r') as f:
+            kb_data = [json.loads(line) for line in f if line.strip()]
+        
+        print(f"📊 知识库文档总数: {len(kb_data):,} 个文档")
+        
+        # 统计source_type分布
+        source_type_stats = {}
+        for item in kb_data:
+            source_type = item.get('source_type', 'unknown')
+            source_type_stats[source_type] = source_type_stats.get(source_type, 0) + 1
+        
+        print(f"\n📋 数据来源分布:")
+        for source, count in source_type_stats.items():
+            percentage = count / len(kb_data) * 100
+            print(f"   {source}: {count:,} ({percentage:.1f}%)")
+        
+        # 统计文档类型（表格vs段落）
+        table_count = sum(1 for item in kb_data if 'Table ID:' in item.get('context', ''))
+        paragraph_count = sum(1 for item in kb_data if 'Paragraph ID:' in item.get('context', ''))
+        
+        print(f"\n📊 文档类型分布:")
+        print(f"   表格文档: {table_count:,} ({table_count/len(kb_data)*100:.1f}%)")
+        print(f"   段落文档: {paragraph_count:,} ({paragraph_count/len(kb_data)*100:.1f}%)")
+        
+        # 长度统计
+        context_lengths = [len(item.get('context', '')) for item in kb_data]
+        print(f"\n📏 文档长度统计:")
+        print(f"   平均长度: {statistics.mean(context_lengths):.1f} 字符")
+        print(f"   长度范围: {min(context_lengths)} - {max(context_lengths)} 字符")
+        
+        return len(kb_data)
+        
+    except Exception as e:
+        print(f"❌ 读取TatQA知识库数据失败: {e}")
+        return 0
+
 def print_summary_report():
     """打印总结报告"""
     print("\n" + "="*80)
@@ -205,6 +247,7 @@ def print_summary_report():
     alphafin_processed, alphafin_metadata = analyze_alphafin_processed_data()
     tatqa_raw, tatqa_questions = analyze_tatqa_raw_data()
     tatqa_converted, tatqa_eval = analyze_tatqa_converted_data()
+    tatqa_kb = analyze_tatqa_knowledge_base()
     
     # 计算转换率
     tatqa_conversion_rate = tatqa_converted / tatqa_questions * 100 if tatqa_questions > 0 else 0
@@ -232,9 +275,12 @@ def print_summary_report():
     
     print("\n● 1.4 TatQA 数据转换过程与质量:")
     print("  关键步骤: Table Textualization将表格转换为自然语言")
-    print(f"  转换率: {tatqa_conversion_rate:.1f}% ({tatqa_converted:,}/{tatqa_questions:,})")
+    print(f"  问题到QCA转换率: {tatqa_conversion_rate:.1f}% ({tatqa_converted:,}/{tatqa_questions:,})")
     print(f"  过滤率: {100 - tatqa_conversion_rate:.1f}%")
     print("  主要原因: answer_type=table但rel_paragraphs为空，表格转换逻辑缺陷")
+    print(f"  知识库文档数: {tatqa_kb:,} 个文档")
+    if tatqa_kb > 0:
+        print(f"  文档利用率: 平均每个文档用于 {tatqa_converted/tatqa_kb:.1f} 个问题")
     
     print("\n● AlphaFin 数据处理流程:")
     print(f"  原始数据过滤率: {alphafin_filter_rate:.1f}%")
