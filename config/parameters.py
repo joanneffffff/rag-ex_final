@@ -27,7 +27,8 @@ class EncoderConfig:
     # 中文微调模型路径
     chinese_model_path: str = "models/finetuned_alphafin_zh_optimized"
     # 英文微调模型路径
-    english_model_path: str = "models/finetuned_finbert_tatqa"
+    # english_model_path: str = "models/finetuned_finbert_tatqa"
+    english_model_path: str = "models/finetuned_finbert_simple_continued_fixed"
     cache_dir: str = EMBEDDING_CACHE_DIR
     device: Optional[str] = "cuda:0"  # 编码器使用cuda:0
     batch_size: int = 32
@@ -93,7 +94,7 @@ class GeneratorConfig:
     use_quantization: bool = True  # 启用量化
     quantization_type: str = "4bit"  # 使用4bit量化以节省内存
     use_flash_attention: bool = False  # 启用Flash Attention优化
-    max_new_tokens: int = 4096  # 增加到4096以生成更完整的答案
+    max_new_tokens: int = 8192  # 增加到4096以生成更完整的答案
     # 对于Fin-R1模型，这些参数会被忽略，但保留在配置中以防其他模型使用
     temperature: float = 0.1  # Fin-R1不使用此参数
     top_p: float = 0.7  # Fin-R1不使用此参数
