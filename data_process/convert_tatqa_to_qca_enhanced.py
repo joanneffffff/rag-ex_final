@@ -176,6 +176,31 @@ def process_tatqa_to_qca_enhanced(input_paths, output_path):
                         table_uid = doc_tables[0].get("uid")
                         if table_uid:
                             relevant_doc_ids.append(table_uid.replace('-', '').lower())
+                
+                # 关键修复：对于table-text类型，还需要添加相关段落内容
+                if answer_type == "table-text" and rel_paragraphs:
+                    paragraph_contents = []
+                    for rel_para in rel_paragraphs:
+                        try:
+                            p_idx = int(rel_para) - 1  # 转换为0-based索引
+                            if p_idx < len(doc_paragraphs):
+                                para_text = doc_paragraphs[p_idx].get("text", "")
+                                para_uid = doc_paragraphs[p_idx].get("uid")
+                                if para_text.strip():
+                                    if para_uid:
+                                        paragraph_contents.append(f"Paragraph ID: {para_uid}\n{para_text}")
+                                        relevant_doc_ids.append(para_uid.replace('-', '').lower())
+                                    else:
+                                        paragraph_contents.append(para_text)
+                        except (ValueError, IndexError):
+                            continue
+                    
+                    # 将段落内容添加到表格内容后面
+                    if paragraph_contents:
+                        if correct_chunk_content:
+                            correct_chunk_content += "\n\n" + "\n\n".join(paragraph_contents)
+                        else:
+                            correct_chunk_content = "\n\n".join(paragraph_contents)
             
             if correct_chunk_content.strip():
                 # 为当前chunk分配一个唯一的doc_id

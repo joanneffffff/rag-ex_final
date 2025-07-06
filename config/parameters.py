@@ -28,7 +28,8 @@ class EncoderConfig:
     chinese_model_path: str = "models/finetuned_alphafin_zh_optimized"
     # 英文微调模型路径
     # english_model_path: str = "models/finetuned_finbert_tatqa"
-    english_model_path: str = "models/finetuned_finbert_simple_continued_fixed"
+    english_model_path: str = "models/finetuned_tatqa_mixed_enhanced"
+    # english_model_path: str = "models/finetuned_finbert_simple_continued_fixed"
     cache_dir: str = EMBEDDING_CACHE_DIR
     device: Optional[str] = "cuda:0"  # 编码器使用cuda:0
     batch_size: int = 32
@@ -65,7 +66,7 @@ class DataConfig:
     max_samples: int = -1  # -1表示加载所有数据，500表示限制样本数
     # 数据路径配置
     chinese_data_path: str = "data/alphafin/alphafin_final_clean.json"  # 中文数据路径
-    english_data_path: str = "data/unified/tatqa_knowledge_base_unified.jsonl"     # 英文数据路径
+    english_data_path: str = "data/unified/tatqa_knowledge_base_combined.jsonl"     # 英文数据路径
     prompt_template_dir: str = "data/prompt_templates"  # prompt模板目录
 
 @dataclass
