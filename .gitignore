@@ -32,6 +32,8 @@ logs/
 # Test cache
 .pytest_cache/
 cache/*
+*/cache/*
+*/models/*
 
 # --- Data and Generated Output Specific Ignores (CRITICAL for your goal) ---
 
