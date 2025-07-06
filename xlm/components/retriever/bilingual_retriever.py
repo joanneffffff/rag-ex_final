@@ -198,25 +198,59 @@ class BilingualRetriever(Retriever):
 
     def _compute_embeddings(self):
         """计算嵌入向量"""
+        print("=== 开始计算嵌入向量 ===")
+        print(f"use_existing_embedding_index: {self.use_existing_embedding_index}")
+        
         if self.use_faiss:
             if self.corpus_documents_en:
+                print(f"初始化英文FAISS索引，文档数量: {len(self.corpus_documents_en)}")
                 self.index_en = self._init_faiss(self.encoder_en, len(self.corpus_documents_en))
             if self.corpus_documents_ch:
+                print(f"初始化中文FAISS索引，文档数量: {len(self.corpus_documents_ch)}")
                 self.index_ch = self._init_faiss(self.encoder_ch, len(self.corpus_documents_ch))
 
         if self.corpus_documents_en:
+            print(f"开始编码英文文档，数量: {len(self.corpus_documents_en)}")
+            print(f"英文编码器: {self.encoder_en.model_name}")
+            print(f"英文编码器设备: {self.encoder_en.device}")
+            
+            # 检查英文文档内容
+            if self.corpus_documents_en:
+                first_doc = self.corpus_documents_en[0]
+                print(f"第一个英文文档内容预览: {first_doc.content[:100]}...")
+            
             self.corpus_embeddings_en = self._batch_encode_corpus(self.corpus_documents_en, self.encoder_en, 'en')
+            print(f"英文嵌入向量计算完成，形状: {self.corpus_embeddings_en.shape if self.corpus_embeddings_en is not None else 'None'}")
+            
+            if self.corpus_embeddings_en is None or self.corpus_embeddings_en.shape[0] == 0:
+                print("❌ 英文嵌入向量计算失败！")
+            else:
+                print("✅ 英文嵌入向量计算成功！")
+                
             if self.use_faiss and self.corpus_embeddings_en is not None:
+                print("将英文嵌入向量添加到FAISS索引")
                 self._add_to_faiss(self.index_en, self.corpus_embeddings_en)
+        else:
+            print("⚠️ 英文文档列表为空")
 
         if self.corpus_documents_ch:
+            print(f"开始编码中文文档，数量: {len(self.corpus_documents_ch)}")
             self.corpus_embeddings_ch = self._batch_encode_corpus(self.corpus_documents_ch, self.encoder_ch, 'zh')
+            print(f"中文嵌入向量计算完成，形状: {self.corpus_embeddings_ch.shape if self.corpus_embeddings_ch is not None else 'None'}")
             if self.use_faiss and self.corpus_embeddings_ch is not None:
+                print("将中文嵌入向量添加到FAISS索引")
                 self._add_to_faiss(self.index_ch, self.corpus_embeddings_ch)
+        else:
+            print("⚠️ 中文文档列表为空")
         
         # 保存到缓存
+        print("保存嵌入向量到缓存")
         self._save_cached_embeddings()
         
+        print("=== 嵌入向量计算完成 ===")
+        print(f"最终状态:")
+        print(f"  英文嵌入向量: {self.corpus_embeddings_en.shape if self.corpus_embeddings_en is not None else 'None'}")
+        print(f"  中文嵌入向量: {self.corpus_embeddings_ch.shape if self.corpus_embeddings_ch is not None else 'None'}")
         pass
 
     def _init_faiss(self, encoder, corpus_size):
@@ -240,15 +274,54 @@ class BilingualRetriever(Retriever):
 
     def _batch_encode_corpus(self, documents: List[DocumentWithMetadata], encoder: FinbertEncoder, language: str = None) -> np.ndarray:
         """Encode corpus documents in batches with a progress bar."""
+        print(f"=== 开始批量编码语料库 ===")
+        print(f"语言: {language}")
+        print(f"文档数量: {len(documents)}")
+        print(f"编码器: {encoder.model_name}")
+        print(f"编码器设备: {encoder.device}")
+        
+        if not documents:
+            print("⚠️ 文档列表为空，返回空数组")
+            return np.array([])
+        
         batch_texts = []
-        for doc in documents:
+        for i, doc in enumerate(documents):
             if language == 'zh' and hasattr(doc.metadata, 'summary') and doc.metadata.summary:
                 # 中文使用summary字段进行FAISS索引
                 batch_texts.append(doc.metadata.summary)
             else:
                 # 英文使用content字段
                 batch_texts.append(doc.content)
-        return encoder.encode(texts=batch_texts, batch_size=self.batch_size, show_progress_bar=True)
+            
+            # 打印前几个文档的内容预览
+            if i < 3:
+                content_preview = batch_texts[-1][:100] + "..." if len(batch_texts[-1]) > 100 else batch_texts[-1]
+                print(f"文档 {i+1} 内容预览: {content_preview}")
+        
+        print(f"准备编码 {len(batch_texts)} 个文本")
+        
+        # 测试编码器是否正常工作
+        try:
+            print("测试编码器...")
+            test_text = batch_texts[0] if batch_texts else "test"
+            test_embedding = encoder.encode([test_text])
+            print(f"测试编码成功，嵌入维度: {test_embedding.shape}")
+        except Exception as e:
+            print(f"❌ 编码器测试失败: {e}")
+            import traceback
+            traceback.print_exc()
+            return np.array([])
+        
+        try:
+            print("开始批量编码...")
+            embeddings = encoder.encode(texts=batch_texts, batch_size=self.batch_size, show_progress_bar=True)
+            print(f"编码完成，嵌入向量形状: {embeddings.shape}")
+            return embeddings
+        except Exception as e:
+            print(f"❌ 批量编码过程中发生错误: {e}")
+            import traceback
+            traceback.print_exc()
+            return np.array([])
     
     def _add_to_faiss(self, index, embeddings: np.ndarray):
         """Add embeddings to FAISS index in batches"""
@@ -267,6 +340,16 @@ class BilingualRetriever(Retriever):
         return_scores: bool = False,
         language: str = None,
     ) -> Union[List[DocumentWithMetadata], Tuple[List[DocumentWithMetadata], List[float]]]:
+        # 添加详细的调试信息
+        print(f"=== BilingualRetriever.retrieve() 调试信息 ===")
+        print(f"查询文本: {text}")
+        print(f"英文文档数量: {len(self.corpus_documents_en) if self.corpus_documents_en else 0}")
+        print(f"中文文档数量: {len(self.corpus_documents_ch) if self.corpus_documents_ch else 0}")
+        print(f"英文嵌入向量形状: {self.corpus_embeddings_en.shape if self.corpus_embeddings_en is not None else 'None'}")
+        print(f"中文嵌入向量形状: {self.corpus_embeddings_ch.shape if self.corpus_embeddings_ch is not None else 'None'}")
+        print(f"英文FAISS索引: {'已初始化' if self.index_en else '未初始化'}")
+        print(f"中文FAISS索引: {'已初始化' if self.index_ch else '未初始化'}")
+        
         # 检查self.corpus_documents_en/ch类型
         if hasattr(self, 'corpus_documents_en') and self.corpus_documents_en is not None:
             for i, doc in enumerate(self.corpus_documents_en):
@@ -285,6 +368,9 @@ class BilingualRetriever(Retriever):
         if language is None:
             lang = detect(text)
             language = 'zh' if lang.startswith('zh') else 'en'
+        
+        print(f"检测到的语言: {language}")
+        
         if language == 'zh':
             encoder = self.encoder_ch
             corpus_embeddings = self.corpus_embeddings_ch
@@ -295,19 +381,31 @@ class BilingualRetriever(Retriever):
             corpus_embeddings = self.corpus_embeddings_en
             corpus_documents = self.corpus_documents_en
             index = self.index_en
+        
+        print(f"选择的编码器: {encoder.model_name}")
+        print(f"选择的语料库文档数量: {len(corpus_documents) if corpus_documents else 0}")
+        print(f"选择的嵌入向量形状: {corpus_embeddings.shape if corpus_embeddings is not None else 'None'}")
+        
         if corpus_embeddings is None or corpus_embeddings.shape[0] == 0:
+            print("❌ 嵌入向量为空或形状为0，返回空结果")
             if return_scores:
                 return [], []
             else:
                 return []
+        
         query_embeddings = encoder.encode([text])
+        print(f"查询嵌入向量形状: {query_embeddings.shape}")
+        
         if self.use_faiss and index:
+            print("使用FAISS索引进行检索")
             distances, indices = index.search(query_embeddings.astype('float32'), top_k)
             results = []
             for score, idx in zip(distances[0], indices[0]):
                 if idx != -1:
                     results.append({'corpus_id': idx, 'score': 1 - score / 2})
+            print(f"FAISS检索结果数量: {len(results)}")
         else:
+            print("使用语义搜索进行检索")
             # 确保tensor在正确的设备上
             query_tensor = torch.tensor(query_embeddings, device=encoder.device)
             corpus_tensor = torch.tensor(corpus_embeddings, device=encoder.device)
@@ -317,9 +415,13 @@ class BilingualRetriever(Retriever):
                 top_k=top_k
             )
             results = hits[0]
+            print(f"语义搜索结果数量: {len(results)}")
+        
         doc_indices = [hit['corpus_id'] for hit in results]
         scores = [hit['score'] for hit in results]
         raw_documents = [corpus_documents[i] for i in doc_indices]
+        
+        print(f"最终返回文档数量: {len(raw_documents)}")
         
         # 确保返回的是DocumentWithMetadata对象，统一使用content字段
         documents = []
