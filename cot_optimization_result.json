@@ -1,3 +1,35 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:a72173e6d0fa4db8b699220e6cbff5c1fed80dcebb2bf202618bf09133b09dfd
-size 1953
+{
+  "selected_samples": [
+    {
+      "pattern": "复杂计算",
+      "sample_id": "unknown",
+      "query": "What was the percentage increase / (decrease) in capital expenditure from 2018 to 2019?",
+      "expected_answer": "0.61",
+      "quality_score": 0.0
+    },
+    {
+      "pattern": "多跳推理",
+      "sample_id": "unknown",
+      "query": "What is the excluded potential common shares for 2018?",
+      "expected_answer": "0.5 million",
+      "quality_score": 0.0
+    },
+    {
+      "pattern": "实体抽取",
+      "sample_id": "unknown",
+      "query": "What does the table show?",
+      "expected_answer": "As of December 31, 2019 and 2018, loans payable",
+      "quality_score": 0.18913043478260871
+    },
+    {
+      "pattern": "数值提取",
+      "sample_id": "unknown",
+      "query": "What is the cost of living indexation rate applicable to?",
+      "expected_answer": "only applicable to DB pension plans",
+      "quality_score": 0.003124999999999996
+    }
+  ],
+  "optimized_cot": "Below are some examples of how to reason step by step and extract the final answer. For your answer, only output the final A: part, do not repeat the reasoning.\n\nQ: What was the percentage increase / (decrease) in capital expenditure from 2018 to 2019?\nContext: \nThought: Extract values from context, calculate percentage: (new-old)/old*100\nA: 0.61\n\nQ: What is the excluded potential common shares for 2018?\nContext: \nThought: Identify multiple entities, extract values for each, compare or combine as needed\nA: 0.5 million\n\nQ: What does the table show?\nContext: \nThought: Find definition or description in context, extract key information\nA: As of December 31, 2019 and 2018, loans payable\n\nQ: What is the cost of living indexation rate applicable to?\nContext: \nThought: Locate specific value in context, extract exact number\nA: only applicable to DB pension plans\n\n",
+  "estimated_tokens": 216,
+  "total_bad_samples": 85
+}

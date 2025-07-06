@@ -1,3 +1,289 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:59c20437033d7b677b36421a1ada46d94cbf6de487d9af42e6dcc78f8ca5bc6e
-size 15227
+{
+  "overall_results": {
+    "total_samples": 14883,
+    "hybrid_samples": 14739,
+    "hybrid_percentage": 99.0324531344487,
+    "overall_distribution": {
+      "table": 6692,
+      "text": 3514,
+      "table-text": 4677
+    },
+    "hybrid_distribution": {
+      "table": 6620,
+      "text": 3487,
+      "table-text": 4632
+    },
+    "hybrid_details": [
+      {
+        "question": "What does the Weighted average actuarial assumptions consist of?...",
+        "answer_from": "table",
+        "context_preview": "Table ID: e78f8b29-6085-43de-b32f-be1a68641be3\nHeaders:  | 2019 % | 2018 % | 2017 %\nRow 1: Weighted average actuarial assumptions used at 31 March1: |  |  | \nRow 2: Rate of inflation2 | 2.9 | 2.9 | 3....",
+        "answer": [
+          "Rate of inflation",
+          "Rate of increase in salaries",
+          "Discount rate"
+        ]
+      },
+      {
+        "question": "How much is the 2019 rate of inflation?...",
+        "answer_from": "table",
+        "context_preview": "Table ID: e78f8b29-6085-43de-b32f-be1a68641be3\nHeaders:  | 2019 % | 2018 % | 2017 %\nRow 1: Weighted average actuarial assumptions used at 31 March1: |  |  | \nRow 2: Rate of inflation2 | 2.9 | 2.9 | 3....",
+        "answer": [
+          "2.9"
+        ]
+      },
+      {
+        "question": "How much is the 2018 rate of inflation?...",
+        "answer_from": "table",
+        "context_preview": "Table ID: e78f8b29-6085-43de-b32f-be1a68641be3\nHeaders:  | 2019 % | 2018 % | 2017 %\nRow 1: Weighted average actuarial assumptions used at 31 March1: |  |  | \nRow 2: Rate of inflation2 | 2.9 | 2.9 | 3....",
+        "answer": [
+          "2.9"
+        ]
+      },
+      {
+        "question": "What is the 2019 average rate of inflation?...",
+        "answer_from": "table",
+        "context_preview": "Table ID: e78f8b29-6085-43de-b32f-be1a68641be3\nHeaders:  | 2019 % | 2018 % | 2017 %\nRow 1: Weighted average actuarial assumptions used at 31 March1: |  |  | \nRow 2: Rate of inflation2 | 2.9 | 2.9 | 3....",
+        "answer": 2.9
+      },
+      {
+        "question": "What is the 2019 average rate of increase in salaries?...",
+        "answer_from": "table",
+        "context_preview": "Table ID: e78f8b29-6085-43de-b32f-be1a68641be3\nHeaders:  | 2019 % | 2018 % | 2017 %\nRow 1: Weighted average actuarial assumptions used at 31 March1: |  |  | \nRow 2: Rate of inflation2 | 2.9 | 2.9 | 3....",
+        "answer": 2.7
+      },
+      {
+        "question": "What is the difference between 2019 average rate of inflation and 2019 average rate of increase in s...",
+        "answer_from": "table",
+        "context_preview": "Table ID: e78f8b29-6085-43de-b32f-be1a68641be3\nHeaders:  | 2019 % | 2018 % | 2017 %\nRow 1: Weighted average actuarial assumptions used at 31 March1: |  |  | \nRow 2: Rate of inflation2 | 2.9 | 2.9 | 3....",
+        "answer": 0.2
+      },
+      {
+        "question": "How was internally developed software capitalised?...",
+        "answer_from": "text",
+        "context_preview": "Table ID: 98c16699-d385-4631-91de-1bc3c87f9f99\nHeaders:  | Rights and licenses | Internally generated software | Software under development | Total\nRow 1: Movements | $'000 | $'000 | $'000 | $'000\nRow...",
+        "answer": [
+          "at cost less accumulated amortisation."
+        ]
+      },
+      {
+        "question": "How much was the closing net book amount for software under development in 2019?...",
+        "answer_from": "table",
+        "context_preview": "Table ID: 98c16699-d385-4631-91de-1bc3c87f9f99\nHeaders:  | Rights and licenses | Internally generated software | Software under development | Total\nRow 1: Movements | $'000 | $'000 | $'000 | $'000\nRow...",
+        "answer": [
+          "16,284"
+        ]
+      },
+      {
+        "question": "What was the total cost for 2019?...",
+        "answer_from": "table",
+        "context_preview": "Table ID: 98c16699-d385-4631-91de-1bc3c87f9f99\nHeaders:  | Rights and licenses | Internally generated software | Software under development | Total\nRow 1: Movements | $'000 | $'000 | $'000 | $'000\nRow...",
+        "answer": [
+          "29,259"
+        ]
+      },
+      {
+        "question": "What was the percentage change in cost of software under development between 2018 and 2019?...",
+        "answer_from": "table",
+        "context_preview": "Table ID: 98c16699-d385-4631-91de-1bc3c87f9f99\nHeaders:  | Rights and licenses | Internally generated software | Software under development | Total\nRow 1: Movements | $'000 | $'000 | $'000 | $'000\nRow...",
+        "answer": 150.18
+      },
+      {
+        "question": "Which year have greater total accumulated amortisation? ...",
+        "answer_from": "table",
+        "context_preview": "Table ID: 98c16699-d385-4631-91de-1bc3c87f9f99\nHeaders:  | Rights and licenses | Internally generated software | Software under development | Total\nRow 1: Movements | $'000 | $'000 | $'000 | $'000\nRow...",
+        "answer": [
+          "2019"
+        ]
+      },
+      {
+        "question": "What was the difference between total opening and closing net book account in 2018?...",
+        "answer_from": "table",
+        "context_preview": "Table ID: 98c16699-d385-4631-91de-1bc3c87f9f99\nHeaders:  | Rights and licenses | Internally generated software | Software under development | Total\nRow 1: Movements | $'000 | $'000 | $'000 | $'000\nRow...",
+        "answer": 4369
+      },
+      {
+        "question": "What is net sales from cheese in 2018 and 2019 respectively?...",
+        "answer_from": "table",
+        "context_preview": "Table ID: 991d23d7-f32d-4954-8e1d-87ad22470fcf\nHeaders:  |  | 2019 |  | 2018\nRow 1: In thousands | $ | % | $ | %\nRow 2: Drinkable Kefir other than ProBugs | $ 71,822 | 77% | $ 78,523 | 76%\nRow 3: Chee...",
+        "answer": [
+          "11,486",
+          "11,459"
+        ]
+      },
+      {
+        "question": "What is net sales from cream and other in 2018 and 2019 respectively?...",
+        "answer_from": "table",
+        "context_preview": "Table ID: 991d23d7-f32d-4954-8e1d-87ad22470fcf\nHeaders:  |  | 2019 |  | 2018\nRow 1: In thousands | $ | % | $ | %\nRow 2: Drinkable Kefir other than ProBugs | $ 71,822 | 77% | $ 78,523 | 76%\nRow 3: Chee...",
+        "answer": [
+          "5,276",
+          "4,228"
+        ]
+      },
+      {
+        "question": "What is net sales from ProBugs Kefir in 2018 and 2019 respectively?...",
+        "answer_from": "table",
+        "context_preview": "Table ID: 991d23d7-f32d-4954-8e1d-87ad22470fcf\nHeaders:  |  | 2019 |  | 2018\nRow 1: In thousands | $ | % | $ | %\nRow 2: Drinkable Kefir other than ProBugs | $ 71,822 | 77% | $ 78,523 | 76%\nRow 3: Chee...",
+        "answer": [
+          "2,795",
+          "2,780"
+        ]
+      },
+      {
+        "question": "How many product categories are available?...",
+        "answer_from": "table-text",
+        "context_preview": "Table ID: 991d23d7-f32d-4954-8e1d-87ad22470fcf\nHeaders:  |  | 2019 |  | 2018\nRow 1: In thousands | $ | % | $ | %\nRow 2: Drinkable Kefir other than ProBugs | $ 71,822 | 77% | $ 78,523 | 76%\nRow 3: Chee...",
+        "answer": "6"
+      },
+      {
+        "question": "What is the change in the net sales for cheese between 2018 and 2019?...",
+        "answer_from": "table",
+        "context_preview": "Table ID: 991d23d7-f32d-4954-8e1d-87ad22470fcf\nHeaders:  |  | 2019 |  | 2018\nRow 1: In thousands | $ | % | $ | %\nRow 2: Drinkable Kefir other than ProBugs | $ 71,822 | 77% | $ 78,523 | 76%\nRow 3: Chee...",
+        "answer": -27
+      },
+      {
+        "question": "What is the percentage change in net sales from Frozen Kefir between 2018 and 2019?...",
+        "answer_from": "table",
+        "context_preview": "Table ID: 991d23d7-f32d-4954-8e1d-87ad22470fcf\nHeaders:  |  | 2019 |  | 2018\nRow 1: In thousands | $ | % | $ | %\nRow 2: Drinkable Kefir other than ProBugs | $ 71,822 | 77% | $ 78,523 | 76%\nRow 3: Chee...",
+        "answer": 12.76
+      },
+      {
+        "question": "Why did the Operating revenues decreased from 2018 to 2019? ...",
+        "answer_from": "text",
+        "context_preview": "Table ID: 806ac467-ab50-428b-8584-baef6d6c4cee\nHeaders:  |  | Years Ended December 31, | \nRow 1:  | 2017 | 2018 | 2019\nRow 2:  | % | % | %\nRow 3: Operating revenues | 100.0 | 100.0 | 100.0\nRow 4: Oper...",
+        "answer": [
+          "primarily due to decreased other operating revenues, decreased foundry wafer sale, and 2.5% depreciation of the NTD in 2019 from 2018."
+        ]
+      },
+      {
+        "question": "Why did the Operating costs decreased from 2018 to 2019?...",
+        "answer_from": "text",
+        "context_preview": "Table ID: 806ac467-ab50-428b-8584-baef6d6c4cee\nHeaders:  |  | Years Ended December 31, | \nRow 1:  | 2017 | 2018 | 2019\nRow 2:  | % | % | %\nRow 3: Operating revenues | 100.0 | 100.0 | 100.0\nRow 4: Oper...",
+        "answer": [
+          "primarily due to the decreased depreciation expense and other operating costs, which was partially offset by the increased direct material costs."
+        ]
+      }
+    ]
+  },
+  "by_type_results": {
+    "table": {
+      "total": 6692,
+      "hybrid_context": 6620,
+      "hybrid_percentage": 98.92408846383742,
+      "examples": [
+        {
+          "question": "What does the Weighted average actuarial assumptions consist of?...",
+          "context_preview": "Table ID: e78f8b29-6085-43de-b32f-be1a68641be3\nHeaders:  | 2019 % | 2018 % | 2017 %\nRow 1: Weighted average actuarial assumptions used at 31 March1: |...",
+          "answer": [
+            "Rate of inflation",
+            "Rate of increase in salaries",
+            "Discount rate"
+          ]
+        },
+        {
+          "question": "How much is the 2019 rate of inflation?...",
+          "context_preview": "Table ID: e78f8b29-6085-43de-b32f-be1a68641be3\nHeaders:  | 2019 % | 2018 % | 2017 %\nRow 1: Weighted average actuarial assumptions used at 31 March1: |...",
+          "answer": [
+            "2.9"
+          ]
+        },
+        {
+          "question": "How much is the 2018 rate of inflation?...",
+          "context_preview": "Table ID: e78f8b29-6085-43de-b32f-be1a68641be3\nHeaders:  | 2019 % | 2018 % | 2017 %\nRow 1: Weighted average actuarial assumptions used at 31 March1: |...",
+          "answer": [
+            "2.9"
+          ]
+        },
+        {
+          "question": "What is the 2019 average rate of inflation?...",
+          "context_preview": "Table ID: e78f8b29-6085-43de-b32f-be1a68641be3\nHeaders:  | 2019 % | 2018 % | 2017 %\nRow 1: Weighted average actuarial assumptions used at 31 March1: |...",
+          "answer": 2.9
+        },
+        {
+          "question": "What is the 2019 average rate of increase in salaries?...",
+          "context_preview": "Table ID: e78f8b29-6085-43de-b32f-be1a68641be3\nHeaders:  | 2019 % | 2018 % | 2017 %\nRow 1: Weighted average actuarial assumptions used at 31 March1: |...",
+          "answer": 2.7
+        }
+      ]
+    },
+    "text": {
+      "total": 3514,
+      "hybrid_context": 3487,
+      "hybrid_percentage": 99.23164484917473,
+      "examples": [
+        {
+          "question": "How was internally developed software capitalised?...",
+          "context_preview": "Table ID: 98c16699-d385-4631-91de-1bc3c87f9f99\nHeaders:  | Rights and licenses | Internally generated software | Software under development | Total\nRo...",
+          "answer": [
+            "at cost less accumulated amortisation."
+          ]
+        },
+        {
+          "question": "Why did the Operating revenues decreased from 2018 to 2019? ...",
+          "context_preview": "Table ID: 806ac467-ab50-428b-8584-baef6d6c4cee\nHeaders:  |  | Years Ended December 31, | \nRow 1:  | 2017 | 2018 | 2019\nRow 2:  | % | % | %\nRow 3: Oper...",
+          "answer": [
+            "primarily due to decreased other operating revenues, decreased foundry wafer sale, and 2.5% depreciation of the NTD in 2019 from 2018."
+          ]
+        },
+        {
+          "question": "Why did the Operating costs decreased from 2018 to 2019?...",
+          "context_preview": "Table ID: 806ac467-ab50-428b-8584-baef6d6c4cee\nHeaders:  |  | Years Ended December 31, | \nRow 1:  | 2017 | 2018 | 2019\nRow 2:  | % | % | %\nRow 3: Oper...",
+          "answer": [
+            "primarily due to the decreased depreciation expense and other operating costs, which was partially offset by the increased direct material costs."
+          ]
+        },
+        {
+          "question": "Why did the gross margin decreased from 2018 to 2019?...",
+          "context_preview": "Table ID: 806ac467-ab50-428b-8584-baef6d6c4cee\nHeaders:  |  | Years Ended December 31, | \nRow 1:  | 2017 | 2018 | 2019\nRow 2:  | % | % | %\nRow 3: Oper...",
+          "answer": [
+            "primarily due to an annual decline of 2.9% in average selling price."
+          ]
+        },
+        {
+          "question": "What led to increase in the revenue of ADG on sequential basis?...",
+          "context_preview": "Table ID: 67111519-017b-4638-9a74-41eb792c2f0f\nHeaders:  |  | Three Months Ended |  | % Variation | \nRow 1:  | December 31, 2019 | September 29, 2019 ...",
+          "answer": [
+            "driven by an increase in volumes of approximately 8%, partially offset by a decrease in average selling prices of approximately 5%, mostly attributable to product mix."
+          ]
+        }
+      ]
+    },
+    "table-text": {
+      "total": 4677,
+      "hybrid_context": 4632,
+      "hybrid_percentage": 99.03784477228993,
+      "examples": [
+        {
+          "question": "How many product categories are available?...",
+          "context_preview": "Table ID: 991d23d7-f32d-4954-8e1d-87ad22470fcf\nHeaders:  |  | 2019 |  | 2018\nRow 1: In thousands | $ | % | $ | %\nRow 2: Drinkable Kefir other than Pro...",
+          "answer": "6"
+        },
+        {
+          "question": "Which years does the table provide information for the components of inventories...",
+          "context_preview": "Table ID: 635228dd-44ae-4ad2-817d-2079a9ceb320\nHeaders:  | March 31, | \nRow 1:  | 2019 | 2018\nRow 2: Raw materials | $74.5 | $26.0\nRow 3: Work in proc...",
+          "answer": [
+            "2019",
+            "2018"
+          ]
+        },
+        {
+          "question": "What was the amount of raw materials in 2018?...",
+          "context_preview": "Table ID: 635228dd-44ae-4ad2-817d-2079a9ceb320\nHeaders:  | March 31, | \nRow 1:  | 2019 | 2018\nRow 2: Raw materials | $74.5 | $26.0\nRow 3: Work in proc...",
+          "answer": [
+            "26.0"
+          ]
+        },
+        {
+          "question": "What was the change in raw materials between 2018 and 2019?...",
+          "context_preview": "Table ID: 635228dd-44ae-4ad2-817d-2079a9ceb320\nHeaders:  | March 31, | \nRow 1:  | 2019 | 2018\nRow 2: Raw materials | $74.5 | $26.0\nRow 3: Work in proc...",
+          "answer": 48.5
+        },
+        {
+          "question": "How many years did the amount of Finished goods exceed $200 million?...",
+          "context_preview": "Table ID: 635228dd-44ae-4ad2-817d-2079a9ceb320\nHeaders:  | March 31, | \nRow 1:  | 2019 | 2018\nRow 2: Raw materials | $74.5 | $26.0\nRow 3: Work in proc...",
+          "answer": "1"
+        }
+      ]
+    }
+  }
+}
