@@ -902,14 +902,25 @@ class OptimizedRagUI:
         
         # 构建UI专用结构（只影响展示，不影响RAG主流程）
         ui_docs = []
+        seen_ui_hashes = set()  # 添加UI级别的去重
+        
         for doc, score in unique_docs:
             if getattr(doc.metadata, 'language', '') == 'chinese':
                 doc_id = str(getattr(doc.metadata, 'origin_doc_id', '') or getattr(doc.metadata, 'doc_id', '')).strip()
                 raw_context = self.docid2context.get(doc_id, "")
                 if not raw_context:
-                    print(f"[UI DEBUG] doc_id未命中: {doc_id}，文档内容前50字: {doc.content[:50] if hasattr(doc, 'content') else str(doc)[:50]}")
+                    raw_context = doc.content
+                    print(f"[UI DEBUG] doc_id未命中: {doc_id}，使用文档内容")
             else:
                 raw_context = doc.content
+            
+            # 对raw_context进行去重检查
+            context_hash = hash(raw_context)
+            if context_hash in seen_ui_hashes:
+                print(f"[UI DEBUG] 跳过重复的UI文档，内容前50字符: {raw_context[:50]}...")
+                continue
+            
+            seen_ui_hashes.add(context_hash)
             preview_content = raw_context[:200] + "..." if len(raw_context) > 200 else raw_context
             ui_docs.append((doc, score, preview_content, raw_context))
         html_content = self._generate_clickable_context_html(ui_docs)
@@ -921,6 +932,20 @@ class OptimizedRagUI:
         # ui_docs: List[Tuple[DocumentWithMetadata, float, str, str]]
         if not ui_docs:
             return "<p>没有检索到相关文档。</p>"
+
+        # 最终的去重检查，确保HTML中不会有重复内容
+        final_ui_docs = []
+        seen_final_hashes = set()
+        
+        for doc, score, preview_content, raw_context in ui_docs:
+            # 使用raw_context的哈希值进行最终去重
+            context_hash = hash(raw_context)
+            if context_hash in seen_final_hashes:
+                print(f"[HTML DEBUG] 跳过重复的HTML文档，内容前50字符: {raw_context[:50]}...")
+                continue
+            
+            seen_final_hashes.add(context_hash)
+            final_ui_docs.append((doc, score, preview_content, raw_context))
 
         html_parts = []
         html_parts.append("""
@@ -999,7 +1024,8 @@ class OptimizedRagUI:
         }
         </style>
         """)
-        for i, (doc, score, preview_content, raw_context) in enumerate(ui_docs):
+        
+        for i, (doc, score, preview_content, raw_context) in enumerate(final_ui_docs):
             short_content = preview_content
             full_content = raw_context
             def html_escape(text):
