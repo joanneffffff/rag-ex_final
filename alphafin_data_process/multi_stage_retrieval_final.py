@@ -567,6 +567,11 @@ class MultiStageRetrievalSystem:
         
         print(f"开始FAISS检索，候选文档数: {len(candidate_indices)}")
         
+        # 如果没有候选文档，直接返回空结果
+        if not candidate_indices:
+            print("没有候选文档，返回空结果")
+            return []
+        
         # 生成查询嵌入
         try:
             query_embedding = self.embedding_model.encode([query])
@@ -575,25 +580,34 @@ class MultiStageRetrievalSystem:
             print(f"查询嵌入生成失败: {e}")
             return []
         
-        # 在FAISS中搜索
+        # 使用现有FAISS索引进行高效搜索
+        print("使用现有FAISS索引进行高效搜索")
+        
         try:
-            scores, indices = self.faiss_index.search(query_embedding.astype('float32'), top_k)
-            print(f"FAISS搜索完成，找到 {len(indices[0])} 个候选")
+            # 在完整FAISS索引上搜索，然后过滤候选文档
+            search_k = min(top_k * 5, len(self.valid_indices))  # 搜索更多以确保覆盖候选文档
+            scores, indices = self.faiss_index.search(query_embedding.astype('float32'), search_k)
+            
+            # 将FAISS索引映射回原始数据索引，并限制在候选文档范围内
+            results = []
+            candidate_set = set(candidate_indices)
+            
+            for faiss_idx, score in zip(indices[0], scores[0]):
+                if faiss_idx < len(self.valid_indices):
+                    original_idx = self.valid_indices[faiss_idx]
+                    # 检查是否在候选列表中
+                    if original_idx in candidate_set:
+                        results.append((original_idx, float(score)))
+                        # 如果已经找到足够的候选，提前结束
+                        if len(results) >= top_k:
+                            break
+            
+            print(f"FAISS检索完成，有效结果: {len(results)} 条记录")
+            return results
+            
         except Exception as e:
             print(f"FAISS搜索失败: {e}")
             return []
-        
-        # 将FAISS索引映射回原始数据索引
-        results = []
-        for faiss_idx, score in zip(indices[0], scores[0]):
-            if faiss_idx < len(self.valid_indices):
-                original_idx = self.valid_indices[faiss_idx]
-                # 检查是否在候选列表中
-                if original_idx in candidate_indices:
-                    results.append((original_idx, float(score)))
-        
-        print(f"FAISS检索完成，有效结果: {len(results)} 条记录")
-        return results
     
     def rerank(self, 
                query: str, 
@@ -634,7 +648,7 @@ class MultiStageRetrievalSystem:
                     if self.dataset_type == "chinese":
                         content = record.get('summary', '')
                     else:
-                        content = record.get('context', '')
+                        content = record.get('context', '') or record.get('content', '')
                     if content.strip():
                         docs_for_rerank.append(content)
                         doc_to_rerank_mapping.append((doc_idx, faiss_score))
@@ -797,7 +811,8 @@ class MultiStageRetrievalSystem:
                company_name: Optional[str] = None,
                stock_code: Optional[str] = None,
                report_date: Optional[str] = None,
-               top_k: int = 10) -> Dict:  # 改为10，与配置文件中的rerank_top_k一致
+               top_k: int = 10,
+               use_prefilter: bool = True) -> Dict:  # 添加预过滤开关参数
         """
         完整的多阶段检索流程
         
@@ -807,6 +822,7 @@ class MultiStageRetrievalSystem:
             stock_code: 股票代码（可选，仅中文数据）
             report_date: 报告日期（可选，仅中文数据）
             top_k: 返回前k个结果
+            use_prefilter: 是否使用预过滤（默认True）
             
         Returns:
             检索结果列表
@@ -814,6 +830,7 @@ class MultiStageRetrievalSystem:
         print(f"\n开始多阶段检索...")
         print(f"查询: {query}")
         print(f"数据集类型: {self.dataset_type}")
+        print(f"预过滤开关: {'开启' if use_prefilter else '关闭'}")
         
         if self.dataset_type == "chinese":
             if company_name:
@@ -833,19 +850,25 @@ class MultiStageRetrievalSystem:
             retrieval_top_k = self.config.retriever.retrieval_top_k
             rerank_top_k = self.config.retriever.rerank_top_k
         
-        # 1. Pre-filtering（仅中文数据支持）
-        candidate_indices = self.pre_filter(company_name, stock_code, report_date)
-        print(f"预过滤结果: {len(candidate_indices)} 个候选文档")
-        
-        # 如果预过滤没有找到匹配的文档，回退到全量FAISS检索
-        if len(candidate_indices) == 0:
-            print("预过滤无结果，回退到全量FAISS检索...")
+        # 1. Pre-filtering（根据开关决定是否使用）
+        if use_prefilter and self.dataset_type == "chinese":
+            print("第一步：启用元数据预过滤...")
+            candidate_indices = self.pre_filter(company_name, stock_code, report_date)
+            print(f"预过滤结果: {len(candidate_indices)} 个候选文档")
+            
+            # 如果预过滤没有找到匹配的文档，回退到全量FAISS检索
+            if len(candidate_indices) == 0:
+                print("预过滤无结果，回退到全量FAISS检索...")
+                candidate_indices = list(range(len(self.data)))
+                print(f"回退到全量检索，候选文档数: {len(candidate_indices)}")
+        else:
+            print("第一步：跳过元数据预过滤，使用全量检索...")
             candidate_indices = list(range(len(self.data)))
-            print(f"回退到全量检索，候选文档数: {len(candidate_indices)}")
+            print(f"全量检索，候选文档数: {len(candidate_indices)}")
         
         # 2. FAISS检索 - 基于预过滤结果，但确保检索到配置的候选数量
-        print("第二步：基于预过滤结果进行FAISS检索...")
-        # 如果预过滤结果少于配置的检索数量，使用预过滤结果；否则使用配置的检索数量
+        print("第二步：基于候选文档进行FAISS检索...")
+        # 如果候选结果少于配置的检索数量，使用候选结果；否则使用配置的检索数量
         actual_top_k = min(retrieval_top_k, len(candidate_indices))
         faiss_results = self.faiss_search(query, candidate_indices, top_k=actual_top_k)
         print(f"FAISS检索结果: {len(faiss_results)} 个文档")
@@ -913,7 +936,8 @@ class MultiStageRetrievalSystem:
             'retrieved_documents': formatted_results,
             'llm_answer': llm_answer,
             'query': query,
-            'total_documents': len(formatted_results)
+            'total_documents': len(formatted_results),
+            'use_prefilter': use_prefilter  # 添加预过滤状态到输出
         }
         
         print(f"检索完成，返回 {len(formatted_results)} 条结果")

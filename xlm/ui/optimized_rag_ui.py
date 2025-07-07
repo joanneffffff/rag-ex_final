@@ -827,7 +827,28 @@ class OptimizedRagUI:
                 prompt = f"Context: {context_str}\nQuestion: {question}\nAnswer:"
         
         try:
-            answer = self.generator.generate(texts=[prompt])[0]
+            # 根据语言检测结果决定hybrid_decision参数
+            if is_chinese_query:
+                hybrid_decision = "multi_stage_chinese"
+            else:
+                # 英文查询：使用混合决策算法
+                try:
+                    # 导入混合决策函数
+                    from comprehensive_evaluation_enhanced import hybrid_decision_enhanced
+                    decision_result = hybrid_decision_enhanced(context_str, question)
+                    hybrid_decision = decision_result['primary_decision']
+                    print(f"🤖 英文混合决策: {hybrid_decision} (置信度: {decision_result['confidence']:.3f})")
+                except Exception as e:
+                    print(f"混合决策失败: {e}，使用默认hybrid")
+                    hybrid_decision = "hybrid"
+            
+            # 使用generate_hybrid_answer方法，传递混合决策参数
+            answer = self.generator.generate_hybrid_answer(
+                question=question,
+                table_context="",  # UI中没有分离的上下文
+                text_context=context_str,
+                hybrid_decision=hybrid_decision
+            )
         except Exception as e:
             print(f"生成器调用失败: {e}")
             answer = "生成器调用失败"

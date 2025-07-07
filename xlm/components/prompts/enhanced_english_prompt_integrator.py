@@ -7,6 +7,8 @@
 import re
 from typing import Dict, List, Optional, Tuple
 from enum import Enum
+from xlm.utils.context_separator import context_separator, separate_context_for_prompt
+from xlm.utils.context_separator import context_separator, separate_context_for_prompt
 
 class ContentType(Enum):
     """内容类型枚举"""

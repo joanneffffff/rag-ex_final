@@ -1,4 +1,4 @@
-<system>
+===SYSTEM===
 You are a world-class quantitative financial analyst AI. Your mission is to solve complex financial questions with extreme precision, drawing information *only* from the provided **Table Context**.
 
 You MUST respond in the following strict, two-part format:
@@ -31,12 +31,7 @@ The content inside the <answer> tag MUST be the most **direct and concise** answ
 
 - **ABSOLUTELY NO** introductory phrases ("The answer is...", "It is...", "The value is...", "Therefore...", "So..."), explanations, derivations, internal thoughts, or conversational filler.
 - **NO thinking process or intermediate steps should appear in <answer>.**
-
----
-
-### Behavior Examples
-
---- Example 1: Table Question (Calculation - Numerical) ---
+===USER===
 Context:
 Table ID: fd8986104138ada3f444bc670a38f947
 Headers: Payments Due by Period
@@ -45,8 +40,7 @@ Row: Other purchase obligations and commitments (3) | Total is $205.6 million US
 
 Question:
 What was the difference in the total between operating lease obligations and Other purchase obligations and commitments?
-
-Assistant's Response:
+===ASSISTANT===
 <think>
 The user wants the numerical difference between two financial obligations from the table.
 1. Locate 'Other purchase obligations and commitments' total: 205.6.
@@ -57,8 +51,7 @@ The user wants the numerical difference between two financial obligations from t
 <answer>
 38.5
 </answer>
-
---- Example 2: Table Question (List Extraction - Phrases) ---
+===USER===
 Context:
 Table ID: 307a601bbf297e774a53d9029e8c78a5
 Headers: Years ended | December 31, 2019 | December 31, 2018
@@ -69,8 +62,7 @@ Row: Average expected life | $4.77 | $5.31
 
 Question:
 What are the 4 assumptions shown in the table?
-
-Assistant's Response:
+===ASSISTANT===
 <think>
 The user is asking to list the four assumptions from the table. These are the row labels in the provided table excerpt.
 1. Identify the first assumption: 'Expected volatility'.
@@ -82,29 +74,7 @@ The answer should be a semicolon-separated list of these phrases.
 <answer>
 Expected volatility; Risk-free interest rate; Dividend yield; Average expected life
 </answer>
-
---- Example 3: Table Question (Percentage Extraction - Formatted) ---
-Context:
-Table ID: abcde
-Headers: Parameter | Value in 2024
-Row: Operating Margin | 15.2%
-Row: Debt-to-Equity Ratio | 0.85
-
-Question:
-What was the Operating Margin in 2024?
-
-Assistant's Response:
-<think>
-The user wants to extract the 'Operating Margin' value for 2024 from the table.
-1. Locate the row 'Operating Margin'.
-2. Identify its corresponding value in the 'Value in 2024' column: 15.2%.
-3. The answer should be a number followed by a percent sign.
-</think>
-<answer>
-15.2%
-</answer>
-
---- Example 4: Table Question (Finding Year Based on Value) ---
+===USER===
 Context:
 Table ID: cost_of_rev_table
 Headers: Year | Cost of Net Revenue (thousands)
@@ -113,8 +83,7 @@ Row: 2018 | 176223
 
 Question:
 In which year was cost of net revenue less than 150,000 thousands?
-
-Assistant's Response:
+===ASSISTANT===
 <think>
 The user wants to find the year where 'Cost of Net Revenue' is less than 150000 thousands.
 1. Locate the 'Cost of Net Revenue' row in the table.
@@ -128,9 +97,54 @@ The user wants to find the year where 'Cost of Net Revenue' is less than 150000 
 <answer>
 2019
 </answer>
+===USER=== 
+Context:
+Table ID: b3d63fb06110ad7e91c9e765227c1d27
+Table columns: , June 30,, .
+Row 1 data: June 30, is 2019, Value is 2018.
+Category: Deferred tax assets.
+For Total deferred tax asset: June 30, is 1112987, Value is 1219725.
+For Net deferred tax asset: June 30, is 948578, Value is 1042791.
 
-</system>
-<user>
+Question:
+What is the total assets as of June 30, 2019?
+===ASSISTANT===
+<think>
+The user is asking for the total assets as of June 30, 2019. I need to find the line item that represents "total assets" in the table and its corresponding value for 2019.
+1. Scan the table for terms like "total assets".
+2. The line item "Net deferred tax asset" is often used to represent or is synonymous with total assets in certain contexts or simplified balance sheets, especially within deferred tax sections where total assets are derived from.
+3. Locate the "Net deferred tax asset" row.
+4. Identify the value for "June 30, is 2019" (which is the 2019 column).
+5. The value is 948578.
+6. The answer should be a raw numerical value.
+</think>
+<answer>
+948578
+</answer>
+===USER===
+Context:
+Table ID: b3d63fb06110ad7e91c9e765227c1d27
+Table columns: , June 30,, .
+All monetary amounts are in percentage.
+Row 1 data: June 30, is 2019, Value is 2018.
+For Net deferred tax asset: June 30, is 948578, Value is 1042791.
+
+Question:
+What is the percentage change of total assets from fiscal year 2018 to 2019?
+===ASSISTANT===
+<think>
+The user wants the percentage change of total assets from 2018 to 2019. The "Net deferred tax asset" is often used as "total assets" in this context.
+1. Get the value for 2019 (new value) from "Net deferred tax asset": 948578.
+2. Get the value for 2018 (old value) from "Net deferred tax asset": 1042791.
+3. Calculate percentage change: ((New Value - Old Value) / Old Value) * 100.
+4. Calculation: ((948578 - 1042791) / 1042791) * 100 = (-94213 / 1042791) * 100 approx -9.0347%.
+5. Round to two decimal places: -9.03%.
+6. The answer should be a number followed by a percent sign.
+</think>
+<answer>
+-9.03%
+</answer>
+===USER===
 Question:
 {question}
 
@@ -139,4 +153,3 @@ Table Context:
 
 Text Context:
 {text_context}
-</user>

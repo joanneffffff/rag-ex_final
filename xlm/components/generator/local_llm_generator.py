@@ -2,6 +2,7 @@ import os
 import json
 import re
 from typing import List, Optional, Dict, Any
+from pathlib import Path
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -70,9 +71,150 @@ class LocalLLMGenerator(Generator):
         # 内存优化设置
         self._setup_memory_optimization()
         
+        # 初始化模板加载器
+        self._init_template_loader()
+        
         self._load_model_and_tokenizer()
         print(f"LocalLLMGenerator '{model_name}' loaded on {self.device} with quantization: {self.use_quantization} ({self.quantization_type}).")
     
+    def _init_template_loader(self):
+        """初始化模板加载器"""
+        self.template_dir = Path("data/prompt_templates")
+        self.templates = {}
+        self._load_templates()
+    
+    def _load_templates(self):
+        """加载所有模板文件"""
+        if not self.template_dir.exists():
+            print(f"Warning: Template directory {self.template_dir} does not exist")
+            return
+        
+        for template_file in self.template_dir.glob("*.txt"):
+            template_name = template_file.stem
+            try:
+                with open(template_file, 'r', encoding='utf-8') as f:
+                    self.templates[template_name] = f.read().strip()
+                print(f"Loaded template: {template_name}")
+            except Exception as e:
+                print(f"Error loading template {template_name}: {e}")
+    
+    def get_template(self, template_name: str) -> Optional[str]:
+        """获取指定名称的模板"""
+        return self.templates.get(template_name)
+    
+    def format_hybrid_template(self, question: str, table_context: str = "", text_context: str = "", hybrid_decision: str = "hybrid") -> str:
+        """
+        格式化混合答案模板
+        
+        Args:
+            question: 用户问题
+            table_context: 表格上下文
+            text_context: 文本上下文
+            hybrid_decision: 混合决策类型 ("hybrid", "table", "text", "multi_stage_chinese")
+            
+        Returns:
+            格式化后的模板字符串
+        """
+        # 根据hybrid_decision选择模板
+        template_name = None
+        if hybrid_decision == "multi_stage_chinese":
+            template_name = "multi_stage_chinese_template"
+        elif hybrid_decision == "hybrid":
+            template_name = "template_for_hybrid_answer"
+        elif hybrid_decision == "table":
+            template_name = "template_for_table_answer"
+        elif hybrid_decision == "text":
+            template_name = "template_for_text_answer"
+        else:
+            # 默认使用混合模板
+            template_name = "template_for_hybrid_answer"
+        
+        template = self.get_template(template_name)
+        if template is None:
+            raise ValueError(f"{template_name} not found")
+        
+        try:
+            # 对于multi_stage_chinese_template，使用特殊的格式化逻辑
+            if hybrid_decision == "multi_stage_chinese":
+                # 合并上下文作为完整片段，使用摘要作为摘要
+                combined_context = f"{table_context}\n{text_context}".strip()
+                summary = combined_context[:500] + "..." if len(combined_context) > 500 else combined_context
+                
+                formatted_template = template.format(
+                    summary=summary,
+                    context=combined_context,
+                    query=question
+                )
+            else:
+                # 其他模板使用原有逻辑
+                formatted_template = template.format(
+                    question=question,
+                    table_context=table_context,
+                    text_context=text_context
+                )
+            return formatted_template
+        except KeyError as e:
+            raise ValueError(f"Error formatting {template_name} template: missing key {e}")
+        except Exception as e:
+            raise ValueError(f"Error formatting {template_name} template: {e}")
+    
+    def generate_hybrid_answer(self, question: str, table_context: str = "", text_context: str = "", hybrid_decision: str = "hybrid") -> str:
+        """
+        使用混合答案模板生成回答
+        
+        Args:
+            question: 用户问题
+            table_context: 表格上下文
+            text_context: 文本上下文
+            hybrid_decision: 混合决策类型 ("hybrid", "table", "text", "multi_stage_chinese")
+            
+        Returns:
+            生成的回答
+        """
+        # 格式化混合答案模板
+        formatted_prompt = self.format_hybrid_template(question, table_context, text_context, hybrid_decision)
+        
+        # 使用现有的生成方法
+        responses = self.generate([formatted_prompt])
+        
+        if responses and len(responses) > 0:
+            return responses[0]
+        else:
+            return "生成回答失败"
+    
+    def extract_answer_from_response(self, response: str) -> str:
+        """
+        从生成的回答中提取最终答案
+        
+        Args:
+            response: 生成的完整回答
+            
+        Returns:
+            提取的答案部分
+        """
+        # 尝试提取 <answer> 标签中的内容
+        answer_match = re.search(r'<answer>(.*?)</answer>', response, re.DOTALL | re.IGNORECASE)
+        if answer_match:
+            return answer_match.group(1).strip()
+        
+        # 如果没有找到 <answer> 标签，尝试其他模式
+        # 查找 "Answer:" 或 "答案:" 后面的内容
+        answer_patterns = [
+            r'Answer:\s*(.*?)(?:\n|$)',
+            r'答案:\s*(.*?)(?:\n|$)',
+            r'<answer>\s*(.*?)\s*</answer>',
+            r'Answer\s*:\s*(.*?)(?:\n|$)',
+            r'答案\s*:\s*(.*?)(?:\n|$)'
+        ]
+        
+        for pattern in answer_patterns:
+            match = re.search(pattern, response, re.DOTALL | re.IGNORECASE)
+            if match:
+                return match.group(1).strip()
+        
+        # 如果都没有找到，返回原始回答
+        return response.strip()
+
     def _validate_config(self, model_name: str, device: str, use_quantization: bool, quantization_type: str):
         """验证配置参数的有效性"""
         if not model_name:
@@ -208,8 +350,8 @@ class LocalLLMGenerator(Generator):
             **model_kwargs
         )
     
-    def convert_to_json_chat_format(self, text):
-        """将包含 ===SYSTEM=== 和 ===USER=== 标记的字符串转换为JSON聊天格式"""
+    def convert_to_json_chat_format(self, text, hybrid_decision=None):
+        """将包含聊天格式标记的字符串转换为JSON聊天格式"""
         
         # 如果输入已经是JSON格式，直接返回
         if text.strip().startswith('[') and text.strip().endswith(']'):
@@ -219,6 +361,69 @@ class LocalLLMGenerator(Generator):
                 return text
             except json.JSONDecodeError:
                 pass
+        
+        # 检测英文模板类型（===SYSTEM===格式，排除rag_english_template）
+        if "===SYSTEM===" in text and "===USER===" in text:
+            # 排除rag_english_template（使用<system>格式）
+            if "<system>" in text:
+                print("Detected rag_english_template format (skipping)")
+                # 继续到下一个检测逻辑
+            else:
+                # 检测模板类型（基于hybrid_decision参数）
+                template_type = "unknown"
+                if hybrid_decision:
+                    if hybrid_decision == "table":
+                        template_type = "table"
+                    elif hybrid_decision == "text":
+                        template_type = "text"
+                    elif hybrid_decision == "hybrid":
+                        template_type = "hybrid"
+                    else:
+                        template_type = "general"
+                else:
+                    template_type = "general"
+                
+                print(f"Detected English template format: {template_type}")
+                
+                # 提取 SYSTEM 部分
+                system_start = text.find("===SYSTEM===")
+                user_start = text.find("===USER===")
+                
+                if system_start != -1 and user_start != -1:
+                    system_content = text[system_start + 12:user_start].strip()
+                    user_content = text[user_start + 10:].strip()
+                    
+                    # 构建JSON格式
+                    chat_data = [
+                        {"role": "system", "content": system_content},
+                        {"role": "user", "content": user_content}
+                    ]
+                    
+                    return json.dumps(chat_data, ensure_ascii=False, indent=2)
+        
+        # 检测ChatML格式（<|im_start|>role...<|im_end|>）
+        if "<|im_start|>" in text and "<|im_end|>" in text:
+            print("Detected ChatML format with <|im_start|> markers")
+            
+            import re
+            # 匹配 <|im_start|>role\ncontent<|im_end|> 格式
+            pattern = r'<\|im_start\|>(\w+)\n(.*?)<\|im_end\|>'
+            matches = re.findall(pattern, text, re.DOTALL)
+            
+            chat_data = []
+            for role, content in matches:
+                content = content.strip()
+                if content:  # 只添加非空内容
+                    if role == "system":
+                        chat_data.append({"role": "system", "content": content})
+                    elif role == "user":
+                        chat_data.append({"role": "user", "content": content})
+                    elif role == "assistant":
+                        chat_data.append({"role": "assistant", "content": content})
+            
+            if chat_data:
+                print(f"Extracted {len(chat_data)} ChatML messages: {[msg['role'] for msg in chat_data]}")
+                return json.dumps(chat_data, ensure_ascii=False, indent=2)
         
         # 检测 multi_stage_chinese_template.txt 格式
         if "===SYSTEM===" in text and "===USER===" in text:
@@ -273,6 +478,8 @@ class LocalLLMGenerator(Generator):
             {"role": "user", "content": text}
         ]
         return json.dumps(chat_data, ensure_ascii=False, indent=2)
+
+
 
     def convert_json_to_model_format(self, json_chat: str) -> str:
         """将JSON聊天格式转换为模型期望的格式"""

@@ -1,0 +1,34 @@
+{
+  "top_1": {
+    "mrr": 0.33,
+    "hit@1": 0.33,
+    "total_samples": 100,
+    "mode": "baseline",
+    "duration_seconds": 2279.115705013275,
+    "timestamp": "2025-07-06T23:29:31.395494"
+  },
+  "top_3": {
+    "mrr": 0.395,
+    "hit@3": 0.48,
+    "total_samples": 100,
+    "mode": "baseline",
+    "duration_seconds": 2375.230828523636,
+    "timestamp": "2025-07-07T00:09:06.627448"
+  },
+  "top_5": {
+    "mrr": 0.4064999999999999,
+    "hit@5": 0.53,
+    "total_samples": 100,
+    "mode": "baseline",
+    "duration_seconds": 2205.2041215896606,
+    "timestamp": "2025-07-07T00:45:51.832605"
+  },
+  "top_10": {
+    "mrr": 0.4149563492063491,
+    "hit@10": 0.6,
+    "total_samples": 100,
+    "mode": "baseline",
+    "duration_seconds": 2337.42862868309,
+    "timestamp": "2025-07-07T01:24:49.262195"
+  }
+}
