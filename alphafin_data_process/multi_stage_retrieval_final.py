@@ -102,57 +102,86 @@ class MultiStageRetrievalSystem:
         """
         self.data_path = data_path
         self.dataset_type = dataset_type
-        self.data = []
-        self.original_data = []
-        self.doc_to_chunks_mapping = {}
+        self.use_existing_config = use_existing_config
         
         # 初始化组件
+        self.data = []
         self.embedding_model = None
         self.faiss_index = None
-        self.qwen_reranker = None
-        self.llm_generator = None  # 添加LLM生成器
         self.valid_indices = []
-        self.metadata_index = defaultdict(dict)
+        self.qwen_reranker = None
+        self.llm_generator = None
+        
+        # 元数据索引
+        self.metadata_index = {
+            'company_name': {},
+            'stock_code': {},
+            'report_date': {},
+            'company_stock': {}
+        }
+        
+        # 股票代码和公司名称映射
+        self.stock_company_mapping = {}
+        self.company_stock_mapping = {}
         
         # 配置
         self.config = None
-        self.model_name = "all-MiniLM-L6-v2"
+        self.model_name = None
         
+        # 文档到chunks的映射（用于重排序）
+        self.doc_to_chunks_mapping = {}
+        
+        # 加载配置
         if use_existing_config:
-            try:
-                from config.parameters import Config
-                self.config = Config()
-                
-                # 根据数据集类型选择编码器
-                if self.dataset_type == "chinese":
-                    # 使用中文编码器
-                    self.model_name = self.config.encoder.chinese_model_path
-                    print(f"使用中文编码器: {self.model_name}")
-                else:
-                    # 使用英文编码器
-                    self.model_name = self.config.encoder.english_model_path
-                    print(f"使用英文编码器: {self.model_name}")
-                
-                print("使用现有配置初始化多阶段检索系统")
-            except Exception as e:
-                print(f"加载配置失败: {e}")
-                # 回退到默认模型
-                if self.dataset_type == "chinese":
-                    self.model_name = "distiluse-base-multilingual-cased-v2"
-                    print(f"使用默认中文编码器: {self.model_name}")
-                else:
-                    self.model_name = "all-MiniLM-L6-v2"
-                    print(f"使用默认英文编码器: {self.model_name}")
+            self._load_config()
         
         # 加载数据
         self._load_data()
         
-        # 构建索引
+        # 加载股票代码和公司名称映射
+        self._load_stock_company_mapping()
+        
+        # 构建元数据索引
         self._build_metadata_index()
+        
+        # 初始化嵌入模型
         self._init_embedding_model()
+        
+        # 构建FAISS索引
         self._build_faiss_index()
+        
+        # 初始化重排序器
         self._init_qwen_reranker()
-        self._init_llm_generator()  # 初始化LLM生成器
+        
+        # 初始化LLM生成器
+        self._init_llm_generator()
+    
+    def _load_config(self):
+        """加载配置文件"""
+        try:
+            from config.parameters import Config
+            self.config = Config()
+            
+            # 根据数据集类型选择编码器
+            if self.dataset_type == "chinese":
+                # 使用中文编码器
+                self.model_name = self.config.encoder.chinese_model_path
+                print(f"使用中文编码器: {self.model_name}")
+            else:
+                # 使用英文编码器
+                self.model_name = self.config.encoder.english_model_path
+                print(f"使用英文编码器: {self.model_name}")
+            
+            print("使用现有配置初始化多阶段检索系统")
+        except Exception as e:
+            print(f"加载配置失败: {e}")
+            # 回退到默认模型
+            if self.dataset_type == "chinese":
+                self.model_name = "distiluse-base-multilingual-cased-v2"
+                print(f"使用默认中文编码器: {self.model_name}")
+            else:
+                self.model_name = "all-MiniLM-L6-v2"
+                print(f"使用默认英文编码器: {self.model_name}")
     
     def _load_data(self):
         """加载数据"""
@@ -160,14 +189,14 @@ class MultiStageRetrievalSystem:
         
         # 加载原始AlphaFin数据用于FAISS索引
         print("加载原始AlphaFin数据用于FAISS索引...")
-        self.original_data = load_json_or_jsonl(self.data_path)
-        print(f"加载了 {len(self.original_data)} 条原始记录")
+        self.data = load_json_or_jsonl(self.data_path)
+        print(f"加载了 {len(self.data)} 条原始记录")
         
         # 建立doc_id到chunks的映射
         print("建立doc_id到chunks的映射关系...")
         self.doc_to_chunks_mapping = {}
         
-        for doc_idx, record in enumerate(self.original_data):
+        for doc_idx, record in enumerate(self.data):
             if self.dataset_type == "chinese":
                 # 对于中文数据，生成chunks
                 original_context = record.get('original_context', '')
@@ -198,7 +227,7 @@ class MultiStageRetrievalSystem:
         print(f"总共生成了 {total_chunks} 个chunks用于重排序")
         
         # 使用原始数据作为主要数据
-        self.data = self.original_data
+        # self.data = self.original_data # original_data is removed
         
         print(f"数据集类型: {self.dataset_type}")
         
@@ -211,6 +240,57 @@ class MultiStageRetrievalSystem:
             has_metadata = any(field in sample_record for field in ['company_name', 'stock_code', 'report_date'])
             print(f"包含元数据字段: {has_metadata}")
     
+    def _load_stock_company_mapping(self):
+        """加载股票代码和公司名称映射文件"""
+        if self.dataset_type == "chinese":
+            # 尝试从多个路径加载映射文件
+            possible_paths = [
+                Path("data/astock_code_company_name.csv"),
+                Path(__file__).parent.parent / "data" / "astock_code_company_name.csv",
+                Path(__file__).parent / "data" / "astock_code_company_name.csv"
+            ]
+            
+            mapping_path = None
+            for path in possible_paths:
+                if path.exists():
+                    mapping_path = path
+                    break
+            
+            if mapping_path:
+                try:
+                    import pandas as pd
+                    df = pd.read_csv(mapping_path, encoding='utf-8')
+                    
+                    # 构建双向映射
+                    for _, row in df.iterrows():
+                        stock_code = str(row['stock_code']).strip()
+                        company_name = str(row['company_name']).strip()
+                        
+                        if stock_code and company_name:
+                            # 股票代码 -> 公司名称
+                            self.stock_company_mapping[stock_code] = company_name
+                            # 公司名称 -> 股票代码
+                            self.company_stock_mapping[company_name] = stock_code
+                    
+                    print(f"成功加载股票代码和公司名称映射文件: {mapping_path}")
+                    print(f"股票代码映射数量: {len(self.stock_company_mapping)}")
+                    print(f"公司名称映射数量: {len(self.company_stock_mapping)}")
+                    
+                except Exception as e:
+                    print(f"加载股票代码和公司名称映射文件失败: {e}")
+                    print(f"文件路径: {mapping_path}")
+                    self.stock_company_mapping = {}
+                    self.company_stock_mapping = {}
+            else:
+                print("股票代码和公司名称映射文件不存在")
+                print(f"尝试的路径: {[str(p) for p in possible_paths]}")
+                self.stock_company_mapping = {}
+                self.company_stock_mapping = {}
+        else:
+            print("英文数据集，不加载股票代码和公司名称映射文件")
+            self.stock_company_mapping = {}
+            self.company_stock_mapping = {}
+
     def _build_metadata_index(self):
         """构建元数据索引用于pre-filtering（仅中文数据）"""
         if self.dataset_type != "chinese":
@@ -478,6 +558,7 @@ class MultiStageRetrievalSystem:
                    max_candidates: int = 1000) -> List[int]:
         """
         基于元数据进行预过滤（仅中文数据支持）
+        当使用预过滤时，自动启用股票代码和公司名称映射以提高匹配准确性
         
         Args:
             company_name: 公司名称
@@ -493,46 +574,68 @@ class MultiStageRetrievalSystem:
             return list(range(len(self.data)))
         
         print("开始元数据预过滤...")
+        print("自动启用股票代码和公司名称映射以提高匹配准确性")
         
         # 如果没有提供任何过滤条件，返回所有记录
         if not any([company_name, stock_code, report_date]):
             print("无过滤条件，返回所有记录")
             return list(range(len(self.data)))
         
+        # 使用股票代码和公司名称映射进行增强匹配
+        enhanced_company_name = company_name
+        enhanced_stock_code = stock_code
+        
+        # 自动启用映射功能来提高匹配准确性
+        # 如果提供了股票代码，尝试获取对应的公司名称
+        if stock_code and not company_name:
+            mapped_company = self.stock_company_mapping.get(stock_code)
+            if mapped_company:
+                enhanced_company_name = mapped_company
+                print(f"通过股票代码映射找到公司名称: {stock_code} -> {mapped_company}")
+        
+        # 如果提供了公司名称，尝试获取对应的股票代码
+        if company_name and not stock_code:
+            mapped_stock = self.company_stock_mapping.get(company_name)
+            if mapped_stock:
+                enhanced_stock_code = mapped_stock
+                print(f"通过公司名称映射找到股票代码: {company_name} -> {mapped_stock}")
+        
         # 优先使用组合索引（公司名称+股票代码）
-        if company_name and stock_code:
-            company_name_lower = company_name.strip().lower()
-            stock_code_lower = str(stock_code).strip().lower()
+        if enhanced_company_name and enhanced_stock_code:
+            company_name_lower = enhanced_company_name.strip().lower()
+            stock_code_lower = str(enhanced_stock_code).strip().lower()
             key = f"{company_name_lower}_{stock_code_lower}"
             
             if key in self.metadata_index['company_stock']:
                 indices = self.metadata_index['company_stock'][key]
-                print(f"组合过滤: 公司'{company_name}' + 股票'{stock_code}' 匹配 {len(indices)} 条记录")
+                print(f"组合过滤: 公司'{enhanced_company_name}' + 股票'{enhanced_stock_code}' 匹配 {len(indices)} 条记录")
                 return indices[:max_candidates]
             else:
-                print(f"组合过滤: 公司'{company_name}' + 股票'{stock_code}' 无匹配记录")
-                return []
+                print(f"组合过滤: 公司'{enhanced_company_name}' + 股票'{enhanced_stock_code}' 无匹配记录")
+                # 如果组合匹配失败，尝试单独匹配
+                return self._fallback_filter(enhanced_company_name, enhanced_stock_code, report_date, max_candidates)
         
         # 如果只提供了公司名称
-        elif company_name:
-            company_name_lower = company_name.strip().lower()
+        elif enhanced_company_name:
+            company_name_lower = enhanced_company_name.strip().lower()
             if company_name_lower in self.metadata_index['company_name']:
                 indices = self.metadata_index['company_name'][company_name_lower]
-                print(f"公司名称过滤: '{company_name}' 匹配 {len(indices)} 条记录")
+                print(f"公司名称过滤: '{enhanced_company_name}' 匹配 {len(indices)} 条记录")
                 return indices[:max_candidates]
             else:
-                print(f"公司名称过滤: '{company_name}' 无匹配记录")
-                return []
+                print(f"公司名称过滤: '{enhanced_company_name}' 无匹配记录")
+                # 尝试模糊匹配
+                return self._fuzzy_company_match(enhanced_company_name, max_candidates)
         
         # 如果只提供了股票代码
-        elif stock_code:
-            stock_code_lower = str(stock_code).strip().lower()
+        elif enhanced_stock_code:
+            stock_code_lower = str(enhanced_stock_code).strip().lower()
             if stock_code_lower in self.metadata_index['stock_code']:
                 indices = self.metadata_index['stock_code'][stock_code_lower]
-                print(f"股票代码过滤: '{stock_code}' 匹配 {len(indices)} 条记录")
+                print(f"股票代码过滤: '{enhanced_stock_code}' 匹配 {len(indices)} 条记录")
                 return indices[:max_candidates]
             else:
-                print(f"股票代码过滤: '{stock_code}' 无匹配记录")
+                print(f"股票代码过滤: '{enhanced_stock_code}' 无匹配记录")
                 return []
         
         # 如果只提供了报告日期
@@ -548,6 +651,60 @@ class MultiStageRetrievalSystem:
         
         print("预过滤完成，候选文档数: 0")
         return []
+    
+    def _fallback_filter(self, company_name: Optional[str], stock_code: Optional[str], 
+                        report_date: Optional[str], max_candidates: int) -> List[int]:
+        """组合匹配失败时的回退策略"""
+        print("组合匹配失败，尝试单独匹配...")
+        
+        all_indices = set()
+        
+        # 尝试公司名称匹配
+        if company_name:
+            company_name_lower = company_name.strip().lower()
+            if company_name_lower in self.metadata_index['company_name']:
+                indices = self.metadata_index['company_name'][company_name_lower]
+                all_indices.update(indices)
+                print(f"回退公司名称匹配: {len(indices)} 条记录")
+        
+        # 尝试股票代码匹配
+        if stock_code:
+            stock_code_lower = str(stock_code).strip().lower()
+            if stock_code_lower in self.metadata_index['stock_code']:
+                indices = self.metadata_index['stock_code'][stock_code_lower]
+                all_indices.update(indices)
+                print(f"回退股票代码匹配: {len(indices)} 条记录")
+        
+        # 尝试报告日期匹配
+        if report_date:
+            report_date_str = report_date.strip()
+            if report_date_str in self.metadata_index['report_date']:
+                indices = self.metadata_index['report_date'][report_date_str]
+                all_indices.update(indices)
+                print(f"回退报告日期匹配: {len(indices)} 条记录")
+        
+        result = list(all_indices)[:max_candidates]
+        print(f"回退策略总匹配: {len(result)} 条记录")
+        return result
+    
+    def _fuzzy_company_match(self, company_name: str, max_candidates: int) -> List[int]:
+        """模糊公司名称匹配"""
+        print(f"尝试模糊匹配公司名称: {company_name}")
+        
+        company_name_lower = company_name.strip().lower()
+        all_indices = set()
+        
+        # 在元数据索引中查找包含该公司名称的记录
+        for indexed_name, indices in self.metadata_index['company_name'].items():
+            if (company_name_lower in indexed_name or 
+                indexed_name in company_name_lower or
+                any(word in indexed_name for word in company_name_lower.split())):
+                all_indices.update(indices)
+                print(f"模糊匹配: '{indexed_name}' -> {len(indices)} 条记录")
+        
+        result = list(all_indices)[:max_candidates]
+        print(f"模糊匹配总结果: {len(result)} 条记录")
+        return result
     
     def faiss_search(self, query: str, candidate_indices: List[int], top_k: int = 100) -> List[Tuple[int, float]]:
         """
@@ -812,7 +969,7 @@ class MultiStageRetrievalSystem:
                stock_code: Optional[str] = None,
                report_date: Optional[str] = None,
                top_k: int = 10,
-               use_prefilter: bool = True) -> Dict:  # 添加预过滤开关参数
+               use_prefilter: bool = True) -> Dict:  # 移除映射开关参数
         """
         完整的多阶段检索流程
         
@@ -822,7 +979,7 @@ class MultiStageRetrievalSystem:
             stock_code: 股票代码（可选，仅中文数据）
             report_date: 报告日期（可选，仅中文数据）
             top_k: 返回前k个结果
-            use_prefilter: 是否使用预过滤（默认True）
+            use_prefilter: 是否使用预过滤（默认True，使用时会自动启用映射功能）
             
         Returns:
             检索结果列表
@@ -831,6 +988,8 @@ class MultiStageRetrievalSystem:
         print(f"查询: {query}")
         print(f"数据集类型: {self.dataset_type}")
         print(f"预过滤开关: {'开启' if use_prefilter else '关闭'}")
+        if use_prefilter:
+            print("预过滤模式下自动启用股票代码和公司名称映射")
         
         if self.dataset_type == "chinese":
             if company_name:
@@ -853,7 +1012,7 @@ class MultiStageRetrievalSystem:
         # 1. Pre-filtering（根据开关决定是否使用）
         if use_prefilter and self.dataset_type == "chinese":
             print("第一步：启用元数据预过滤...")
-            candidate_indices = self.pre_filter(company_name, stock_code, report_date)
+            candidate_indices = self.pre_filter(company_name, stock_code, report_date) # 预过滤时自动启用映射
             print(f"预过滤结果: {len(candidate_indices)} 个候选文档")
             
             # 如果预过滤没有找到匹配的文档，回退到全量FAISS检索

@@ -83,15 +83,15 @@ if __name__ == "__main__":
     
     # 分割AlphaFin数据
     split_alphafin_json(
-        input_json="data/alphafin/alphafin_rag_ready.json",      # AlphaFin的原始数据
-        train_jsonl="data/alphafin/alphafin_train_qc.jsonl",     # 输出AlphaFin训练集Q-C
+        input_json="data/alphafin/alphafin_final_clean.json",      # AlphaFin的清理后数据
+        train_jsonl="evaluate_mrr/alphafin_train_qc.jsonl",     # 输出AlphaFin训练集Q-C
         eval_jsonl="evaluate_mrr/alphafin_eval.jsonl",           # 输出AlphaFin评估集Q-C-A
-        train_ratio=0.8,
+        train_ratio=0.9,  # 改为9/1分割
         seed=42
     )
     
     # 分析数据分布
     analyze_data_distribution(
-        "data/alphafin/alphafin_train_qc.jsonl",
+        "evaluate_mrr/alphafin_train_qc.jsonl",
         "evaluate_mrr/alphafin_eval.jsonl"
     ) 

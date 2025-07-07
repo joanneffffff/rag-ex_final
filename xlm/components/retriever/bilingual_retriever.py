@@ -116,20 +116,10 @@ class BilingualRetriever(Retriever):
                         if self.corpus_embeddings_en is not None:
                             self._add_to_faiss(self.index_en, self.corpus_embeddings_en)
             else:
-                # 英文文档为空，检查是否有任何英文缓存文件
-                cache_files = [f for f in os.listdir(self.cache_dir) if f.endswith('.npy') and 'finetuned_finbert_tatqa' in f]
-                if cache_files:
-                    # 使用第一个找到的缓存文件
-                    cache_file = cache_files[0]
-                    embeddings_path_en = os.path.join(self.cache_dir, cache_file)
-                    self.corpus_embeddings_en = np.load(embeddings_path_en)
-                    loaded_any = True
-                    
-                    # 尝试加载对应的FAISS索引
-                    index_file = cache_file.replace('.npy', '.faiss')
-                    index_path_en = os.path.join(self.cache_dir, index_file)
-                    if os.path.exists(index_path_en):
-                        self.index_en = faiss.read_index(index_path_en)
+                # 英文文档为空，不加载任何缓存文件
+                # 因为无法验证缓存是否与当前数据匹配
+                print("⚠️ 英文文档列表为空，跳过缓存加载以确保数据一致性")
+                loaded_any = False
 
             # 检查中文文档缓存
             if self.corpus_documents_ch:
@@ -148,20 +138,10 @@ class BilingualRetriever(Retriever):
                         if self.corpus_embeddings_ch is not None:
                             self._add_to_faiss(self.index_ch, self.corpus_embeddings_ch)
             else:
-                # 中文文档为空，检查是否有任何中文缓存文件
-                cache_files = [f for f in os.listdir(self.cache_dir) if f.endswith('.npy') and 'finetuned_alphafin' in f]
-                if cache_files:
-                    # 使用第一个找到的缓存文件
-                    cache_file = cache_files[0]
-                    embeddings_path_ch = os.path.join(self.cache_dir, cache_file)
-                    self.corpus_embeddings_ch = np.load(embeddings_path_ch)
-                    loaded_any = True
-                    
-                    # 尝试加载对应的FAISS索引
-                    index_file = cache_file.replace('.npy', '.faiss')
-                    index_path_ch = os.path.join(self.cache_dir, index_file)
-                    if os.path.exists(index_path_ch):
-                        self.index_ch = faiss.read_index(index_path_ch)
+                # 中文文档为空，不加载任何缓存文件
+                # 因为无法验证缓存是否与当前数据匹配
+                print("⚠️ 中文文档列表为空，跳过缓存加载以确保数据一致性")
+                loaded_any = False
 
             return loaded_any
         except Exception as e:

@@ -54,7 +54,8 @@ class RagSystemAdapter:
         self,
         query: str,
         top_k: int = 10,
-        mode: str = "baseline"  # "baseline", "prefilter", "reranker"
+        mode: str = "baseline",  # "baseline", "prefilter", "reranker"
+        use_prefilter: Optional[bool] = None  # 如果为None，则根据mode和配置文件自动设置
     ) -> List[Dict[str, Any]]:
         """
         统一检索接口 - 基于OptimizedRagUI的实际工作流程
@@ -63,6 +64,7 @@ class RagSystemAdapter:
             query: 查询文本
             top_k: 返回的文档数量
             mode: 检索模式（baseline=仅FAISS, prefilter=元数据过滤+FAISS, reranker=元数据过滤+FAISS+重排序）
+            use_prefilter: 是否使用预过滤（如果为None，则根据mode和配置文件自动设置，使用时会自动启用映射功能）
             
         Returns:
             检索结果列表，每条包含doc_id、content、metadata等信息
@@ -70,10 +72,25 @@ class RagSystemAdapter:
         if self.ui is None:
             raise ValueError("UI系统未初始化")
         
+        # 根据mode和配置文件自动设置use_prefilter（如果未指定）
+        if use_prefilter is None:
+            if mode == "baseline":
+                # baseline模式：根据配置文件决定是否使用预过滤
+                use_prefilter = self.ui.config.retriever.use_prefilter
+            elif mode == "prefilter":
+                use_prefilter = True  # prefilter模式强制使用预过滤
+            elif mode == "reranker":
+                use_prefilter = True  # reranker模式强制使用预过滤
+            else:
+                use_prefilter = self.ui.config.retriever.use_prefilter  # 默认使用配置文件设置
+        
         print(f"开始检索评测...")
         print(f"查询: {query}")
         print(f"检索模式: {mode}")
-        print(f"返回数量: {top_k}")
+        print(f"预过滤开关: {'开启' if use_prefilter else '关闭'}")
+        if use_prefilter:
+            print("预过滤模式下自动启用股票代码和公司名称映射")
+        print(f"Top-K: {top_k}")
         
         # 根据mode设置reranker_checkbox
         reranker_checkbox = (mode == 'reranker')
@@ -89,12 +106,10 @@ class RagSystemAdapter:
         print(f"检测到的语言: {language}")
         
         # 调用UI的_unified_rag_processing方法进行检索
-        # 这是与run_optimized_ui完全相同的检索流程
         answer, context_html = self.ui._unified_rag_processing(query, language, reranker_checkbox)
         
         # 从UI的检索结果中提取文档信息
-        # 注意：UI返回的是(answer, context_html)，我们需要从UI的内部状态获取检索结果
-        results = self._extract_retrieval_results_from_ui(query, language, reranker_checkbox, top_k)
+        results = self._extract_retrieval_results_from_ui(query, language, reranker_checkbox, top_k, use_prefilter)
         
         print(f"检索完成，返回 {len(results)} 个文档")
         return results
@@ -104,7 +119,8 @@ class RagSystemAdapter:
         query: str,
         language: str,
         reranker_checkbox: bool,
-        top_k: int
+        top_k: int,
+        use_prefilter: bool = True
     ) -> List[Dict[str, Any]]:
         """
         从UI的检索流程中提取文档结果
@@ -123,23 +139,21 @@ class RagSystemAdapter:
                 from xlm.utils.stock_info_extractor import extract_stock_info, extract_report_date
                 company_name, stock_code = extract_stock_info(query)
                 report_date = extract_report_date(query)
-                if company_name:
-                    print(f"提取到公司名称: {company_name}")
-                if stock_code:
-                    print(f"提取到股票代码: {stock_code}")
-                if report_date:
-                    print(f"提取到报告日期: {report_date}")
                 
-                # 1.2 元数据过滤
-                candidate_indices = self.ui.chinese_retrieval_system.pre_filter(
-                    company_name=company_name,
-                    stock_code=stock_code,
-                    report_date=report_date,
-                    max_candidates=1000
-                )
+                # 1.2 元数据过滤 - 根据use_prefilter参数决定是否使用
+                if use_prefilter:
+                    print("启用元数据预过滤（自动启用股票代码和公司名称映射）...")
+                    candidate_indices = self.ui.chinese_retrieval_system.pre_filter(
+                        company_name=company_name,
+                        stock_code=stock_code,
+                        report_date=report_date
+                    )
+                else:
+                    print("跳过元数据预过滤，使用全量检索...")
+                    candidate_indices = list(range(len(self.ui.chinese_retrieval_system.data)))
                 
                 if candidate_indices:
-                    print(f"元数据过滤成功，找到 {len(candidate_indices)} 个候选文档")
+                    print(f"候选文档数量: {len(candidate_indices)}")
                     
                     # 1.3 使用已有的FAISS索引在过滤后的文档中进行检索
                     faiss_results = self.ui.chinese_retrieval_system.faiss_search(
@@ -393,7 +407,8 @@ class RagSystemAdapter:
         self,
         eval_dataset: List[Dict],
         top_k: int = 10,
-        mode: str = "baseline"
+        mode: str = "baseline",
+        use_prefilter: Optional[bool] = None
     ) -> Dict[str, float]:
         """
         评测检索性能
@@ -402,13 +417,31 @@ class RagSystemAdapter:
             eval_dataset: 评测数据集，每条包含generated_question和doc_id
             top_k: 检索返回的文档数量
             mode: 检索模式
+            use_prefilter: 是否使用预过滤（如果为None，则根据mode和配置文件自动设置，使用时会自动启用映射功能）
             
         Returns:
             评测结果字典，包含MRR、Hit@k等指标
         """
+        # 根据mode和配置文件自动设置use_prefilter（如果未指定）
+        if use_prefilter is None:
+            if self.ui is None:
+                use_prefilter = True  # 默认值
+            elif mode == "baseline":
+                # baseline模式：根据配置文件决定是否使用预过滤
+                use_prefilter = self.ui.config.retriever.use_prefilter
+            elif mode == "prefilter":
+                use_prefilter = True  # prefilter模式强制使用预过滤
+            elif mode == "reranker":
+                use_prefilter = True  # reranker模式强制使用预过滤
+            else:
+                use_prefilter = self.ui.config.retriever.use_prefilter  # 默认使用配置文件设置
+        
         print(f"开始评测检索性能...")
         print(f"评测样本数: {len(eval_dataset)}")
         print(f"检索模式: {mode}")
+        print(f"预过滤开关: {'开启' if use_prefilter else '关闭'}")
+        if use_prefilter:
+            print("预过滤模式下自动启用股票代码和公司名称映射")
         print(f"Top-K: {top_k}")
         
         mrr_total = 0.0
@@ -416,51 +449,63 @@ class RagSystemAdapter:
         total = 0
         
         for i, sample in enumerate(eval_dataset):
-            if i % 100 == 0:
-                print(f"处理进度: {i}/{len(eval_dataset)}")
-            
             query = sample.get('generated_question', '')
-            gold_doc_id = sample.get('doc_id', '')
+            target_doc_id = sample.get('doc_id', '')
             
-            if not query or not gold_doc_id:
+            if not query or not target_doc_id:
                 continue
             
-            # 调用检索接口
-            results = self.get_ranked_documents_for_evaluation(
-                query=query,
-                top_k=top_k,
-                mode=mode
-            )
+            print(f"\n处理样本 {i+1}/{len(eval_dataset)}")
+            print(f"查询: {query}")
+            print(f"目标文档ID: {target_doc_id}")
             
-            # 计算MRR和Hit@k
-            rank = None
-            for j, doc in enumerate(results):
-                if doc['doc_id'] == gold_doc_id:
-                    rank = j + 1
-                    break
-            
-            if rank:
-                mrr_total += 1.0 / rank
-                hitk_total += 1
-            
-            total += 1
+            try:
+                # 使用统一的检索接口
+                results = self.get_ranked_documents_for_evaluation(
+                    query=query,
+                    top_k=top_k,
+                    mode=mode,
+                    use_prefilter=use_prefilter
+                )
+                
+                # 计算MRR和Hit@k
+                found_rank = None
+                for rank, result in enumerate(results, 1):
+                    if result.get('doc_id') == target_doc_id:
+                        found_rank = rank
+                        break
+                
+                if found_rank is not None:
+                    mrr_total += 1.0 / found_rank
+                    hitk_total += 1
+                    print(f"✅ 找到目标文档，排名: {found_rank}")
+                else:
+                    print(f"❌ 未找到目标文档")
+                
+                total += 1
+                
+            except Exception as e:
+                print(f"处理样本时出错: {e}")
+                continue
         
         # 计算最终指标
-        mrr = mrr_total / total if total > 0 else 0.0
-        hitk = hitk_total / total if total > 0 else 0.0
+        if total > 0:
+            mrr = mrr_total / total
+            hitk = hitk_total / total
+        else:
+            mrr = 0.0
+            hitk = 0.0
         
         results = {
-            'mrr': mrr,
-            f'hit@{top_k}': hitk,
-            'total_samples': total,
-            'mode': mode
+            'MRR': mrr,
+            f'Hit@{top_k}': hitk,
+            'total_samples': total
         }
         
-        print(f"\n评测结果:")
-        print(f"模式: {mode}")
-        print(f"总样本数: {total}")
+        print(f"\n评测完成:")
         print(f"MRR: {mrr:.4f}")
         print(f"Hit@{top_k}: {hitk:.4f}")
+        print(f"总样本数: {total}")
         
         return results
 
