@@ -465,13 +465,20 @@ def main():
 
     # Start training
     print("开始训练...")
+    # 检查GPU数量
+    gpu_count = torch.cuda.device_count()
+    print(f"检测到 {gpu_count} 个GPU设备")
+    
     model.fit(train_objectives=[(train_dataloader, train_loss)],
               epochs=args.epochs,
               warmup_steps=100, # A small number of warmup steps
               output_path=args.output_dir,
               evaluator=evaluator, # 将 evaluator 实例传递给 fit 方法
               evaluation_steps=args.eval_steps,
-              callback=None # 不再需要自定义回调函数
+              callback=None, # 不再需要自定义回调函数
+              # 启用DDP以获得更好的多GPU性能
+              use_amp=True,  # 自动混合精度
+              scheduler='warmupcosine'  # 更好的学习率调度
              )
 
     print(f"微调模型已保存到：{args.output_dir}")
