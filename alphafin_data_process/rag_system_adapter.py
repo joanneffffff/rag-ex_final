@@ -5,6 +5,7 @@ RAG系统适配器 - 基于run_optimized_ui的实际工作流程
 
 import sys
 import hashlib
+import json
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 import torch
@@ -425,10 +426,13 @@ class RagSystemAdapter:
         use_prefilter: Optional[bool] = None
     ) -> Dict[str, float]:
         """
-        评测检索性能
+        评测检索性能 - 兼容AlphaFin和TatQA数据集
         
         Args:
-            eval_dataset: 评测数据集，每条包含generated_question和doc_id
+            eval_dataset: 评测数据集，支持多种格式：
+                - AlphaFin格式: 包含generated_question和doc_id
+                - TatQA格式: 包含generated_question和relevant_doc_ids
+                - 通用格式: 支持question/query和id/document_id/target_id等字段
             top_k: 检索返回的文档数量
             mode: 检索模式
             use_prefilter: 是否使用预过滤（如果为None，则根据mode和配置文件自动设置，使用时会自动启用映射功能）
@@ -463,15 +467,44 @@ class RagSystemAdapter:
         total = 0
         
         for i, sample in enumerate(eval_dataset):
-            query = sample.get('generated_question', '')
-            target_doc_id = sample.get('doc_id', '')
+            # 兼容不同数据集的查询字段
+            query = sample.get('generated_question', '') or sample.get('question', '') or sample.get('query', '')
             
-            if not query or not target_doc_id:
+            # 兼容不同数据集的目标文档ID字段
+            target_doc_ids = []
+            
+            # 1. 优先使用relevant_doc_ids（TatQA数据集）
+            if 'relevant_doc_ids' in sample and sample['relevant_doc_ids']:
+                target_doc_ids = sample['relevant_doc_ids']
+                if isinstance(target_doc_ids, str):
+                    # 如果是字符串，尝试解析为列表
+                    try:
+                        target_doc_ids = json.loads(target_doc_ids)
+                    except:
+                        target_doc_ids = [target_doc_ids]
+                elif not isinstance(target_doc_ids, list):
+                    target_doc_ids = [target_doc_ids]
+            
+            # 2. 如果没有relevant_doc_ids，使用doc_id（AlphaFin数据集）
+            if not target_doc_ids and 'doc_id' in sample:
+                doc_id = sample['doc_id']
+                if doc_id:
+                    target_doc_ids = [doc_id] if isinstance(doc_id, str) else doc_id
+            
+            # 3. 如果都没有，尝试其他可能的字段
+            if not target_doc_ids:
+                for field in ['id', 'document_id', 'target_id']:
+                    if field in sample and sample[field]:
+                        target_doc_ids = [sample[field]]
+                        break
+            
+            if not query or not target_doc_ids:
+                print(f"跳过样本 {i+1}: 缺少查询或目标文档ID")
                 continue
             
             print(f"\n处理样本 {i+1}/{len(eval_dataset)}")
-            print(f"查询: {query}")
-            print(f"目标文档ID: {target_doc_id}")
+            print(f"查询: {query[:100]}...")
+            print(f"目标文档IDs: {target_doc_ids}")
             
             try:
                 # 使用统一的检索接口
@@ -482,10 +515,11 @@ class RagSystemAdapter:
                     use_prefilter=use_prefilter
                 )
                 
-                # 计算MRR和Hit@k
+                # 计算MRR和Hit@k - 支持多个相关文档ID
                 found_rank = None
                 for rank, result in enumerate(results, 1):
-                    if result.get('doc_id') == target_doc_id:
+                    result_doc_id = result.get('doc_id')
+                    if result_doc_id in target_doc_ids:
                         found_rank = rank
                         break
                 

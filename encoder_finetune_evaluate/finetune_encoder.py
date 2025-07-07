@@ -13,80 +13,54 @@ from pathlib import Path
 
 # --- 数据加载函数 ---
 def load_qc_pairs(jsonl_path, max_samples=None):
-    """加载训练用的 Q-C 对"""
-    pairs = []
+    """
+    加载Q-C对数据用于训练，使用generated_question作为query，summary作为context
+    """
+    examples = []
     with open(jsonl_path, 'r', encoding='utf-8') as f:
-        for i, line in enumerate(f):
-            # 当max_samples为0时，使用全部数据；当max_samples为None时，也使用全部数据
-            if max_samples is not None and max_samples > 0 and i >= max_samples:
-                break
-            try:
+        for line in f:
+            if line.strip():
                 item = json.loads(line)
+                # 使用generated_question作为query，summary作为context
+                query = item.get('generated_question', item.get('query', ''))
+                context = item.get('summary', item.get('context', ''))
                 
-                # 优先使用generated_question，然后是query，最后是question
-                if 'generated_question' in item and item['generated_question']:
-                    q_raw = item['generated_question']
-                elif 'query' in item:
-                    q_raw = item['query']
-                else:
-                    q_raw = item.get('question', '')
-                q = str(q_raw).strip() 
-                
-                # 优先使用summary，然后是context
-                if 'summary' in item and item['summary']:
-                    c_raw = item['summary']
-                else:
-                    c_raw = item.get('context', '')
-                c = str(c_raw).strip()
-                
-                if q and c:
-                    pairs.append(InputExample(texts=[q, c], label=1.0))
-                else:
-                    print(f"警告：训练数据行 {i+1}，因为问题或上下文为空或无效。原始行: {line.strip()}")
-            except json.JSONDecodeError:
-                print(f"错误：跳过训练数据行 {i+1}，非法的 JSON 格式: {line.strip()}")
-            except Exception as e:
-                print(f"处理训练数据行 {i+1} 时发生未知错误: {e} - 原始行: {line.strip()}")
-    return pairs
+                if query and context:
+                    examples.append(InputExample(texts=[query, context]))
+                    
+                    if max_samples and len(examples) >= max_samples:
+                        break
+    
+    print(f"加载了 {len(examples)} 个有效训练样本。 (共 {len(examples)} 个原始样本)")
+    return examples
 
 def load_qca_for_eval(jsonl_path, max_samples=None):
-    """加载评估用的 Q-C-A 数据，供 MRREvaluator 使用"""
+    """
+    加载Q-C-A数据用于评估，使用generated_question作为query，summary作为context
+    """
     data = []
     with open(jsonl_path, 'r', encoding='utf-8') as f:
-        for i, line in enumerate(f):
-            # 当max_samples为0时，使用全部数据；当max_samples为None时，也使用全部数据
-            if max_samples is not None and max_samples > 0 and i >= max_samples:
-                break
-            try:
+        for line in f:
+            if line.strip():
                 item = json.loads(line)
+                # 使用generated_question作为query，summary作为context
+                query = item.get('generated_question', item.get('query', ''))
+                context = item.get('summary', item.get('context', ''))
+                answer = item.get('answer', '')
+                doc_id = item.get('doc_id', '')
                 
-                # 优先使用generated_question，然后是query，最后是question
-                if 'generated_question' in item and item['generated_question']:
-                    q_raw = item['generated_question']
-                elif 'query' in item:
-                    q_raw = item['query']
-                else:
-                    q_raw = item.get('question', '')
-                q = str(q_raw).strip() 
-                
-                # 优先使用summary，然后是context
-                if 'summary' in item and item['summary']:
-                    c_raw = item['summary']
-                else:
-                    c_raw = item.get('context', '')
-                c = str(c_raw).strip()
-                
-                a_raw = item.get('answer', '')
-                a = str(a_raw).strip() 
-
-                if q and c: # 确保问题和上下文都非空
-                    data.append({'query': q, 'context': c, 'answer': a})
-                else:
-                    print(f"警告：评估数据行 {i+1}，因为问题或上下文为空或无效。原始行: {line.strip()}")
-            except json.JSONDecodeError:
-                print(f"错误：跳过评估数据行 {i+1}，非法的 JSON 格式: {line.strip()}")
-            except Exception as e:
-                print(f"处理评估数据行 {i+1} 时发生未知错误: {e} - 原始行: {line.strip()}")
+                if query and context:
+                    data.append({
+                        'query': query,
+                        'context': context,
+                        'answer': answer,
+                        'doc_id': doc_id
+                    })
+                    
+                    if max_samples and len(data) >= max_samples:
+                        break
+    
+    print(f"加载了 {len(data)} 个有效评估样本 (训练时评估)。")
     return data
 
 # --- MRR 评估器类 ---
@@ -139,26 +113,63 @@ class MRREvaluator(SentenceEvaluator):
 
             mrrs = []
             iterator = tqdm(self.dataset, desc='评估 MRR', disable=not self.show_progress_bar)
-            for i, item in enumerate(iterator):
-                query_emb = model.encode(item['query'], convert_to_tensor=True)
-                scores = util.cos_sim(query_emb, context_embeddings)[0].cpu().numpy()
-
-                # 目标上下文就是当前样本的上下文
-                target_context_idx = i 
-
-                sorted_indices = np.argsort(scores)[::-1]
+            
+            # 检查是否有doc_id字段
+            has_doc_id = any('doc_id' in item or 'id' in item for item in self.dataset)
+            
+            if has_doc_id:
+                # 使用doc_id匹配的逻辑
+                doc_id_to_idx = {}
+                for idx, item in enumerate(self.dataset):
+                    doc_id = item.get('doc_id') or item.get('id') or str(idx)
+                    doc_id_to_idx[doc_id] = idx
                 
-                rank = -1
-                for r, idx in enumerate(sorted_indices):
-                    if idx == target_context_idx:
-                        rank = r + 1
-                        break
+                for i, item in enumerate(iterator):
+                    query_emb = model.encode(item['query'], convert_to_tensor=True)
+                    scores = util.cos_sim(query_emb, context_embeddings)[0].cpu().numpy()
+
+                    # 使用doc_id找到目标上下文的索引
+                    target_doc_id = item.get('doc_id') or item.get('id') or str(i)
+                    target_context_idx = doc_id_to_idx.get(target_doc_id, i)
+
+                    sorted_indices = np.argsort(scores)[::-1]
+                    
+                    rank = -1
+                    for r, idx in enumerate(sorted_indices):
+                        if idx == target_context_idx:
+                            rank = r + 1
+                            break
+                    
+                    if rank != -1:
+                        mrr_score = 1.0 / rank
+                        mrrs.append(mrr_score)
+                    else:
+                        mrrs.append(0.0)
+            else:
+                # 使用内容匹配的逻辑（适用于没有doc_id的情况）
+                print("检测到数据没有doc_id字段，使用内容匹配计算MRR...")
                 
-                if rank != -1:
-                    mrr_score = 1.0 / rank
-                    mrrs.append(mrr_score)
-                else:
-                    mrrs.append(0.0) 
+                for i, item in enumerate(iterator):
+                    query_emb = model.encode(item['query'], convert_to_tensor=True)
+                    scores = util.cos_sim(query_emb, context_embeddings)[0].cpu().numpy()
+
+                    # 找到当前样本的context在所有contexts中的位置
+                    current_context = item['context']
+                    target_context_idx = i  # 假设contexts列表与dataset列表顺序一致
+
+                    sorted_indices = np.argsort(scores)[::-1]
+                    
+                    rank = -1
+                    for r, idx in enumerate(sorted_indices):
+                        if idx == target_context_idx:
+                            rank = r + 1
+                            break
+                    
+                    if rank != -1:
+                        mrr_score = 1.0 / rank
+                        mrrs.append(mrr_score)
+                    else:
+                        mrrs.append(0.0)
             
             mrr = np.mean(mrrs) if mrrs else 0.0 
 
@@ -189,7 +200,6 @@ def finetune_encoder(model_name, train_jsonl, eval_jsonl, output_dir, batch_size
         print(f"加载了 {len(eval_data)} 个评估样本。")
         evaluator = MRREvaluator(dataset=eval_data, name='mrr_eval', show_progress_bar=True)
 
-
     print(f"加载模型：{model_name}")
     try:
         model = SentenceTransformer(model_name)
@@ -203,17 +213,28 @@ def finetune_encoder(model_name, train_jsonl, eval_jsonl, output_dir, batch_size
     train_loss = losses.MultipleNegativesRankingLoss(model) 
     
     print(f"开始模型微调，共 {epochs} 个 epoch...")
+    print(f"使用改进的训练策略：")
+    print(f"  - 学习率: 2e-5")
+    print(f"  - 权重衰减: 0.01")
+    print(f"  - 评估步数: {eval_steps}")
+    print(f"  - 批次大小: {batch_size}")
+    
+    # 创建输出目录
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # 使用改进的训练配置
     model.fit(
         train_objectives=[(train_dataloader, train_loss)], 
         epochs=epochs,
-        warmup_steps=100,
         evaluator=evaluator,          
         evaluation_steps=eval_steps,  
         output_path=output_dir,       
-        show_progress_bar=True   
+        show_progress_bar=True,
+        optimizer_params={'lr': 2e-5, 'weight_decay': 0.01},
+        scheduler='WarmupCosine',
+        warmup_steps=100
     )
     
-    os.makedirs(output_dir, exist_ok=True)
     model.save(output_dir)
     print(f"模型已保存到：{output_dir}")
 

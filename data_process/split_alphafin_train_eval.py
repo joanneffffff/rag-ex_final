@@ -30,13 +30,14 @@ def split_alphafin_json(
     print(f"  - 训练集: {len(train_data)} 个样本 ({train_ratio*100:.0f}%)")
     print(f"  - 评估集: {len(eval_data)} 个样本 ({(1-train_ratio)*100:.0f}%)")
     
-    # 保存训练集（只保留Q-C对）
+    # 保存训练集（保留Q-C和doc_id）
     print(f"💾 保存训练集: {train_jsonl}")
     with open(train_jsonl, "w", encoding="utf-8") as f:
         for item in train_data:
             train_item = {
                 "query": item.get("question", ""),
-                "context": item.get("context", "")
+                "context": item.get("context", ""),
+                "doc_id": item.get("doc_id", "")  # 添加doc_id字段
             }
             f.write(json.dumps(train_item, ensure_ascii=False) + "\n")
     
