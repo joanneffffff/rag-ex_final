@@ -80,13 +80,13 @@ fi
 if [ "$QUICK_MODE" = "quick" ]; then
     echo "⚡ 快速测试模式"
     LIMIT_TRAIN=1000
-    LIMIT_EVAL=50
+    LIMIT_EVAL=100  # 使用100个评估样本
     EPOCHS=1
     BATCH_SIZE=8
 else
     echo "🚀 完整训练模式"
     LIMIT_TRAIN=0  # 使用全部数据
-    LIMIT_EVAL=100
+    LIMIT_EVAL=0   # 使用全部评估样本
 fi
 
 EVAL_TOP_K=100
@@ -141,9 +141,8 @@ if [ "$DATASET" = "alphafin" ]; then
         --output_dir "$OUTPUT_MODEL_PATH" \
         --batch_size $BATCH_SIZE \
         --epochs $EPOCHS \
-        --learning_rate $LEARNING_RATE \
-        --max_seq_length $MAX_SEQ_LENGTH \
-        --max_samples $LIMIT_TRAIN
+        --max_samples $LIMIT_TRAIN \
+        --eval_steps 500
 else
     # TAT-QA使用英文微调脚本
     python "$FINETUNE_SCRIPT" \
@@ -165,88 +164,34 @@ if [ $? -eq 0 ]; then
     echo "完成时间: $(date)"
     echo ""
     
-    # ==================== 添加评估步骤 ====================
-    echo "🔍 开始模型评估..."
-    echo "时间: $(date)"
-    echo ""
-    
-    # 创建评估结果目录
-    EVAL_OUTPUT_DIR="evaluation_results/${DATASET}_encoder_$(date +%Y%m%d_%H%M%S)"
-    mkdir -p "$EVAL_OUTPUT_DIR"
-    
-    if [ "$DATASET" = "alphafin" ]; then
-        echo "📊 运行AlphaFin编码器评估..."
-        
-        # 1. 运行MRR评估
-        echo "1. 运行MRR评估..."
-        python encoder_finetune_evaluate/evaluate_chinese_encoder_reranker_mrr.py \
-            --encoder_model_name "$OUTPUT_MODEL_PATH" \
-            --eval_jsonl "$EVAL_DATA" \
-            --base_raw_data_path "data/alphafin/alphafin_final_clean.json" \
-            --output_dir "$EVAL_OUTPUT_DIR" \
-            --max_samples $LIMIT_EVAL
-        
-        # 2. 运行检索评估
-        echo "2. 运行检索评估..."
-        python alphafin_data_process/run_retrieval_evaluation_background.py \
-            --eval_data_path "$EVAL_DATA" \
-            --output_dir "$EVAL_OUTPUT_DIR/retrieval_eval" \
-            --modes baseline prefilter reranker \
-            --max_samples $LIMIT_EVAL
-        
-    else
-        echo "📊 运行TAT-QA编码器评估..."
-        
-        # 1. 运行编码器评估
-        echo "1. 运行编码器评估..."
-        python encoder_finetune_evaluate/run_encoder_eval.py \
-            --model_name "$OUTPUT_MODEL_PATH" \
-            --eval_jsonl "$EVAL_DATA" \
-            --max_samples $LIMIT_EVAL \
-            --output_dir "$EVAL_OUTPUT_DIR"
-        
-        # 2. 运行TAT-QA检索评估
-        echo "2. 运行TAT-QA检索评估..."
-        python alphafin_data_process/run_tatqa_retrieval_evaluation.py \
-            --mode reranker \
-            --encoder_model_path "$OUTPUT_MODEL_PATH" \
-            --output_dir "$EVAL_OUTPUT_DIR/tatqa_eval" \
-            --max_samples $LIMIT_EVAL
-    fi
-    
-    echo ""
-    echo "✅ 评估完成！"
-    echo "评估结果保存在: $EVAL_OUTPUT_DIR"
-    echo "完成时间: $(date)"
-    echo ""
-    
     # ==================== 显示下一步建议 ====================
     echo "下一步建议："
     echo ""
     
     if [ "$DATASET" = "alphafin" ]; then
-        echo "1. 查看评估结果："
-        echo "   ls -la $EVAL_OUTPUT_DIR"
+        echo "1. 查看微调后的模型："
+        echo "   ls -la $OUTPUT_MODEL_PATH"
         echo ""
-        echo "2. 使用微调后的模型进行RAG系统测试："
+        echo "2. 手动运行编码器评估（可选）："
+        echo "   python encoder_finetune_evaluate/evaluate_chinese_encoder_reranker_mrr.py \\"
+        echo "       --encoder_model_name $OUTPUT_MODEL_PATH \\"
+        echo "       --reranker_model_name [reranker_model_path] \\"
+        echo "       --eval_jsonl $EVAL_DATA \\"
+        echo "       --base_raw_data_path data/alphafin/alphafin_final_clean.json"
+        echo ""
+        echo "3. 使用微调后的模型进行RAG系统测试："
         echo "   python run_optimized_ui.py"
-        echo ""
-        echo "3. 运行完整检索评估："
-        echo "   python alphafin_data_process/run_retrieval_evaluation_background.py \\"
-        echo "       --eval_data_path data/alphafin/eval_data_100_from_corpus.jsonl \\"
-        echo "       --output_dir alphafin_data_process/evaluation_results \\"
-        echo "       --modes baseline prefilter reranker"
     else
-        echo "1. 查看评估结果："
-        echo "   ls -la $EVAL_OUTPUT_DIR"
+        echo "1. 查看微调后的模型："
+        echo "   ls -la $OUTPUT_MODEL_PATH"
         echo ""
-        echo "2. 使用微调后的模型进行RAG系统测试："
+        echo "2. 手动运行编码器评估（可选）："
+        echo "   python encoder_finetune_evaluate/run_encoder_eval.py \\"
+        echo "       --model_name $OUTPUT_MODEL_PATH \\"
+        echo "       --eval_jsonl $EVAL_DATA"
+        echo ""
+        echo "3. 使用微调后的模型进行RAG系统测试："
         echo "   python run_optimized_ui.py"
-        echo ""
-        echo "3. 运行TAT-QA完整评估："
-        echo "   python alphafin_data_process/run_tatqa_retrieval_evaluation.py \\"
-        echo "       --mode reranker \\"
-        echo "       --encoder_model_path $OUTPUT_MODEL_PATH"
     fi
     
 else

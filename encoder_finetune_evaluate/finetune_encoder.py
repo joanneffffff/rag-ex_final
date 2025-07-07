@@ -17,20 +17,32 @@ def load_qc_pairs(jsonl_path, max_samples=None):
     pairs = []
     with open(jsonl_path, 'r', encoding='utf-8') as f:
         for i, line in enumerate(f):
-            if max_samples and i >= max_samples:
+            # 当max_samples为0时，使用全部数据；当max_samples为None时，也使用全部数据
+            if max_samples is not None and max_samples > 0 and i >= max_samples:
                 break
             try:
                 item = json.loads(line)
-                q_raw = item['query'] if 'query' in item else item.get('question', '')
+                
+                # 优先使用generated_question，然后是query，最后是question
+                if 'generated_question' in item and item['generated_question']:
+                    q_raw = item['generated_question']
+                elif 'query' in item:
+                    q_raw = item['query']
+                else:
+                    q_raw = item.get('question', '')
                 q = str(q_raw).strip() 
                 
-                c_raw = item.get('context', '')
+                # 优先使用summary，然后是context
+                if 'summary' in item and item['summary']:
+                    c_raw = item['summary']
+                else:
+                    c_raw = item.get('context', '')
                 c = str(c_raw).strip()
                 
                 if q and c:
                     pairs.append(InputExample(texts=[q, c], label=1.0))
                 else:
-                    print(f"警告：训练数据行 {i+1}，因为 'query'/'question' 或 'context' 为空或无效。原始行: {line.strip()}")
+                    print(f"警告：训练数据行 {i+1}，因为问题或上下文为空或无效。原始行: {line.strip()}")
             except json.JSONDecodeError:
                 print(f"错误：跳过训练数据行 {i+1}，非法的 JSON 格式: {line.strip()}")
             except Exception as e:
@@ -42,14 +54,26 @@ def load_qca_for_eval(jsonl_path, max_samples=None):
     data = []
     with open(jsonl_path, 'r', encoding='utf-8') as f:
         for i, line in enumerate(f):
-            if max_samples and i >= max_samples:
+            # 当max_samples为0时，使用全部数据；当max_samples为None时，也使用全部数据
+            if max_samples is not None and max_samples > 0 and i >= max_samples:
                 break
             try:
                 item = json.loads(line)
-                q_raw = item['query'] if 'query' in item else item.get('question', '')
+                
+                # 优先使用generated_question，然后是query，最后是question
+                if 'generated_question' in item and item['generated_question']:
+                    q_raw = item['generated_question']
+                elif 'query' in item:
+                    q_raw = item['query']
+                else:
+                    q_raw = item.get('question', '')
                 q = str(q_raw).strip() 
                 
-                c_raw = item.get('context', '')
+                # 优先使用summary，然后是context
+                if 'summary' in item and item['summary']:
+                    c_raw = item['summary']
+                else:
+                    c_raw = item.get('context', '')
                 c = str(c_raw).strip()
                 
                 a_raw = item.get('answer', '')
@@ -58,7 +82,7 @@ def load_qca_for_eval(jsonl_path, max_samples=None):
                 if q and c: # 确保问题和上下文都非空
                     data.append({'query': q, 'context': c, 'answer': a})
                 else:
-                    print(f"警告：评估数据行 {i+1}，因为 'query'/'question' 或 'context' 为空或无效。原始行: {line.strip()}")
+                    print(f"警告：评估数据行 {i+1}，因为问题或上下文为空或无效。原始行: {line.strip()}")
             except json.JSONDecodeError:
                 print(f"错误：跳过评估数据行 {i+1}，非法的 JSON 格式: {line.strip()}")
             except Exception as e:
@@ -69,7 +93,7 @@ def load_qca_for_eval(jsonl_path, max_samples=None):
 class MRREvaluator(SentenceEvaluator):
     """
     对给定的 (query, context, answer) 数据集计算 Mean Reciprocal Rank (MRR)。
-    假设每个 item['context'] 是其 item['query'] 的正确上下文。
+    简化版本：只评估微调效果，不需要构建完整的检索库。
     """
     def __init__(self, dataset, name='', show_progress_bar=False, write_csv=True):
         self.dataset = dataset
@@ -77,6 +101,14 @@ class MRREvaluator(SentenceEvaluator):
         self.show_progress_bar = show_progress_bar
         self.write_csv = write_csv
 
+        # 添加调试信息
+        if dataset and len(dataset) > 0:
+            print(f"调试：第一个数据项字段: {list(dataset[0].keys())}")
+            if 'query' not in dataset[0]:
+                print(f"错误：数据项缺少'query'字段，可用字段: {list(dataset[0].keys())}")
+                raise KeyError("数据项缺少'query'字段")
+
+        # 确保数据字段存在
         self.queries = [item['query'] for item in dataset]
         self.contexts = [item['context'] for item in dataset]
         self.answers = [item['answer'] for item in dataset] 
@@ -101,7 +133,7 @@ class MRREvaluator(SentenceEvaluator):
             mrr = 0.0
         else:
             print(f"编码 {len(self.contexts)} 个评估上下文...")
-            # >>>>> 这里是修正过的行 <<<<<
+            # 编码所有上下文
             context_embeddings = model.encode(self.contexts, batch_size=64, convert_to_tensor=True,
                                               show_progress_bar=self.show_progress_bar)
 
@@ -111,6 +143,7 @@ class MRREvaluator(SentenceEvaluator):
                 query_emb = model.encode(item['query'], convert_to_tensor=True)
                 scores = util.cos_sim(query_emb, context_embeddings)[0].cpu().numpy()
 
+                # 目标上下文就是当前样本的上下文
                 target_context_idx = i 
 
                 sorted_indices = np.argsort(scores)[::-1]
@@ -419,78 +452,16 @@ def main():
     evaluator = None
     if args.eval_steps > 0:
         print(f"加载评估数据：{args.eval_jsonl}")
-        raw_eval_data_for_eval = []
-        with open(args.eval_jsonl, "r", encoding="utf-8") as f:
-            for line in f:
-                raw_eval_data_for_eval.append(json.loads(line))
-        
-        eval_data = []
-        for item in raw_eval_data_for_eval:
-            # 修正：检查 'context' 键，以及 'question' 或 'query' 至少一个存在
-            is_valid_item = isinstance(item, dict) and "context" in item and \
-                            (get_question_or_query(item) is not None)
-            if is_valid_item:
-                eval_data.append(item)
-            else:
-                print(f"警告：评估数据（训练时）中发现无效样本，缺少 'context' 或缺少 'question'/'query' 键，或不是字典。样本内容：{item}")
-        print(f"加载了 {len(eval_data)} 个有效评估样本 (训练时评估)。 (共 {len(raw_eval_data_for_eval)} 个原始样本)")
+        # 使用专门的函数来加载评估数据，确保字段映射正确
+        eval_data = load_qca_for_eval(args.eval_jsonl, args.max_samples)
+        print(f"加载了 {len(eval_data)} 个有效评估样本 (训练时评估)。")
 
         if not eval_data:
             print("警告：没有找到任何有效的评估样本用于训练时的评估。跳过训练过程中的评估。")
         else:
-            # 构建完整的 Chunk 检索库 (包含所有段落和表格)
-            print(f"从原始数据路径构建完整 Chunk 检索库：{Path(args.base_raw_data_path)}")
-            corpus_input_paths = [
-                Path(args.base_raw_data_path) / "tatqa_dataset_train.json",
-                Path(args.base_raw_data_path) / "tatqa_dataset_dev.json",
-                Path(args.base_raw_data_path) / "tatqa_dataset_test_gold.json"
-            ]
-            corpus_chunks = process_tatqa_to_qca_for_corpus(corpus_input_paths)
-            print(f"构建了 {len(corpus_chunks)} 个 Chunk 作为检索库。")
-
-            # 准备 InformationRetrievalEvaluator 所需的数据
-            queries = {}
-            corpus = {}
-            relevant_docs = {} # qrels: {query_id: {doc_id, doc_id, ...}}
-
-            # 填充 queries 和 corpus
-            for i, query_item in enumerate(eval_data):
-                query_id = f"q_{i}" # 生成唯一的查询 ID
-                queries[query_id] = get_question_or_query(query_item)
-                
-                # 寻找正确的 chunk_id
-                correct_context = query_item["context"]
-                found_chunk_id = None
-                # 由于 corpus_chunks 是列表，这里需要线性搜索，效率不高，但对于评估集大小通常可接受
-                # 更优化的做法是先将 corpus_chunks 转换为 {text: chunk_id} 的字典
-                for chunk in corpus_chunks:
-                    if chunk["text"] == correct_context:
-                        # 确保 chunk_id 在全局语料库中是唯一的
-                        found_chunk_id = f"doc_{chunk['doc_id']}_{chunk['chunk_id']}"
-                        break
-                
-                if found_chunk_id:
-                    if query_id not in relevant_docs:
-                        relevant_docs[query_id] = set()
-                    relevant_docs[query_id].add(found_chunk_id)
-                else:
-                    print(f"警告：找不到查询 '{queries[query_id]}' 对应的正确上下文：'{correct_context}' 在语料库中。此查询将被排除在评估之外。")
-            
-            # 填充 corpus 字典，使用统一的 Chunk ID
-            for chunk in corpus_chunks:
-                corpus_id = f"doc_{chunk['doc_id']}_{chunk['chunk_id']}"
-                corpus[corpus_id] = chunk["text"]
-
-            # 创建 InformationRetrievalEvaluator 实例
-            # 这里的 batch_size 是指评估时的查询批次大小，可以设大一些
-            evaluator = InformationRetrievalEvaluator(
-                queries=queries, 
-                corpus=corpus, 
-                relevant_docs=relevant_docs, 
-                batch_size=16, # 可以根据需要调整评估时的批次大小
-                main_score_function=None, # 默认是CosineSimilarity, 这里可以不指定
-                name='mrr_eval' # 评估结果的文件名后缀
-            )
+            # 使用简单的MRREvaluator，不需要构建复杂的检索库
+            evaluator = MRREvaluator(dataset=eval_data, name='mrr_eval', show_progress_bar=True)
+            print("使用简单MRR评估器进行训练时评估。")
 
     # Start training
     print("开始训练...")
