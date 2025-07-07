@@ -49,16 +49,38 @@ class BilingualRetriever(Retriever):
         # 创建缓存目录
         os.makedirs(self.cache_dir, exist_ok=True)
 
-        # 只在use_existing_embedding_index为True时尝试加载缓存，否则强制重新编码
+        # 初始化嵌入向量为空数组，确保即使文档为空也有有效状态
+        if self.corpus_documents_en is None:
+            self.corpus_documents_en = []
+        if self.corpus_documents_ch is None:
+            self.corpus_documents_ch = []
+            
+        print(f"初始化状态: 英文文档 {len(self.corpus_documents_en)} 个, 中文文档 {len(self.corpus_documents_ch)} 个")
+        
+        # 智能缓存加载：优先尝试缓存，失败时自动回退到重新计算
         if self.use_existing_embedding_index:
-            loaded = self._load_cached_embeddings()
-            if loaded:
-                print("Loaded cached embeddings successfully.")
-            else:
-                print("未找到有效缓存，自动重新计算embedding...")
-                self.use_existing_embedding_index = False
+            try:
+                print("🔄 尝试加载现有缓存...")
+                loaded = self._load_cached_embeddings()
+                if loaded:
+                    print("✅ 缓存加载成功")
+                    
+                    # 验证加载的嵌入向量是否有效
+                    if self._validate_loaded_embeddings():
+                        print("✅ 嵌入向量验证通过")
+                    else:
+                        print("⚠️ 嵌入向量验证失败，重新计算...")
+                        self._compute_embeddings()
+                else:
+                    print("⚠️ 缓存加载失败，重新计算embedding...")
+                    self._compute_embeddings()
+                    
+            except Exception as e:
+                print(f"❌ 缓存加载过程中发生错误: {e}")
+                print("🔄 自动回退到重新计算embedding...")
                 self._compute_embeddings()
         else:
+            print("🔄 强制重新计算embedding...")
             self._compute_embeddings()
 
         # 验证文档类型
@@ -107,9 +129,19 @@ class BilingualRetriever(Retriever):
             
             # 检查嵌入向量维度是否匹配
             if os.path.exists(embeddings_path):
-                cached_embeddings = np.load(embeddings_path)
-                if cached_embeddings.shape[0] != len(documents):
-                    print(f"⚠️ 文档数量不匹配: 缓存={cached_embeddings.shape[0]}, 当前={len(documents)}")
+                try:
+                    cached_embeddings = np.load(embeddings_path)
+                    if cached_embeddings.shape[0] != len(documents):
+                        print(f"⚠️ 文档数量不匹配: 缓存={cached_embeddings.shape[0]}, 当前={len(documents)}")
+                        return False
+                    
+                    # 检查嵌入向量是否为空或无效
+                    if cached_embeddings.size == 0:
+                        print(f"⚠️ 缓存的嵌入向量为空")
+                        return False
+                        
+                except Exception as e:
+                    print(f"⚠️ 嵌入向量缓存读取失败: {e}")
                     return False
             
             # 检查FAISS索引是否有效
@@ -119,6 +151,12 @@ class BilingualRetriever(Retriever):
                     if hasattr(index, 'ntotal') and index.ntotal != len(documents):
                         print(f"⚠️ FAISS索引大小不匹配: 缓存={index.ntotal}, 当前={len(documents)}")
                         return False
+                        
+                    # 检查FAISS索引是否为空
+                    if hasattr(index, 'ntotal') and index.ntotal == 0:
+                        print(f"⚠️ FAISS索引为空")
+                        return False
+                        
                 except Exception as e:
                     print(f"⚠️ FAISS索引读取失败: {e}")
                     return False
@@ -146,6 +184,61 @@ class BilingualRetriever(Retriever):
                 
         except Exception as e:
             print(f"⚠️ 清除缓存失败: {e}")
+    
+    def _validate_loaded_embeddings(self) -> bool:
+        """验证加载的嵌入向量是否有效"""
+        try:
+            # 验证英文嵌入向量
+            if self.corpus_documents_en:
+                if self.corpus_embeddings_en is None:
+                    print("❌ 英文嵌入向量为None")
+                    return False
+                
+                if self.corpus_embeddings_en.size == 0:
+                    print("❌ 英文嵌入向量为空")
+                    return False
+                
+                if self.corpus_embeddings_en.shape[0] != len(self.corpus_documents_en):
+                    print(f"❌ 英文嵌入向量维度不匹配: {self.corpus_embeddings_en.shape[0]} != {len(self.corpus_documents_en)}")
+                    return False
+                
+                print(f"✅ 英文嵌入向量有效: {self.corpus_embeddings_en.shape}")
+            
+            # 验证中文嵌入向量
+            if self.corpus_documents_ch:
+                if self.corpus_embeddings_ch is None:
+                    print("❌ 中文嵌入向量为None")
+                    return False
+                
+                if self.corpus_embeddings_ch.size == 0:
+                    print("❌ 中文嵌入向量为空")
+                    return False
+                
+                if self.corpus_embeddings_ch.shape[0] != len(self.corpus_documents_ch):
+                    print(f"❌ 中文嵌入向量维度不匹配: {self.corpus_embeddings_ch.shape[0]} != {len(self.corpus_documents_ch)}")
+                    return False
+                
+                print(f"✅ 中文嵌入向量有效: {self.corpus_embeddings_ch.shape}")
+            
+            # 验证FAISS索引
+            if self.use_faiss:
+                if self.corpus_documents_en and self.index_en:
+                    if not hasattr(self.index_en, 'ntotal') or self.index_en.ntotal == 0:
+                        print("❌ 英文FAISS索引为空")
+                        return False
+                    print(f"✅ 英文FAISS索引有效: {self.index_en.ntotal} 个文档")
+                
+                if self.corpus_documents_ch and self.index_ch:
+                    if not hasattr(self.index_ch, 'ntotal') or self.index_ch.ntotal == 0:
+                        print("❌ 中文FAISS索引为空")
+                        return False
+                    print(f"✅ 中文FAISS索引有效: {self.index_ch.ntotal} 个文档")
+            
+            return True
+            
+        except Exception as e:
+            print(f"❌ 嵌入向量验证失败: {e}")
+            return False
 
     def _load_cached_embeddings(self) -> bool:
         """尝试加载缓存的嵌入向量，自动检测数据变化"""
@@ -157,136 +250,236 @@ class BilingualRetriever(Retriever):
                 cache_key_en = self._get_cache_key(self.corpus_documents_en, str(self.encoder_en.model_name))
                 print(f"🔍 检查英文缓存: {cache_key_en}")
                 
-                if self._is_cache_valid(self.corpus_documents_en, cache_key_en):
-                    embeddings_path_en = self._get_cache_path(cache_key_en, "npy")
-                    index_path_en = self._get_cache_path(cache_key_en, "faiss")
-                    
-                    self.corpus_embeddings_en = np.load(embeddings_path_en)
-                    loaded_any = True
-                    
-                    if self.use_faiss and os.path.exists(index_path_en):
-                        self.index_en = faiss.read_index(index_path_en)
-                        print(f"✅ 英文FAISS索引加载成功，文档数: {len(self.corpus_documents_en)}")
-                else:
-                    # 清除无效缓存
+                try:
+                    if self._is_cache_valid(self.corpus_documents_en, cache_key_en):
+                        embeddings_path_en = self._get_cache_path(cache_key_en, "npy")
+                        index_path_en = self._get_cache_path(cache_key_en, "faiss")
+                        
+                        # 尝试加载嵌入向量
+                        try:
+                            self.corpus_embeddings_en = np.load(embeddings_path_en)
+                            print(f"✅ 英文嵌入向量加载成功，形状: {self.corpus_embeddings_en.shape}")
+                            loaded_any = True
+                        except Exception as e:
+                            print(f"❌ 英文嵌入向量加载失败: {e}")
+                            self.corpus_embeddings_en = np.array([])
+                        
+                        # 尝试加载FAISS索引
+                        if self.use_faiss and os.path.exists(index_path_en):
+                            try:
+                                self.index_en = faiss.read_index(index_path_en)
+                                print(f"✅ 英文FAISS索引加载成功，文档数: {len(self.corpus_documents_en)}")
+                            except Exception as e:
+                                print(f"❌ 英文FAISS索引加载失败: {e}")
+                                self.index_en = None
+                    else:
+                        # 清除无效缓存
+                        self._clear_invalid_cache(cache_key_en)
+                        print(f"🔄 英文数据发生变化，需要重新生成索引")
+                        self.corpus_embeddings_en = np.array([])
+                        self.index_en = None
+                        
+                except Exception as e:
+                    print(f"❌ 英文缓存验证失败: {e}")
                     self._clear_invalid_cache(cache_key_en)
-                    print(f"🔄 英文数据发生变化，需要重新生成索引")
+                    self.corpus_embeddings_en = np.array([])
+                    self.index_en = None
             else:
-                print("⚠️ 英文文档列表为空，跳过缓存加载")
+                print("⚠️ 英文文档列表为空，初始化空嵌入向量")
+                self.corpus_embeddings_en = np.array([])
+                if self.use_faiss:
+                    self.index_en = self._init_faiss(self.encoder_en, 0)
 
             # 检查中文文档缓存
             if self.corpus_documents_ch:
                 cache_key_ch = self._get_cache_key(self.corpus_documents_ch, str(self.encoder_ch.model_name))
                 print(f"🔍 检查中文缓存: {cache_key_ch}")
                 
-                if self._is_cache_valid(self.corpus_documents_ch, cache_key_ch):
-                    embeddings_path_ch = self._get_cache_path(cache_key_ch, "npy")
-                    index_path_ch = self._get_cache_path(cache_key_ch, "faiss")
-                    
-                    self.corpus_embeddings_ch = np.load(embeddings_path_ch)
-                    loaded_any = True
-                    
-                    if self.use_faiss and os.path.exists(index_path_ch):
-                        self.index_ch = faiss.read_index(index_path_ch)
-                        print(f"✅ 中文FAISS索引加载成功，文档数: {len(self.corpus_documents_ch)}")
-                else:
-                    # 清除无效缓存
+                try:
+                    if self._is_cache_valid(self.corpus_documents_ch, cache_key_ch):
+                        embeddings_path_ch = self._get_cache_path(cache_key_ch, "npy")
+                        index_path_ch = self._get_cache_path(cache_key_ch, "faiss")
+                        
+                        # 尝试加载嵌入向量
+                        try:
+                            self.corpus_embeddings_ch = np.load(embeddings_path_ch)
+                            print(f"✅ 中文嵌入向量加载成功，形状: {self.corpus_embeddings_ch.shape}")
+                            loaded_any = True
+                        except Exception as e:
+                            print(f"❌ 中文嵌入向量加载失败: {e}")
+                            self.corpus_embeddings_ch = np.array([])
+                        
+                        # 尝试加载FAISS索引
+                        if self.use_faiss and os.path.exists(index_path_ch):
+                            try:
+                                self.index_ch = faiss.read_index(index_path_ch)
+                                print(f"✅ 中文FAISS索引加载成功，文档数: {len(self.corpus_documents_ch)}")
+                            except Exception as e:
+                                print(f"❌ 中文FAISS索引加载失败: {e}")
+                                self.index_ch = None
+                    else:
+                        # 清除无效缓存
+                        self._clear_invalid_cache(cache_key_ch)
+                        print(f"🔄 中文数据发生变化，需要重新生成索引")
+                        self.corpus_embeddings_ch = np.array([])
+                        self.index_ch = None
+                        
+                except Exception as e:
+                    print(f"❌ 中文缓存验证失败: {e}")
                     self._clear_invalid_cache(cache_key_ch)
-                    print(f"🔄 中文数据发生变化，需要重新生成索引")
+                    self.corpus_embeddings_ch = np.array([])
+                    self.index_ch = None
             else:
-                print("⚠️ 中文文档列表为空，跳过缓存加载")
+                print("⚠️ 中文文档列表为空，初始化空嵌入向量")
+                self.corpus_embeddings_ch = np.array([])
+                if self.use_faiss:
+                    self.index_ch = self._init_faiss(self.encoder_ch, 0)
 
             return loaded_any
         except Exception as e:
             print(f"❌ 缓存加载失败: {e}")
+            # 确保嵌入向量不为None
+            if self.corpus_embeddings_en is None:
+                self.corpus_embeddings_en = np.array([])
+            if self.corpus_embeddings_ch is None:
+                self.corpus_embeddings_ch = np.array([])
             return False
 
     def _save_cached_embeddings(self):
         """保存嵌入向量到缓存"""
         try:
             # 保存英文文档嵌入向量
-            if self.corpus_documents_en and self.corpus_embeddings_en is not None:
-                cache_key_en = self._get_cache_key(self.corpus_documents_en, str(self.encoder_en.model_name))
-                embeddings_path_en = self._get_cache_path(cache_key_en, "npy")
-                index_path_en = self._get_cache_path(cache_key_en, "faiss")
-                # 确保目录存在
-                os.makedirs(os.path.dirname(embeddings_path_en), exist_ok=True)
-                os.makedirs(os.path.dirname(index_path_en), exist_ok=True)
-                np.save(embeddings_path_en, self.corpus_embeddings_en)
-                if self.use_faiss and self.index_en:
-                    faiss.write_index(self.index_en, index_path_en)
+            if self.corpus_documents_en and self.corpus_embeddings_en is not None and self.corpus_embeddings_en.size > 0:
+                try:
+                    cache_key_en = self._get_cache_key(self.corpus_documents_en, str(self.encoder_en.model_name))
+                    embeddings_path_en = self._get_cache_path(cache_key_en, "npy")
+                    index_path_en = self._get_cache_path(cache_key_en, "faiss")
+                    
+                    # 确保目录存在
+                    os.makedirs(os.path.dirname(embeddings_path_en), exist_ok=True)
+                    os.makedirs(os.path.dirname(index_path_en), exist_ok=True)
+                    
+                    # 保存嵌入向量
+                    np.save(embeddings_path_en, self.corpus_embeddings_en)
+                    print(f"✅ 英文嵌入向量已保存: {embeddings_path_en}")
+                    
+                    # 保存FAISS索引
+                    if self.use_faiss and self.index_en:
+                        faiss.write_index(self.index_en, index_path_en)
+                        print(f"✅ 英文FAISS索引已保存: {index_path_en}")
+                        
+                except Exception as e:
+                    print(f"❌ 英文缓存保存失败: {e}")
 
             # 保存中文文档嵌入向量
-            if self.corpus_documents_ch and self.corpus_embeddings_ch is not None:
-                cache_key_ch = self._get_cache_key(self.corpus_documents_ch, str(self.encoder_ch.model_name))
-                embeddings_path_ch = self._get_cache_path(cache_key_ch, "npy")
-                index_path_ch = self._get_cache_path(cache_key_ch, "faiss")
-                # 确保目录存在
-                os.makedirs(os.path.dirname(embeddings_path_ch), exist_ok=True)
-                os.makedirs(os.path.dirname(index_path_ch), exist_ok=True)
-                np.save(embeddings_path_ch, self.corpus_embeddings_ch)
-                if self.use_faiss and self.index_ch:
-                    faiss.write_index(self.index_ch, index_path_ch)
+            if self.corpus_documents_ch and self.corpus_embeddings_ch is not None and self.corpus_embeddings_ch.size > 0:
+                try:
+                    cache_key_ch = self._get_cache_key(self.corpus_documents_ch, str(self.encoder_ch.model_name))
+                    embeddings_path_ch = self._get_cache_path(cache_key_ch, "npy")
+                    index_path_ch = self._get_cache_path(cache_key_ch, "faiss")
+                    
+                    # 确保目录存在
+                    os.makedirs(os.path.dirname(embeddings_path_ch), exist_ok=True)
+                    os.makedirs(os.path.dirname(index_path_ch), exist_ok=True)
+                    
+                    # 保存嵌入向量
+                    np.save(embeddings_path_ch, self.corpus_embeddings_ch)
+                    print(f"✅ 中文嵌入向量已保存: {embeddings_path_ch}")
+                    
+                    # 保存FAISS索引
+                    if self.use_faiss and self.index_ch:
+                        faiss.write_index(self.index_ch, index_path_ch)
+                        print(f"✅ 中文FAISS索引已保存: {index_path_ch}")
+                        
+                except Exception as e:
+                    print(f"❌ 中文缓存保存失败: {e}")
+                    
         except Exception as e:
-            pass
+            print(f"❌ 缓存保存过程中发生错误: {e}")
 
     def _compute_embeddings(self):
         """计算嵌入向量"""
         print("=== 开始计算嵌入向量 ===")
         print(f"use_existing_embedding_index: {self.use_existing_embedding_index}")
         
-        # 检查是否需要初始化FAISS索引
-        if self.use_faiss:
-            if self.corpus_documents_en and self.index_en is None:
-                print(f"初始化英文FAISS索引，文档数量: {len(self.corpus_documents_en)}")
-                self.index_en = self._init_faiss(self.encoder_en, len(self.corpus_documents_en))
-            if self.corpus_documents_ch and self.index_ch is None:
-                print(f"初始化中文FAISS索引，文档数量: {len(self.corpus_documents_ch)}")
-                self.index_ch = self._init_faiss(self.encoder_ch, len(self.corpus_documents_ch))
+        try:
+            # 检查是否需要初始化FAISS索引
+            if self.use_faiss:
+                if self.corpus_documents_en and self.index_en is None:
+                    print(f"初始化英文FAISS索引，文档数量: {len(self.corpus_documents_en)}")
+                    self.index_en = self._init_faiss(self.encoder_en, len(self.corpus_documents_en))
+                if self.corpus_documents_ch and self.index_ch is None:
+                    print(f"初始化中文FAISS索引，文档数量: {len(self.corpus_documents_ch)}")
+                    self.index_ch = self._init_faiss(self.encoder_ch, len(self.corpus_documents_ch))
 
-        if self.corpus_documents_en:
-            print(f"开始编码英文文档，数量: {len(self.corpus_documents_en)}")
-            print(f"英文编码器: {self.encoder_en.model_name}")
-            print(f"英文编码器设备: {self.encoder_en.device}")
-            
-            # 检查英文文档内容
             if self.corpus_documents_en:
-                first_doc = self.corpus_documents_en[0]
-                print(f"第一个英文文档内容预览: {first_doc.content[:100]}...")
-            
-            self.corpus_embeddings_en = self._batch_encode_corpus(self.corpus_documents_en, self.encoder_en, 'en')
-            print(f"英文嵌入向量计算完成，形状: {self.corpus_embeddings_en.shape if self.corpus_embeddings_en is not None else 'None'}")
-            
-            if self.corpus_embeddings_en is None or self.corpus_embeddings_en.shape[0] == 0:
-                print("❌ 英文嵌入向量计算失败！")
-            else:
-                print("✅ 英文嵌入向量计算成功！")
+                print(f"开始编码英文文档，数量: {len(self.corpus_documents_en)}")
+                print(f"英文编码器: {self.encoder_en.model_name}")
+                print(f"英文编码器设备: {self.encoder_en.device}")
                 
-            if self.use_faiss and self.corpus_embeddings_en is not None:
-                print("将英文嵌入向量添加到FAISS索引")
-                self._add_to_faiss(self.index_en, self.corpus_embeddings_en)
-        else:
-            print("⚠️ 英文文档列表为空")
+                # 检查英文文档内容
+                if self.corpus_documents_en:
+                    first_doc = self.corpus_documents_en[0]
+                    print(f"第一个英文文档内容预览: {first_doc.content[:100]}...")
+                
+                self.corpus_embeddings_en = self._batch_encode_corpus(self.corpus_documents_en, self.encoder_en, 'en')
+                print(f"英文嵌入向量计算完成，形状: {self.corpus_embeddings_en.shape if self.corpus_embeddings_en is not None else 'None'}")
+                
+                if self.corpus_embeddings_en is None or self.corpus_embeddings_en.shape[0] == 0:
+                    print("❌ 英文嵌入向量计算失败！")
+                    self.corpus_embeddings_en = np.array([])  # 确保不为None
+                else:
+                    print("✅ 英文嵌入向量计算成功！")
+                    
+                if self.use_faiss and self.corpus_embeddings_en is not None and self.corpus_embeddings_en.shape[0] > 0:
+                    print("将英文嵌入向量添加到FAISS索引")
+                    self._add_to_faiss(self.index_en, self.corpus_embeddings_en)
+            else:
+                print("⚠️ 英文文档列表为空，初始化空嵌入向量")
+                self.corpus_embeddings_en = np.array([])
+                if self.use_faiss and self.index_en is None:
+                    self.index_en = self._init_faiss(self.encoder_en, 0)
 
-        if self.corpus_documents_ch:
-            print(f"开始编码中文文档，数量: {len(self.corpus_documents_ch)}")
-            self.corpus_embeddings_ch = self._batch_encode_corpus(self.corpus_documents_ch, self.encoder_ch, 'zh')
-            print(f"中文嵌入向量计算完成，形状: {self.corpus_embeddings_ch.shape if self.corpus_embeddings_ch is not None else 'None'}")
-            if self.use_faiss and self.corpus_embeddings_ch is not None:
-                print("将中文嵌入向量添加到FAISS索引")
-                self._add_to_faiss(self.index_ch, self.corpus_embeddings_ch)
-        else:
-            print("⚠️ 中文文档列表为空")
-        
-        # 保存到缓存
-        print("保存嵌入向量到缓存")
-        self._save_cached_embeddings()
-        
-        print("=== 嵌入向量计算完成 ===")
-        print(f"最终状态:")
-        print(f"  英文嵌入向量: {self.corpus_embeddings_en.shape if self.corpus_embeddings_en is not None else 'None'}")
-        print(f"  中文嵌入向量: {self.corpus_embeddings_ch.shape if self.corpus_embeddings_ch is not None else 'None'}")
-        pass
+            if self.corpus_documents_ch:
+                print(f"开始编码中文文档，数量: {len(self.corpus_documents_ch)}")
+                self.corpus_embeddings_ch = self._batch_encode_corpus(self.corpus_documents_ch, self.encoder_ch, 'zh')
+                print(f"中文嵌入向量计算完成，形状: {self.corpus_embeddings_ch.shape if self.corpus_embeddings_ch is not None else 'None'}")
+                
+                if self.corpus_embeddings_ch is None or self.corpus_embeddings_ch.shape[0] == 0:
+                    print("❌ 中文嵌入向量计算失败！")
+                    self.corpus_embeddings_ch = np.array([])  # 确保不为None
+                else:
+                    print("✅ 中文嵌入向量计算成功！")
+                    
+                if self.use_faiss and self.corpus_embeddings_ch is not None and self.corpus_embeddings_ch.shape[0] > 0:
+                    print("将中文嵌入向量添加到FAISS索引")
+                    self._add_to_faiss(self.index_ch, self.corpus_embeddings_ch)
+            else:
+                print("⚠️ 中文文档列表为空，初始化空嵌入向量")
+                self.corpus_embeddings_ch = np.array([])
+                if self.use_faiss and self.index_ch is None:
+                    self.index_ch = self._init_faiss(self.encoder_ch, 0)
+            
+            # 保存到缓存
+            print("保存嵌入向量到缓存")
+            try:
+                self._save_cached_embeddings()
+            except Exception as e:
+                print(f"⚠️ 缓存保存失败: {e}")
+            
+            print("=== 嵌入向量计算完成 ===")
+            print(f"最终状态:")
+            print(f"  英文嵌入向量: {self.corpus_embeddings_en.shape if self.corpus_embeddings_en is not None else 'None'}")
+            print(f"  中文嵌入向量: {self.corpus_embeddings_ch.shape if self.corpus_embeddings_ch is not None else 'None'}")
+            
+        except Exception as e:
+            print(f"❌ 嵌入向量计算过程中发生错误: {e}")
+            # 确保嵌入向量不为None
+            if self.corpus_embeddings_en is None:
+                self.corpus_embeddings_en = np.array([])
+            if self.corpus_embeddings_ch is None:
+                self.corpus_embeddings_ch = np.array([])
+            print("🔄 已重置嵌入向量为空数组")
 
     def _init_faiss(self, encoder, corpus_size):
         """Initialize FAISS index"""
@@ -311,7 +504,7 @@ class BilingualRetriever(Retriever):
         """Encode corpus documents in batches with a progress bar."""
         print(f"=== 开始批量编码语料库 ===")
         print(f"语言: {language}")
-        print(f"文档数量: {len(documents)}")
+        print(f"文档数量: {len(documents) if documents else 0}")
         print(f"编码器: {encoder.model_name}")
         print(f"编码器设备: {encoder.device}")
         
