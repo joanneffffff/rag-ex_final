@@ -31,7 +31,7 @@ from xlm.registry.retriever import load_enhanced_retriever
 from xlm.registry.generator import load_generator
 from config.parameters import Config, EncoderConfig, RetrieverConfig, ModalityConfig, EMBEDDING_CACHE_DIR, RERANKER_CACHE_DIR
 from xlm.components.prompt_templates.template_loader import template_loader
-from xlm.utils.stock_info_extractor import extract_stock_info, extract_report_date
+from xlm.utils.stock_info_extractor import extract_stock_info, extract_stock_info_with_mapping, extract_report_date
 
 # 尝试导入多阶段检索系统
 try:
@@ -462,9 +462,19 @@ class OptimizedRagUI:
         # 检测语言
         try:
             lang = detect(question)
-            language = 'zh' if lang.startswith('zh') else 'en'
+            # 检查是否包含中文字符
+            chinese_chars = sum(1 for char in question if '\u4e00' <= char <= '\u9fff')
+            total_chars = len([char for char in question if char.isalpha() or '\u4e00' <= char <= '\u9fff'])
+            
+            # 如果包含中文字符且中文比例超过30%，或者langdetect检测为中文，则认为是中文
+            if chinese_chars > 0 and (chinese_chars / total_chars > 0.3 or lang.startswith('zh')):
+                language = 'zh'
+            else:
+                language = 'en'
         except:
-            language = 'en'
+            # 如果langdetect失败，使用字符检测
+            chinese_chars = sum(1 for char in question if '\u4e00' <= char <= '\u9fff')
+            language = 'zh' if chinese_chars > 0 else 'en'
         
         # 统一使用相同的RAG系统处理
         return self._unified_rag_processing(question, language, reranker_checkbox)
@@ -484,7 +494,7 @@ class OptimizedRagUI:
             print("检测到中文查询，尝试使用元数据过滤...")
             try:
                 # 1.1 提取关键词
-                company_name, stock_code = extract_stock_info(question)
+                company_name, stock_code = extract_stock_info_with_mapping(question)
                 report_date = extract_report_date(question)
                 if company_name:
                     print(f"提取到公司名称: {company_name}")

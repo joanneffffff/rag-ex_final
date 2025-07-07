@@ -29,7 +29,7 @@ from xlm.registry.retriever import load_enhanced_retriever
 from xlm.registry.generator import load_generator
 from config.parameters import Config, EncoderConfig, RetrieverConfig, ModalityConfig, EMBEDDING_CACHE_DIR, RERANKER_CACHE_DIR
 from xlm.components.prompt_templates.template_loader import template_loader
-from xlm.utils.stock_info_extractor import extract_stock_info, extract_report_date
+from xlm.utils.stock_info_extractor import extract_stock_info, extract_stock_info_with_mapping, extract_report_date
 
 # 尝试导入多阶段检索系统
 try:
@@ -340,7 +340,7 @@ class OptimizedRagUIWithMultiStage:
         try:
             print(f"🔍 开始中文多阶段检索...")
             print(f"📋 查询: {question}")
-            company_name, stock_code = extract_stock_info(question)
+            company_name, stock_code = extract_stock_info_with_mapping(question)
             report_date = extract_report_date(question)
             print(f"🏢 公司名称: {company_name}")
             print(f"📈 股票代码: {stock_code}")

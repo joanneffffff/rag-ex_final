@@ -5,7 +5,196 @@
 """
 
 import re
-from typing import Tuple, Optional
+import pandas as pd
+from pathlib import Path
+from typing import Tuple, Optional, Dict
+
+
+def load_stock_company_mapping() -> Tuple[Dict[str, str], Dict[str, str]]:
+    """
+    加载股票代码和公司名称映射文件
+    
+    Returns:
+        (stock_company_mapping, company_stock_mapping): 双向映射字典
+    """
+    stock_company_mapping = {}
+    company_stock_mapping = {}
+    
+    # 尝试从多个路径加载映射文件
+    possible_paths = [
+        Path("data/astock_code_company_name.csv"),
+        Path(__file__).parent.parent.parent / "data" / "astock_code_company_name.csv",
+        Path(__file__).parent.parent / "data" / "astock_code_company_name.csv"
+    ]
+    
+    mapping_path = None
+    for path in possible_paths:
+        if path.exists():
+            mapping_path = path
+            break
+    
+    if mapping_path:
+        try:
+            df = pd.read_csv(mapping_path, encoding='utf-8')
+            
+            # 构建双向映射
+            for _, row in df.iterrows():
+                stock_code = str(row['stock_code']).strip()
+                company_name = str(row['company_name']).strip()
+                
+                if stock_code and company_name:
+                    # 股票代码 -> 公司名称
+                    stock_company_mapping[stock_code] = company_name
+                    # 公司名称 -> 股票代码
+                    company_stock_mapping[company_name] = stock_code
+            
+            print(f"成功加载股票代码和公司名称映射文件: {mapping_path}")
+            print(f"股票代码映射数量: {len(stock_company_mapping)}")
+            print(f"公司名称映射数量: {len(company_stock_mapping)}")
+            
+        except Exception as e:
+            print(f"加载股票代码和公司名称映射文件失败: {e}")
+            print(f"文件路径: {mapping_path}")
+    else:
+        print("股票代码和公司名称映射文件不存在")
+        print(f"尝试的路径: {[str(p) for p in possible_paths]}")
+    
+    return stock_company_mapping, company_stock_mapping
+
+
+def extract_stock_info_with_mapping(query: str) -> Tuple[Optional[str], Optional[str]]:
+    """
+    使用映射文件优先的股票信息提取函数
+    
+    策略：
+    1. 先使用映射文件查找已知的公司名称和股票代码
+    2. 再使用正则表达式提取未在映射中的信息
+    3. 优先使用映射文件中的准确信息
+    
+    Args:
+        query: 查询文本
+        
+    Returns:
+        (company_name, stock_code): 公司名称和股票代码的元组
+    """
+    # 加载映射文件
+    stock_company_mapping, company_stock_mapping = load_stock_company_mapping()
+    
+    stock_code = None
+    company_name = None
+    
+    # 第一步：使用映射文件查找
+    print(f"使用映射文件查找查询中的公司信息...")
+    
+    # 1.1 查找股票代码
+    stock_patterns = [
+        r'[（(](\d{6})[）)]',  # 中英文括号
+        r'(\d{6}(?:\.(?:SZ|SH))?)',  # 带交易所后缀
+        r'(\d{6})',  # 纯数字
+    ]
+    
+    for pattern in stock_patterns:
+        match = re.search(pattern, query)
+        if match:
+            found_stock_code = match.group(1)
+            # 清理股票代码（移除交易所后缀）
+            pure_code_match = re.search(r'(\d{6})', found_stock_code)
+            if pure_code_match:
+                found_stock_code = pure_code_match.group(1)
+            
+            # 检查是否在映射文件中
+            if found_stock_code in stock_company_mapping:
+                stock_code = found_stock_code
+                mapped_company = stock_company_mapping[found_stock_code]
+                print(f"✅ 通过映射文件找到股票代码: {found_stock_code} -> 公司: {mapped_company}")
+                break
+    
+    # 1.2 查找公司名称
+    if not company_name:
+        # 在映射文件中查找查询中提到的公司名称
+        for mapped_company in company_stock_mapping.keys():
+            if mapped_company in query:
+                company_name = mapped_company
+                mapped_stock = company_stock_mapping[mapped_company]
+                print(f"✅ 通过映射文件找到公司名称: {mapped_company} -> 股票: {mapped_stock}")
+                # 如果还没有找到股票代码，使用映射的股票代码
+                if not stock_code:
+                    stock_code = mapped_stock
+                break
+    
+    # 第二步：如果映射文件没有找到，使用正则表达式
+    if not stock_code or not company_name:
+        print("映射文件未找到完整信息，使用正则表达式提取...")
+        
+        # 2.1 提取股票代码（如果还没有找到）
+        if not stock_code:
+            for pattern in stock_patterns:
+                match = re.search(pattern, query)
+                if match:
+                    found_stock_code = match.group(1)
+                    pure_code_match = re.search(r'(\d{6})', found_stock_code)
+                    if pure_code_match:
+                        stock_code = pure_code_match.group(1)
+                        print(f"🔍 正则表达式提取股票代码: {stock_code}")
+                        break
+        
+        # 2.2 提取公司名称（如果还没有找到）
+        if not company_name:
+            # 优先查找带括号格式的公司名称
+            bracket_patterns = [
+                r'([^，。？\s]+)[（(]\d{6}(?:\.(?:SZ|SH))?[）)]',  # 公司名(股票代码)
+            ]
+            
+            for pattern in bracket_patterns:
+                match = re.search(pattern, query)
+                if match:
+                    company_name = match.group(1).strip()
+                    print(f"🔍 正则表达式提取公司名称: {company_name}")
+                    break
+            
+            # 如果没有找到，尝试其他格式
+            if not company_name:
+                # 查找公司后缀
+                company_patterns = [
+                    r'([^，。？\s]+(?:股份|集团|公司|有限|科技|网络|银行|证券|保险))',
+                ]
+                
+                for pattern in company_patterns:
+                    match = re.search(pattern, query)
+                    if match:
+                        potential_company = match.group(1).strip()
+                        # 验证提取的公司名称是否合理（长度、内容等）
+                        if len(potential_company) >= 2 and len(potential_company) <= 20:
+                            # 检查是否包含明显的公司后缀
+                            if any(suffix in potential_company for suffix in ['股份', '集团', '公司', '有限', '科技', '网络', '银行', '证券', '保险']):
+                                company_name = potential_company
+                                print(f"🔍 正则表达式提取公司名称: {company_name}")
+                                break
+    
+    # 第三步：验证和清理结果
+    if company_name:
+        # 清理公司名称
+        company_name = company_name.strip()
+        # 移除可能的标点符号
+        company_name = re.sub(r'[，。？\s]+$', '', company_name)
+        
+        # 验证公司名称是否合理
+        if len(company_name) < 2 or len(company_name) > 20:
+            print(f"⚠️  公司名称长度不合理: {company_name}")
+            company_name = None
+    
+    if stock_code:
+        # 验证股票代码格式 - 修复：允许6位数字，不强制要求前导零
+        if not re.match(r'^\d{6}$', stock_code):
+            # 尝试补全前导零
+            if re.match(r'^\d{1,6}$', stock_code):
+                stock_code = stock_code.zfill(6)
+                print(f"🔧 补全股票代码前导零: {stock_code}")
+            else:
+                print(f"⚠️  股票代码格式不正确: {stock_code}")
+                stock_code = None
+    
+    return company_name, stock_code
 
 
 def extract_stock_info(query: str) -> Tuple[Optional[str], Optional[str]]:

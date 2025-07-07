@@ -346,8 +346,22 @@ class BilingualRetriever(Retriever):
                     print(f"警告: corpus_documents_ch[{i}]的content字段类型错误: {type(getattr(doc, 'content', None))}")
                     
         if language is None:
-            lang = detect(text)
-            language = 'zh' if lang.startswith('zh') else 'en'
+            # 增强的语言检测逻辑
+            try:
+                lang = detect(text)
+                # 检查是否包含中文字符
+                chinese_chars = sum(1 for char in text if '\u4e00' <= char <= '\u9fff')
+                total_chars = len([char for char in text if char.isalpha() or '\u4e00' <= char <= '\u9fff'])
+                
+                # 如果包含中文字符且中文比例超过30%，或者langdetect检测为中文，则认为是中文
+                if chinese_chars > 0 and (chinese_chars / total_chars > 0.3 or lang.startswith('zh')):
+                    language = 'zh'
+                else:
+                    language = 'en'
+            except:
+                # 如果langdetect失败，使用字符检测
+                chinese_chars = sum(1 for char in text if '\u4e00' <= char <= '\u9fff')
+                language = 'zh' if chinese_chars > 0 else 'en'
         
         print(f"检测到的语言: {language}")
         

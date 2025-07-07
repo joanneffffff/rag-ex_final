@@ -72,17 +72,20 @@ class RagSystemAdapter:
         if self.ui is None:
             raise ValueError("UI系统未初始化")
         
-        # 根据mode和配置文件自动设置use_prefilter（如果未指定）
-        if use_prefilter is None:
-            if mode == "baseline":
-                # baseline模式：根据配置文件决定是否使用预过滤
+        # 根据mode自动设置use_prefilter
+        if mode == "baseline":
+            # baseline模式：纯FAISS检索，不使用预过滤
+            use_prefilter = False
+        elif mode == "prefilter":
+            # prefilter模式：强制使用预过滤
+            use_prefilter = True
+        elif mode == "reranker":
+            # reranker模式：强制使用预过滤
+            use_prefilter = True
+        else:
+            # 其他模式：使用传入的参数或配置文件设置
+            if use_prefilter is None:
                 use_prefilter = self.ui.config.retriever.use_prefilter
-            elif mode == "prefilter":
-                use_prefilter = True  # prefilter模式强制使用预过滤
-            elif mode == "reranker":
-                use_prefilter = True  # reranker模式强制使用预过滤
-            else:
-                use_prefilter = self.ui.config.retriever.use_prefilter  # 默认使用配置文件设置
         
         print(f"开始检索评测...")
         print(f"查询: {query}")
@@ -99,9 +102,19 @@ class RagSystemAdapter:
         try:
             from langdetect import detect
             lang = detect(query)
-            language = 'zh' if lang.startswith('zh') else 'en'
+            # 检查是否包含中文字符
+            chinese_chars = sum(1 for char in query if '\u4e00' <= char <= '\u9fff')
+            total_chars = len([char for char in query if char.isalpha() or '\u4e00' <= char <= '\u9fff'])
+            
+            # 如果包含中文字符且中文比例超过30%，或者langdetect检测为中文，则认为是中文
+            if chinese_chars > 0 and (chinese_chars / total_chars > 0.3 or lang.startswith('zh')):
+                language = 'zh'
+            else:
+                language = 'en'
         except:
-            language = 'en'
+            # 如果langdetect失败，使用字符检测
+            chinese_chars = sum(1 for char in query if '\u4e00' <= char <= '\u9fff')
+            language = 'zh' if chinese_chars > 0 else 'en'
         
         print(f"检测到的语言: {language}")
         
@@ -136,8 +149,9 @@ class RagSystemAdapter:
             print("检测到中文查询，尝试使用元数据过滤...")
             try:
                 # 1.1 提取关键词
-                from xlm.utils.stock_info_extractor import extract_stock_info, extract_report_date
-                company_name, stock_code = extract_stock_info(query)
+                from xlm.utils.stock_info_extractor import extract_stock_info, extract_stock_info_with_mapping, extract_report_date
+                # 使用映射优先的提取函数
+                company_name, stock_code = extract_stock_info_with_mapping(query)
                 report_date = extract_report_date(query)
                 
                 # 1.2 元数据过滤 - 根据use_prefilter参数决定是否使用
