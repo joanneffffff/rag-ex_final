@@ -94,57 +94,111 @@ class BilingualRetriever(Retriever):
         """获取缓存文件路径"""
         return os.path.join(self.cache_dir, f"{cache_key}.{suffix}")
 
+    def _is_cache_valid(self, documents: List[DocumentWithMetadata], cache_key: str) -> bool:
+        """检查缓存是否有效（数据是否发生变化）"""
+        try:
+            # 检查缓存文件是否存在
+            embeddings_path = self._get_cache_path(cache_key, "npy")
+            index_path = self._get_cache_path(cache_key, "faiss")
+            
+            if not os.path.exists(embeddings_path) or not os.path.exists(index_path):
+                print(f"⚠️ 缓存文件不存在，需要重新生成")
+                return False
+            
+            # 检查嵌入向量维度是否匹配
+            if os.path.exists(embeddings_path):
+                cached_embeddings = np.load(embeddings_path)
+                if cached_embeddings.shape[0] != len(documents):
+                    print(f"⚠️ 文档数量不匹配: 缓存={cached_embeddings.shape[0]}, 当前={len(documents)}")
+                    return False
+            
+            # 检查FAISS索引是否有效
+            if os.path.exists(index_path):
+                try:
+                    index = faiss.read_index(index_path)
+                    if hasattr(index, 'ntotal') and index.ntotal != len(documents):
+                        print(f"⚠️ FAISS索引大小不匹配: 缓存={index.ntotal}, 当前={len(documents)}")
+                        return False
+                except Exception as e:
+                    print(f"⚠️ FAISS索引读取失败: {e}")
+                    return False
+            
+            print(f"✅ 缓存验证通过")
+            return True
+            
+        except Exception as e:
+            print(f"⚠️ 缓存验证失败: {e}")
+            return False
+
+    def _clear_invalid_cache(self, cache_key: str):
+        """清除无效的缓存文件"""
+        try:
+            embeddings_path = self._get_cache_path(cache_key, "npy")
+            index_path = self._get_cache_path(cache_key, "faiss")
+            
+            if os.path.exists(embeddings_path):
+                os.remove(embeddings_path)
+                print(f"🗑️ 删除无效嵌入向量缓存: {embeddings_path}")
+            
+            if os.path.exists(index_path):
+                os.remove(index_path)
+                print(f"🗑️ 删除无效FAISS索引缓存: {index_path}")
+                
+        except Exception as e:
+            print(f"⚠️ 清除缓存失败: {e}")
+
     def _load_cached_embeddings(self) -> bool:
-        """尝试加载缓存的嵌入向量"""
+        """尝试加载缓存的嵌入向量，自动检测数据变化"""
         try:
             loaded_any = False
             
             # 检查英文文档缓存
             if self.corpus_documents_en:
                 cache_key_en = self._get_cache_key(self.corpus_documents_en, str(self.encoder_en.model_name))
-                embeddings_path_en = self._get_cache_path(cache_key_en, "npy")
-                index_path_en = self._get_cache_path(cache_key_en, "faiss")
+                print(f"🔍 检查英文缓存: {cache_key_en}")
                 
-                if os.path.exists(embeddings_path_en):
+                if self._is_cache_valid(self.corpus_documents_en, cache_key_en):
+                    embeddings_path_en = self._get_cache_path(cache_key_en, "npy")
+                    index_path_en = self._get_cache_path(cache_key_en, "faiss")
+                    
                     self.corpus_embeddings_en = np.load(embeddings_path_en)
                     loaded_any = True
                     
                     if self.use_faiss and os.path.exists(index_path_en):
                         self.index_en = faiss.read_index(index_path_en)
-                    elif self.use_faiss:
-                        self.index_en = self._init_faiss(self.encoder_en, len(self.corpus_documents_en))
-                        if self.corpus_embeddings_en is not None:
-                            self._add_to_faiss(self.index_en, self.corpus_embeddings_en)
+                        print(f"✅ 英文FAISS索引加载成功，文档数: {len(self.corpus_documents_en)}")
+                else:
+                    # 清除无效缓存
+                    self._clear_invalid_cache(cache_key_en)
+                    print(f"🔄 英文数据发生变化，需要重新生成索引")
             else:
-                # 英文文档为空，不加载任何缓存文件
-                # 因为无法验证缓存是否与当前数据匹配
-                print("⚠️ 英文文档列表为空，跳过缓存加载以确保数据一致性")
-                loaded_any = False
+                print("⚠️ 英文文档列表为空，跳过缓存加载")
 
             # 检查中文文档缓存
             if self.corpus_documents_ch:
                 cache_key_ch = self._get_cache_key(self.corpus_documents_ch, str(self.encoder_ch.model_name))
-                embeddings_path_ch = self._get_cache_path(cache_key_ch, "npy")
-                index_path_ch = self._get_cache_path(cache_key_ch, "faiss")
+                print(f"🔍 检查中文缓存: {cache_key_ch}")
                 
-                if os.path.exists(embeddings_path_ch):
+                if self._is_cache_valid(self.corpus_documents_ch, cache_key_ch):
+                    embeddings_path_ch = self._get_cache_path(cache_key_ch, "npy")
+                    index_path_ch = self._get_cache_path(cache_key_ch, "faiss")
+                    
                     self.corpus_embeddings_ch = np.load(embeddings_path_ch)
                     loaded_any = True
                     
                     if self.use_faiss and os.path.exists(index_path_ch):
                         self.index_ch = faiss.read_index(index_path_ch)
-                    elif self.use_faiss:
-                        self.index_ch = self._init_faiss(self.encoder_ch, len(self.corpus_documents_ch))
-                        if self.corpus_embeddings_ch is not None:
-                            self._add_to_faiss(self.index_ch, self.corpus_embeddings_ch)
+                        print(f"✅ 中文FAISS索引加载成功，文档数: {len(self.corpus_documents_ch)}")
+                else:
+                    # 清除无效缓存
+                    self._clear_invalid_cache(cache_key_ch)
+                    print(f"🔄 中文数据发生变化，需要重新生成索引")
             else:
-                # 中文文档为空，不加载任何缓存文件
-                # 因为无法验证缓存是否与当前数据匹配
-                print("⚠️ 中文文档列表为空，跳过缓存加载以确保数据一致性")
-                loaded_any = False
+                print("⚠️ 中文文档列表为空，跳过缓存加载")
 
             return loaded_any
         except Exception as e:
+            print(f"❌ 缓存加载失败: {e}")
             return False
 
     def _save_cached_embeddings(self):
@@ -181,11 +235,12 @@ class BilingualRetriever(Retriever):
         print("=== 开始计算嵌入向量 ===")
         print(f"use_existing_embedding_index: {self.use_existing_embedding_index}")
         
+        # 检查是否需要初始化FAISS索引
         if self.use_faiss:
-            if self.corpus_documents_en:
+            if self.corpus_documents_en and self.index_en is None:
                 print(f"初始化英文FAISS索引，文档数量: {len(self.corpus_documents_en)}")
                 self.index_en = self._init_faiss(self.encoder_en, len(self.corpus_documents_en))
-            if self.corpus_documents_ch:
+            if self.corpus_documents_ch and self.index_ch is None:
                 print(f"初始化中文FAISS索引，文档数量: {len(self.corpus_documents_ch)}")
                 self.index_ch = self._init_faiss(self.encoder_ch, len(self.corpus_documents_ch))
 
