@@ -903,6 +903,8 @@ class OptimizedRagUI:
         # 构建UI专用结构（只影响展示，不影响RAG主流程）
         ui_docs = []
         seen_ui_hashes = set()  # 添加UI级别的去重
+        seen_table_ids = set()  # 添加Table ID去重
+        seen_paragraph_ids = set()  # 添加Paragraph ID去重
         
         for doc, score in unique_docs:
             if getattr(doc.metadata, 'language', '') == 'chinese':
@@ -913,6 +915,33 @@ class OptimizedRagUI:
                     print(f"[UI DEBUG] doc_id未命中: {doc_id}，使用文档内容")
             else:
                 raw_context = doc.content
+            
+            # 检查内容类型并应用相应的去重逻辑
+            has_table_id = "Table ID:" in raw_context
+            has_paragraph_id = "Paragraph ID:" in raw_context
+            
+            if has_table_id:
+                # 表格内容或表格+文本内容：使用Table ID去重
+                import re
+                table_id_match = re.search(r'Table ID:\s*([a-f0-9-]+)', raw_context)
+                if table_id_match:
+                    table_id = table_id_match.group(1)
+                    if table_id in seen_table_ids:
+                        print(f"[UI DEBUG] 跳过重复的Table ID: {table_id}，内容前50字符: {raw_context[:50]}...")
+                        continue
+                    seen_table_ids.add(table_id)
+                    print(f"[UI DEBUG] 保留Table ID: {table_id}")
+            elif has_paragraph_id:
+                # 纯文本内容：使用Paragraph ID去重
+                import re
+                paragraph_id_match = re.search(r'Paragraph ID:\s*([a-f0-9-]+)', raw_context)
+                if paragraph_id_match:
+                    paragraph_id = paragraph_id_match.group(1)
+                    if paragraph_id in seen_paragraph_ids:
+                        print(f"[UI DEBUG] 跳过重复的Paragraph ID: {paragraph_id}，内容前50字符: {raw_context[:50]}...")
+                        continue
+                    seen_paragraph_ids.add(paragraph_id)
+                    print(f"[UI DEBUG] 保留Paragraph ID: {paragraph_id}")
             
             # 对raw_context进行去重检查
             context_hash = hash(raw_context)
@@ -936,8 +965,37 @@ class OptimizedRagUI:
         # 最终的去重检查，确保HTML中不会有重复内容
         final_ui_docs = []
         seen_final_hashes = set()
+        seen_final_table_ids = set()  # 添加Table ID去重
+        seen_final_paragraph_ids = set()  # 添加Paragraph ID去重
         
         for doc, score, preview_content, raw_context in ui_docs:
+            # 检查内容类型并应用相应的去重逻辑
+            has_table_id = "Table ID:" in raw_context
+            has_paragraph_id = "Paragraph ID:" in raw_context
+            
+            if has_table_id:
+                # 表格内容或表格+文本内容：使用Table ID去重
+                import re
+                table_id_match = re.search(r'Table ID:\s*([a-f0-9-]+)', raw_context)
+                if table_id_match:
+                    table_id = table_id_match.group(1)
+                    if table_id in seen_final_table_ids:
+                        print(f"[HTML DEBUG] 跳过重复的Table ID: {table_id}，内容前50字符: {raw_context[:50]}...")
+                        continue
+                    seen_final_table_ids.add(table_id)
+                    print(f"[HTML DEBUG] 保留Table ID: {table_id}")
+            elif has_paragraph_id:
+                # 纯文本内容：使用Paragraph ID去重
+                import re
+                paragraph_id_match = re.search(r'Paragraph ID:\s*([a-f0-9-]+)', raw_context)
+                if paragraph_id_match:
+                    paragraph_id = paragraph_id_match.group(1)
+                    if paragraph_id in seen_final_paragraph_ids:
+                        print(f"[HTML DEBUG] 跳过重复的Paragraph ID: {paragraph_id}，内容前50字符: {raw_context[:50]}...")
+                        continue
+                    seen_final_paragraph_ids.add(paragraph_id)
+                    print(f"[HTML DEBUG] 保留Paragraph ID: {paragraph_id}")
+            
             # 使用raw_context的哈希值进行最终去重
             context_hash = hash(raw_context)
             if context_hash in seen_final_hashes:
