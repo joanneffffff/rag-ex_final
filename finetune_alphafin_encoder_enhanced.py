@@ -92,7 +92,7 @@ class MRREvaluator(SentenceEvaluator):
                 else:
                     mrrs.append(0.0) 
             
-            mrr = np.mean(mrrs) if mrrs else 0.0 
+            mrr = float(np.mean(mrrs)) if mrrs else 0.0 
 
         print(f"MRR (Epoch: {epoch}, Steps: {steps}): {mrr:.4f}")
         print(f"--- MRR 评估结束 ---")
@@ -196,13 +196,52 @@ def main():
     else:
         evaluator = MRREvaluator(dataset=eval_data, name='mrr_eval', show_progress_bar=True)
 
+    # 检查GPU内存
+    print(f"\n🔍 检查GPU内存...")
+    if torch.cuda.is_available():
+        gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1024**3
+        gpu_memory_allocated = torch.cuda.memory_allocated(0) / 1024**3
+        gpu_memory_free = gpu_memory - gpu_memory_allocated
+        print(f"  GPU内存: 总计 {gpu_memory:.1f}GB, 已用 {gpu_memory_allocated:.1f}GB, 可用 {gpu_memory_free:.1f}GB")
+        
+        if gpu_memory_free < 2.0:
+            print("⚠️  警告：GPU内存不足，建议清理内存或减少批次大小")
+            print("💡 清理命令: nvidia-smi --gpu-reset")
+    else:
+        print("  CPU模式")
+    
     # 加载模型
     print(f"\n🤖 加载模型：{args.model_name}")
     try:
+        # 设置设备
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        print(f"  使用设备: {device}")
+        
+        # 尝试加载模型
         model = SentenceTransformer(args.model_name)
+        if device == "cuda":
+            model = model.to(device)
         print("✅ 模型加载成功")
+        
+        # 测试模型推理
+        print("  测试模型推理...")
+        test_text = "测试文本"
+        test_embedding = model.encode(test_text, convert_to_tensor=True)
+        print(f"  推理测试成功，嵌入维度: {test_embedding.shape}")
+        
+    except torch.cuda.OutOfMemoryError as e:
+        print(f"❌ CUDA内存不足: {e}")
+        print("💡 解决方案:")
+        print("  1. 减少批次大小: --batch_size 4 或 8")
+        print("  2. 清理GPU内存: nvidia-smi --gpu-reset")
+        print("  3. 使用CPU训练: 设置 CUDA_VISIBLE_DEVICES=''")
+        return
     except Exception as e:
         print(f"❌ 模型加载失败: {e}")
+        print("💡 可能的原因:")
+        print("  1. 模型名称错误")
+        print("  2. 网络连接问题")
+        print("  3. 依赖包版本不兼容")
         return
 
     # 准备训练
@@ -216,17 +255,32 @@ def main():
     
     # 开始训练
     print(f"\n🚀 开始训练...")
-    model.fit(
-        train_objectives=[(train_dataloader, train_loss)],
-        epochs=args.epochs,
-        evaluator=evaluator,
-        evaluation_steps=args.eval_steps,
-        output_path=args.output_dir,
-        show_progress_bar=True,
-        optimizer_params={'lr': 2e-5, 'weight_decay': 0.01},
-        scheduler='WarmupCosine',
-        warmup_steps=100
-    )
+    
+    # 确保evaluator不为None
+    if evaluator is None:
+        print("⚠️  警告：没有评估器，将跳过评估")
+        model.fit(
+            train_objectives=[(train_dataloader, train_loss)],
+            epochs=args.epochs,
+            evaluation_steps=args.eval_steps,
+            output_path=args.output_dir,
+            show_progress_bar=True,
+            optimizer_params={'lr': 2e-5, 'weight_decay': 0.01},
+            scheduler='WarmupCosine',
+            warmup_steps=100
+        )
+    else:
+        model.fit(
+            train_objectives=[(train_dataloader, train_loss)],
+            epochs=args.epochs,
+            evaluator=evaluator,
+            evaluation_steps=args.eval_steps,
+            output_path=args.output_dir,
+            show_progress_bar=True,
+            optimizer_params={'lr': 2e-5, 'weight_decay': 0.01},
+            scheduler='WarmupCosine',
+            warmup_steps=100
+        )
     
     # 保存最终模型
     model.save(args.output_dir)
