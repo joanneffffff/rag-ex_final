@@ -9,16 +9,60 @@ import os
 import json
 import logging
 import argparse
+import importlib.util
 from pathlib import Path
 from datetime import datetime
 import time
 from typing import Dict, Any, Optional, List
+
+# 允许使用所有GPU
+# os.environ['CUDA_VISIBLE_DEVICES'] = '0,1'  # 使用GPU 0和1
 
 # 添加项目根目录到路径
 sys.path.append(str(Path(__file__).parent.parent))
 
 from alphafin_data_process.rag_system_adapter import RagSystemAdapter
 from utils.data_loader import load_json_or_jsonl
+
+def save_intermediate_results(
+    results: Dict[str, Any], 
+    output_path: Path, 
+    timestamp: str, 
+    mode: str,
+    sample_count: int = 0
+):
+    """
+    保存中间结果，防止数据丢失
+    
+    Args:
+        results: 当前结果字典
+        output_path: 输出目录
+        timestamp: 时间戳
+        mode: 当前模式
+        sample_count: 已处理的样本数量
+    """
+    try:
+        # 保存当前模式的结果
+        mode_file = output_path / f"results_{mode}_{timestamp}.json"
+        with open(mode_file, 'w', encoding='utf-8') as f:
+            json.dump(results, f, ensure_ascii=False, indent=2)
+        
+        # 保存进度信息
+        progress_file = output_path / f"progress_{timestamp}.json"
+        progress_info = {
+            'timestamp': timestamp,
+            'current_mode': mode,
+            'processed_samples': sample_count,
+            'last_update': datetime.now().isoformat(),
+            'status': 'running'
+        }
+        with open(progress_file, 'w', encoding='utf-8') as f:
+            json.dump(progress_info, f, ensure_ascii=False, indent=2)
+            
+        print(f"中间结果已保存 - 模式: {mode}, 样本数: {sample_count}")
+        
+    except Exception as e:
+        print(f"保存中间结果失败: {e}")
 
 def calculate_metrics_from_raw_results(
     raw_results: List[Dict[str, Any]], 
@@ -100,7 +144,8 @@ def run_evaluation_background(
     modes: Optional[list] = None,
     top_k_list: Optional[list] = None,
     use_prefilter: bool = True,
-    max_samples: Optional[int] = None
+    max_samples: Optional[int] = None,
+    config_path: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     后台运行检索评测 - 优化版本：一次检索，多指标计算
@@ -158,7 +203,25 @@ def run_evaluation_background(
     
     # 初始化RAG系统适配器
     try:
-        adapter = RagSystemAdapter()
+        sys.path.insert(0, str(Path(__file__).parent.parent / "config"))
+        
+        # 根据配置路径动态导入配置
+        if config_path:
+            # 动态导入指定的配置文件
+            config_module_name = Path(config_path).stem
+            config_spec = importlib.util.spec_from_file_location(config_module_name, config_path)
+            if config_spec is None:
+                raise ImportError(f"无法加载配置文件: {config_path}")
+            config_module = importlib.util.module_from_spec(config_spec)
+            config_spec.loader.exec_module(config_module)
+            config = config_module.config
+            print(f"使用指定配置初始化RAG系统: {config_path}")
+        else:
+            # 使用默认轻量级配置
+            from parameters_evaluation_light import config
+            print("使用默认轻量级配置初始化RAG系统（专门用于检索评估）...")
+        
+        adapter = RagSystemAdapter(config=config)
         print("RAG系统适配器初始化成功")
     except Exception as e:
         print(f"RAG系统适配器初始化失败: {e}")
@@ -187,6 +250,13 @@ def run_evaluation_background(
             )
             retrieval_time = time.time() - start_time
             print(f"检索完成，耗时: {retrieval_time:.2f}秒")
+            
+            # 检索完成后立即保存原始结果
+            raw_results_file = output_path / f"raw_results_{mode}_{timestamp}.json"
+            with open(raw_results_file, 'w', encoding='utf-8') as f:
+                json.dump(raw_results, f, ensure_ascii=False, indent=2)
+            print(f"原始检索结果已保存: {raw_results_file}")
+            
         except Exception as e:
             print(f"检索失败: {e}")
             continue
@@ -207,6 +277,9 @@ def run_evaluation_background(
                 print(f"  MRR: {results['MRR']:.4f}")
                 print(f"  Hit@{top_k}: {results[f'Hit@{top_k}']:.4f}")
                 
+                # 每个top_k计算完成后保存中间结果
+                save_intermediate_results(mode_results, output_path, timestamp, mode, len(eval_data))
+                
             except Exception as e:
                 print(f"Top-{top_k} 指标计算失败: {e}")
                 mode_results[f"top_{top_k}"] = {
@@ -224,12 +297,32 @@ def run_evaluation_background(
         with open(mode_file, 'w', encoding='utf-8') as f:
             json.dump(mode_results, f, ensure_ascii=False, indent=2)
         print(f"模式 {mode} 结果已保存到: {mode_file}")
+        
+        # 同时更新完整结果文件
+        complete_file = output_path / f"complete_results_{timestamp}.json"
+        with open(complete_file, 'w', encoding='utf-8') as f:
+            json.dump(all_results, f, ensure_ascii=False, indent=2)
+        print(f"完整结果已更新: {complete_file}")
     
     # 保存完整结果
     complete_file = output_path / f"complete_results_{timestamp}.json"
     with open(complete_file, 'w', encoding='utf-8') as f:
         json.dump(all_results, f, ensure_ascii=False, indent=2)
     print(f"完整结果已保存到: {complete_file}")
+    
+    # 保存最终状态
+    final_progress_file = output_path / f"progress_{timestamp}.json"
+    final_progress_info = {
+        'timestamp': timestamp,
+        'status': 'completed',
+        'total_modes': len(modes),
+        'completed_modes': list(all_results.keys()),
+        'completion_time': datetime.now().isoformat(),
+        'total_samples': len(eval_data)
+    }
+    with open(final_progress_file, 'w', encoding='utf-8') as f:
+        json.dump(final_progress_info, f, ensure_ascii=False, indent=2)
+    print(f"最终状态已保存: {final_progress_file}")
     
     # 打印汇总结果
     print(f"\n{'='*80}")
@@ -298,6 +391,8 @@ def main():
                        help='是否使用预过滤（baseline模式可以控制）')
     parser.add_argument('--max_samples', type=int, default=None,
                        help='最大测试样本数（用于快速测试）')
+    parser.add_argument('--config', type=str, default=None,
+                       help='配置文件路径（可选，默认使用轻量级配置）')
     
     args = parser.parse_args()
     
@@ -309,7 +404,8 @@ def main():
             modes=args.modes,
             top_k_list=args.top_k_list,
             use_prefilter=args.use_prefilter,
-            max_samples=args.max_samples
+            max_samples=args.max_samples,
+            config_path=args.config
         )
         
         print("后台评测完成！")

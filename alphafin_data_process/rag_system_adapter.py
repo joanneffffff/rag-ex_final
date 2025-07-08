@@ -14,6 +14,7 @@ import torch
 sys.path.append(str(Path(__file__).parent.parent))
 
 from xlm.ui.optimized_rag_ui import OptimizedRagUI
+from config.parameters_cuda1_conservative import config as conservative_config
 from config.parameters import Config
 
 class RagSystemAdapter:
@@ -27,9 +28,10 @@ class RagSystemAdapter:
         初始化RAG系统适配器 - 使用与run_optimized_ui相同的初始化方式
         
         Args:
-            config: 配置对象，如果为None则使用默认配置
+            config: 配置对象，如果为None则使用保守配置
         """
-        self.config = config or Config()
+        # 默认使用保守配置以节省显存
+        self.config = config or conservative_config
         self.ui = None
         
         # 使用与run_optimized_ui相同的初始化方式

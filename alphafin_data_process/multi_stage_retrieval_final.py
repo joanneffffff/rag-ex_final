@@ -369,28 +369,38 @@ class MultiStageRetrievalSystem:
             print(f"使用配置的缓存目录: {cache_dir}")
         
         try:
+            # 从配置中获取设备设置
+            device = "cuda:0"  # 默认值
+            if self.config and hasattr(self.config, 'encoder'):
+                device = self.config.encoder.device or "cuda:0"
+            
             # 检查是否是微调模型路径
             if "finetuned" in self.model_name or "models/" in self.model_name:
-                print("检测到微调模型，使用FinbertEncoder...")
+                print(f"检测到微调模型，使用FinbertEncoder...")
                 from xlm.components.encoder.finbert import FinbertEncoder
                 self.embedding_model = FinbertEncoder(
                     model_name=self.model_name,
                     cache_dir=cache_dir,
-                    device="cuda:0"  # 编码器使用cuda:0
+                    device=device
                 )
-                print("微调模型加载完成 (cuda:0)")
+                print(f"微调模型加载完成 ({device})")
             else:
                 # 使用SentenceTransformer加载HuggingFace模型
                 from sentence_transformers import SentenceTransformer
                 self.embedding_model = SentenceTransformer(self.model_name, cache_folder=cache_dir)
-                # 将模型移动到cuda:0
+                # 将模型移动到指定设备
                 if hasattr(self.embedding_model, 'to'):
-                    self.embedding_model.to('cuda:0')
-                print("HuggingFace模型加载完成 (cuda:0)")
+                    self.embedding_model.to(device)
+                print(f"HuggingFace模型加载完成 ({device})")
         except Exception as e:
             print(f"嵌入模型加载失败: {e}")
             print("尝试使用默认模型...")
             try:
+                # 从配置中获取设备设置
+                device = "cuda:0"  # 默认值
+                if self.config and hasattr(self.config, 'encoder'):
+                    device = self.config.encoder.device or "cuda:0"
+                
                 # 回退到默认模型
                 if self.dataset_type == "chinese":
                     fallback_model = "distiluse-base-multilingual-cased-v2"
@@ -399,10 +409,10 @@ class MultiStageRetrievalSystem:
                 print(f"使用回退模型: {fallback_model}")
                 from sentence_transformers import SentenceTransformer
                 self.embedding_model = SentenceTransformer(fallback_model)
-                # 将模型移动到cuda:0
+                # 将模型移动到指定设备
                 if hasattr(self.embedding_model, 'to'):
-                    self.embedding_model.to('cuda:0')
-                print("回退模型加载成功 (cuda:0)")
+                    self.embedding_model.to(device)
+                print(f"回退模型加载成功 ({device})")
             except Exception as e2:
                 print(f"回退模型也加载失败: {e2}")
                 self.embedding_model = None
@@ -482,15 +492,20 @@ class MultiStageRetrievalSystem:
             print(f"缓存目录: {cache_dir}")
             print(f"量化: {use_quantization} ({quantization_type})")
             
+            # 从配置中获取设备设置
+            device = "cpu"  # 默认使用CPU
+            if self.config and hasattr(self.config, 'reranker'):
+                device = self.config.reranker.device or "cpu"
+            
             # 使用现有的QwenReranker
             self.qwen_reranker = QwenReranker(
                 model_name=model_name,
-                device="cuda:0",  # 重排序器使用cuda:0
+                device=device,
                 cache_dir=cache_dir,
                 use_quantization=use_quantization,
                 quantization_type=quantization_type
             )
-            print("Qwen reranker初始化完成 (cuda:0)")
+            print(f"Qwen reranker初始化完成 ({device})")
         except Exception as e:
             print(f"Qwen reranker初始化失败: {e}")
             self.qwen_reranker = None
