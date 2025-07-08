@@ -661,7 +661,23 @@ class BilingualRetriever(Retriever):
         
         doc_indices = [hit['corpus_id'] for hit in results]
         scores = [hit['score'] for hit in results]
-        raw_documents = [corpus_documents[i] for i in doc_indices]
+        
+        # 添加索引范围检查
+        print(f"检索到的索引: {doc_indices}")
+        print(f"语料库文档数量: {len(corpus_documents)}")
+        
+        # 过滤无效索引
+        valid_indices = []
+        valid_scores = []
+        for i, (idx, score) in enumerate(zip(doc_indices, scores)):
+            if 0 <= idx < len(corpus_documents):
+                valid_indices.append(idx)
+                valid_scores.append(score)
+            else:
+                print(f"警告: 跳过无效索引 {idx} (超出范围 [0, {len(corpus_documents)})")
+        
+        raw_documents = [corpus_documents[i] for i in valid_indices]
+        scores = valid_scores
         
         print(f"最终返回文档数量: {len(raw_documents)}")
         
