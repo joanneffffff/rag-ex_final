@@ -25,7 +25,8 @@ RERANKER_CACHE_DIR = DEFAULT_CACHE_DIR
 @dataclass
 class EncoderConfig:
     # 中文微调模型路径
-    chinese_model_path: str = "models/finetuned_alphafin_zh_optimized"
+    # chinese_model_path: str = "models/finetuned_alphafin_zh_optimized"
+    chinese_model_path: str = "models/alphafin_encoder_finetuned_1epoch"
     # 英文微调模型路径
     # english_model_path: str = "models/finetuned_finbert_tatqa"
     english_model_path: str = "models/finetuned_tatqa_mixed_enhanced"
