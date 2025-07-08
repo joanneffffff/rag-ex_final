@@ -30,14 +30,14 @@ def split_alphafin_json(
     print(f"  - 训练集: {len(train_data)} 个样本 ({train_ratio*100:.0f}%)")
     print(f"  - 评估集: {len(eval_data)} 个样本 ({(1-train_ratio)*100:.0f}%)")
     
-    # 保存训练集（保留Q-C和doc_id）
+    # 保存训练集（保留generated_question、summary和doc_id）
     print(f"💾 保存训练集: {train_jsonl}")
     with open(train_jsonl, "w", encoding="utf-8") as f:
         for item in train_data:
             train_item = {
-                "query": item.get("question", ""),
-                "context": item.get("context", ""),
-                "doc_id": item.get("doc_id", "")  # 添加doc_id字段
+                "generated_question": item.get("generated_question", item.get("question", "")),
+                "summary": item.get("summary", ""),
+                "doc_id": item.get("doc_id", "")
             }
             f.write(json.dumps(train_item, ensure_ascii=False) + "\n")
     
@@ -69,8 +69,8 @@ def analyze_data_distribution(train_jsonl, eval_jsonl):
     
     print(f"训练集统计:")
     print(f"  - 样本数: {len(train_samples)}")
-    print(f"  - 平均问题长度: {sum(len(s['query']) for s in train_samples)/len(train_samples):.1f} 字符")
-    print(f"  - 平均上下文长度: {sum(len(s['context']) for s in train_samples)/len(train_samples):.1f} 字符")
+    print(f"  - 平均问题长度: {sum(len(s['generated_question']) for s in train_samples)/len(train_samples):.1f} 字符")
+    print(f"  - 平均摘要长度: {sum(len(s['summary']) for s in train_samples)/len(train_samples):.1f} 字符")
     
     print(f"评估集统计:")
     print(f"  - 样本数: {len(eval_samples)}")

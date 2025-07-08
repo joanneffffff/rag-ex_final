@@ -11,16 +11,18 @@ import torch
 import numpy as np
 from sentence_transformers import SentenceTransformer, InputExample, losses
 from sentence_transformers.evaluation import SentenceEvaluator
+from sentence_transformers.datasets import SentencesDataset
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import csv
+from typing import List, Dict
 
 class MRREvaluator(SentenceEvaluator):
     """
     对给定的 (generated_question, summary) 数据集计算 Mean Reciprocal Rank (MRR)
     使用doc_id进行正确的匹配
     """
-    def __init__(self, dataset, name='', show_progress_bar=False, write_csv=True):
+    def __init__(self, dataset: List[Dict], name: str = '', show_progress_bar: bool = False, write_csv: bool = True):
         self.dataset = dataset
         self.name = name
         self.show_progress_bar = show_progress_bar
@@ -35,13 +37,13 @@ class MRREvaluator(SentenceEvaluator):
 
         # 确保数据字段存在
         self.queries = [item['query'] for item in dataset]
-        self.contexts = [item['context'] for item in dataset]
+        self.contexts = [item['context'] for item in dataset]  # 使用context字段
         self.answers = [item['answer'] for item in dataset] 
 
-        self.csv_file: str = ""
+        self.csv_file = ""
         self.csv_headers = ["epoch", "steps", "MRR"]
 
-    def __call__(self, model, output_path: str = None, epoch: int = -1, steps: int = -1) -> float:
+    def __call__(self, model, output_path: str = "", epoch: int = -1, steps: int = -1) -> float:
         if epoch != -1:
             if self.write_csv:
                 self.csv_file = os.path.join(output_path, self.name + "_mrr_evaluation_results.csv")
@@ -72,7 +74,8 @@ class MRREvaluator(SentenceEvaluator):
             
             for i, item in enumerate(iterator):
                 query_emb = model.encode(item['query'], convert_to_tensor=True)
-                scores = torch.cosine_similarity(query_emb.unsqueeze(0), context_embeddings)[0].cpu().numpy()
+                # 用summary做context - 修复：计算查询与所有上下文的相似度
+                scores = torch.cosine_similarity(query_emb.unsqueeze(0), context_embeddings).cpu().numpy()
 
                 # 使用doc_id找到目标上下文的索引
                 target_doc_id = item.get('doc_id') or str(i)
@@ -105,18 +108,18 @@ class MRREvaluator(SentenceEvaluator):
         return mrr
 
 def load_training_data(jsonl_path, max_samples=None):
-    """加载训练数据，使用generated_question作为query，summary作为context"""
+    """加载训练数据，使用generated_question和summary字段"""
     examples = []
     with open(jsonl_path, 'r', encoding='utf-8') as f:
         for line in f:
             if line.strip():
                 item = json.loads(line)
-                # 使用generated_question作为query，summary作为context
-                query = item.get('generated_question', item.get('query', ''))
-                context = item.get('summary', item.get('context', ''))
+                # 使用generated_question和summary字段
+                generated_question = item.get('generated_question', '')
+                summary = item.get('summary', '')
                 
-                if query and context:
-                    examples.append(InputExample(texts=[query, context]))
+                if generated_question and summary:
+                    examples.append(InputExample(texts=[generated_question, summary]))
                     
                     if max_samples and len(examples) >= max_samples:
                         break
@@ -125,22 +128,22 @@ def load_training_data(jsonl_path, max_samples=None):
     return examples
 
 def load_eval_data(jsonl_path, max_samples=None):
-    """加载评估数据，使用generated_question作为query，summary作为context"""
+    """加载评估数据，使用generated_question和summary字段"""
     data = []
     with open(jsonl_path, 'r', encoding='utf-8') as f:
         for line in f:
             if line.strip():
                 item = json.loads(line)
-                # 使用generated_question作为query，summary作为context
-                query = item.get('generated_question', item.get('query', ''))
-                context = item.get('summary', item.get('context', ''))
+                # 使用generated_question和summary字段
+                generated_question = item.get('generated_question', '')
+                summary = item.get('summary', '')
                 answer = item.get('answer', '')
                 doc_id = item.get('doc_id', '')
                 
-                if query and context:
+                if generated_question and summary:
                     data.append({
-                        'query': query,
-                        'context': context,
+                        'query': generated_question,  # 为了兼容MRREvaluator，仍然使用query键
+                        'context': summary,          # 为了兼容MRREvaluator，仍然使用context键
                         'answer': answer,
                         'doc_id': doc_id
                     })
@@ -155,9 +158,9 @@ def main():
     parser = argparse.ArgumentParser(description="AlphaFin中文编码器微调 (增强版)")
     parser.add_argument("--model_name", type=str, default="Langboat/mengzi-bert-base-fin",
                        help="基础模型名称")
-    parser.add_argument("--train_jsonl", type=str, default="evaluate_mrr/alphafin_train_qc.jsonl",
+    parser.add_argument("--train_jsonl", type=str, default="evaluate_mrr/alphafin_train_summary.jsonl",
                        help="训练数据文件")
-    parser.add_argument("--eval_jsonl", type=str, default="evaluate_mrr/alphafin_eval.jsonl",
+    parser.add_argument("--eval_jsonl", type=str, default="evaluate_mrr/alphafin_eval_summary.jsonl",
                        help="评估数据文件")
     parser.add_argument("--output_dir", type=str, default="models/alphafin_encoder_finetuned",
                        help="输出目录")
@@ -178,7 +181,7 @@ def main():
     print(f"  - 训练轮数: {args.epochs}")
     print(f"  - 最大样本数: {args.max_samples}")
     print(f"  - 评估步数: {args.eval_steps}")
-    print(f"  - 使用字段: generated_question -> summary")
+    print(f"  - 使用字段: generated_question -> summary (直接使用原始字段)")
     
     # 加载训练数据
     print(f"\n📖 加载训练数据：{args.train_jsonl}")
@@ -189,7 +192,7 @@ def main():
 
     # 加载评估数据
     print(f"📖 加载评估数据：{args.eval_jsonl}")
-    eval_data = load_eval_data(args.eval_jsonl, args.max_samples)
+    eval_data: List[Dict] = load_eval_data(args.eval_jsonl, args.max_samples)
     if not eval_data:
         print("❌ 没有加载到有效的评估样本")
         evaluator = None
@@ -214,8 +217,17 @@ def main():
     print(f"\n🤖 加载模型：{args.model_name}")
     try:
         # 设置设备
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        print(f"  使用设备: {device}")
+        if torch.cuda.is_available():
+            device = "cuda"
+            # 如果有多个GPU，使用CUDA_VISIBLE_DEVICES指定的设备
+            if torch.cuda.device_count() > 1:
+                print(f"  检测到 {torch.cuda.device_count()} 个GPU设备")
+                print(f"  使用设备: {device}")
+            else:
+                print(f"  使用设备: {device}")
+        else:
+            device = "cpu"
+            print(f"  使用设备: {device}")
         
         # 尝试加载模型
         model = SentenceTransformer(args.model_name)
@@ -247,7 +259,8 @@ def main():
     # 准备训练
     print(f"\n🎯 准备训练:")
     print(f"  - 训练样本数: {len(train_examples)}")
-    train_dataloader = DataLoader(train_examples, shuffle=True, batch_size=args.batch_size)
+    train_dataset = SentencesDataset(train_examples, model)
+    train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=args.batch_size)
     train_loss = losses.MultipleNegativesRankingLoss(model)
     
     # 创建输出目录
@@ -256,32 +269,21 @@ def main():
     # 开始训练
     print(f"\n🚀 开始训练...")
     
-    # 确保evaluator不为None
-    if evaluator is None:
-        print("⚠️  警告：没有评估器，将跳过评估")
-        model.fit(
-            train_objectives=[(train_dataloader, train_loss)],
-            epochs=args.epochs,
-            evaluation_steps=args.eval_steps,
-            output_path=args.output_dir,
-            show_progress_bar=True,
-            optimizer_params={'lr': 2e-5, 'weight_decay': 0.01},
-            scheduler='WarmupCosine',
-            warmup_steps=100
-        )
-    else:
-        model.fit(
-            train_objectives=[(train_dataloader, train_loss)],
-            epochs=args.epochs,
-            evaluator=evaluator,
-            evaluation_steps=args.eval_steps,
-            output_path=args.output_dir,
-            show_progress_bar=True,
-            optimizer_params={'lr': 2e-5, 'weight_decay': 0.01},
-            scheduler='WarmupCosine',
-            warmup_steps=100
-        )
+    # 使用sentence_transformers的fit方法
+    fit_kwargs = {
+        'train_objectives': [(train_dataloader, train_loss)],
+        'epochs': args.epochs,
+        'warmup_steps': 100,
+        'output_path': args.output_dir,
+        'use_amp': True,
+        'scheduler': 'warmupcosine'
+    }
     
+    if evaluator is not None:
+        fit_kwargs['evaluator'] = evaluator
+        fit_kwargs['evaluation_steps'] = args.eval_steps
+    
+    model.fit(**fit_kwargs)
     # 保存最终模型
     model.save(args.output_dir)
     print(f"\n✅ 微调完成！模型已保存到：{args.output_dir}")
