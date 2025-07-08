@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-后台运行检索评测脚本
-支持日志记录，不使用shell
+后台运行检索评测脚本 - 优化版本
+支持一次检索，多指标计算，以节省GPU资源
 """
 
 import sys
@@ -12,13 +12,69 @@ import argparse
 from pathlib import Path
 from datetime import datetime
 import time
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 # 添加项目根目录到路径
 sys.path.append(str(Path(__file__).parent.parent))
 
 from alphafin_data_process.rag_system_adapter import RagSystemAdapter
 from utils.data_loader import load_json_or_jsonl
+
+def calculate_metrics_from_raw_results(
+    raw_results: List[Dict[str, Any]], 
+    top_k: int
+) -> Dict[str, float]:
+    """
+    从原始检索结果计算指标
+    
+    Args:
+        raw_results: 原始检索结果列表，每个元素包含：
+            - query_text: str - 查询文本
+            - ground_truth_doc_ids: List[str] - 正确答案的文档ID列表
+            - retrieved_doc_ids_ranked: List[str] - 检索到的文档ID列表（按排序结果）
+        top_k: 要计算的top-k值
+        
+    Returns:
+        指标字典，包含MRR、Hit@k等
+    """
+    mrr_total = 0.0
+    hitk_total = 0
+    total = 0
+    
+    for i, result in enumerate(raw_results):
+        query_text = result.get('query_text', '')
+        ground_truth_doc_ids = result.get('ground_truth_doc_ids', [])
+        retrieved_doc_ids = result.get('retrieved_doc_ids_ranked', [])
+        
+        if not query_text or not ground_truth_doc_ids:
+            continue
+        
+        # 计算MRR和Hit@k - 支持多个相关文档ID
+        found_rank = None
+        for rank, doc_id in enumerate(retrieved_doc_ids[:top_k], 1):
+            if doc_id in ground_truth_doc_ids:
+                found_rank = rank
+                break
+        
+        if found_rank is not None:
+            mrr_total += 1.0 / found_rank
+            hitk_total += 1
+        
+        total += 1
+    
+    # 计算最终指标
+    if total > 0:
+        mrr = mrr_total / total
+        hitk = hitk_total / total
+    else:
+        mrr = 0.0
+        hitk = 0.0
+    
+    return {
+        'MRR': mrr,
+        f'Hit@{top_k}': hitk,
+        'total_samples': total
+    }
 
 def setup_logging(log_file: str) -> logging.Logger:
     """设置日志记录"""
@@ -47,7 +103,7 @@ def run_evaluation_background(
     max_samples: Optional[int] = None
 ) -> Dict[str, Any]:
     """
-    后台运行检索评测
+    后台运行检索评测 - 优化版本：一次检索，多指标计算
     
     Args:
         eval_data_path: 评测数据集路径
@@ -74,7 +130,7 @@ def run_evaluation_background(
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     log_file = output_path / f"evaluation_log_{timestamp}.txt"
     
-    print(f"开始检索评测...")
+    print(f"开始检索评测（优化版本）...")
     print(f"评测数据: {eval_data_path}")
     print(f"输出目录: {output_dir}")
     print(f"检索模式: {modes}")
@@ -116,28 +172,48 @@ def run_evaluation_background(
         print(f"开始评测模式: {mode}")
         print(f"{'='*50}")
         
+        # 确定最大检索深度
+        max_top_k = max(top_k_list)
+        print(f"使用最大检索深度: {max_top_k}")
+        
+        # 一次性检索 - 记录开始时间
+        start_time = time.time()
+        try:
+            raw_results = adapter.evaluate_retrieval_performance(
+                eval_dataset=eval_data,
+                top_k=max_top_k,  # 使用最大深度进行检索
+                mode=mode,
+                use_prefilter=use_prefilter
+            )
+            retrieval_time = time.time() - start_time
+            print(f"检索完成，耗时: {retrieval_time:.2f}秒")
+        except Exception as e:
+            print(f"检索失败: {e}")
+            continue
+        
         mode_results = {}
         
+        # 对每个top_k值计算指标
         for top_k in top_k_list:
-            print(f"\n评测 Top-{top_k}...")
+            print(f"\n计算 Top-{top_k} 指标...")
             
             try:
-                results = adapter.evaluate_retrieval_performance(
-                    eval_dataset=eval_data,
-                    top_k=top_k,
-                    mode=mode,
-                    use_prefilter=use_prefilter
-                )
+                # 使用原始检索结果计算指标
+                results = calculate_metrics_from_raw_results(raw_results, top_k)
+                results['retrieval_time_seconds'] = retrieval_time  # 添加检索耗时
                 
                 mode_results[f"top_{top_k}"] = results
-                print(f"Top-{top_k} 评测完成")
+                print(f"Top-{top_k} 指标计算完成")
+                print(f"  MRR: {results['MRR']:.4f}")
+                print(f"  Hit@{top_k}: {results[f'Hit@{top_k}']:.4f}")
                 
             except Exception as e:
-                print(f"Top-{top_k} 评测失败: {e}")
+                print(f"Top-{top_k} 指标计算失败: {e}")
                 mode_results[f"top_{top_k}"] = {
                     'MRR': 0.0,
                     f'Hit@{top_k}': 0.0,
                     'total_samples': 0,
+                    'retrieval_time_seconds': retrieval_time,
                     'error': str(e)
                 }
         
@@ -168,7 +244,8 @@ def run_evaluation_background(
                 result = all_results[mode][f"top_{top_k}"]
                 mrr = result.get('MRR', 0.0)
                 hitk = result.get(f'Hit@{top_k}', 0.0)
-                print(f"  Top-{top_k}: MRR={mrr:.4f}, Hit@{top_k}={hitk:.4f}")
+                retrieval_time = result.get('retrieval_time_seconds', 0.0)
+                print(f"  Top-{top_k}: MRR={mrr:.4f}, Hit@{top_k}={hitk:.4f}, 检索耗时={retrieval_time:.2f}s")
     
     return all_results
 

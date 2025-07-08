@@ -424,21 +424,24 @@ class RagSystemAdapter:
         top_k: int = 10,
         mode: str = "baseline",
         use_prefilter: Optional[bool] = None
-    ) -> Dict[str, float]:
+    ) -> List[Dict[str, Any]]:
         """
-        评测检索性能 - 兼容AlphaFin和TatQA数据集
+        执行检索并返回原始结果 - 优化版本，不计算指标
         
         Args:
             eval_dataset: 评测数据集，支持多种格式：
                 - AlphaFin格式: 包含generated_question和doc_id
                 - TatQA格式: 包含generated_question和relevant_doc_ids
                 - 通用格式: 支持question/query和id/document_id/target_id等字段
-            top_k: 检索返回的文档数量
+            top_k: 检索返回的文档数量（实际检索深度）
             mode: 检索模式
             use_prefilter: 是否使用预过滤（如果为None，则根据mode和配置文件自动设置，使用时会自动启用映射功能）
             
         Returns:
-            评测结果字典，包含MRR、Hit@k等指标
+            原始检索结果列表，每个元素包含：
+            - query_text: str - 查询文本
+            - ground_truth_doc_ids: List[str] - 正确答案的文档ID列表
+            - retrieved_doc_ids_ranked: List[str] - 检索到的文档ID列表（按排序结果）
         """
         # 根据mode和配置文件自动设置use_prefilter（如果未指定）
         if use_prefilter is None:
@@ -454,17 +457,15 @@ class RagSystemAdapter:
             else:
                 use_prefilter = self.ui.config.retriever.use_prefilter  # 默认使用配置文件设置
         
-        print(f"开始评测检索性能...")
+        print(f"开始执行检索（优化版本）...")
         print(f"评测样本数: {len(eval_dataset)}")
         print(f"检索模式: {mode}")
         print(f"预过滤开关: {'开启' if use_prefilter else '关闭'}")
         if use_prefilter:
             print("预过滤模式下自动启用股票代码和公司名称映射")
-        print(f"Top-K: {top_k}")
+        print(f"检索深度: {top_k}")
         
-        mrr_total = 0.0
-        hitk_total = 0
-        total = 0
+        raw_results = []
         
         for i, sample in enumerate(eval_dataset):
             # 兼容不同数据集的查询字段
@@ -515,47 +516,36 @@ class RagSystemAdapter:
                     use_prefilter=use_prefilter
                 )
                 
-                # 计算MRR和Hit@k - 支持多个相关文档ID
-                found_rank = None
-                for rank, result in enumerate(results, 1):
-                    result_doc_id = result.get('doc_id')
-                    if result_doc_id in target_doc_ids:
-                        found_rank = rank
-                        break
+                # 提取检索到的文档ID列表（按排序结果）
+                retrieved_doc_ids = []
+                for result in results:
+                    doc_id = result.get('doc_id')
+                    if doc_id:
+                        retrieved_doc_ids.append(str(doc_id))
                 
-                if found_rank is not None:
-                    mrr_total += 1.0 / found_rank
-                    hitk_total += 1
-                    print(f"✅ 找到目标文档，排名: {found_rank}")
-                else:
-                    print(f"❌ 未找到目标文档")
+                # 构建原始结果
+                raw_result = {
+                    'query_text': query,
+                    'ground_truth_doc_ids': [str(doc_id) for doc_id in target_doc_ids],
+                    'retrieved_doc_ids_ranked': retrieved_doc_ids
+                }
                 
-                total += 1
+                raw_results.append(raw_result)
+                print(f"✅ 检索完成，返回 {len(retrieved_doc_ids)} 个文档")
                 
             except Exception as e:
                 print(f"处理样本时出错: {e}")
+                # 即使出错也要添加结果，避免索引错位
+                raw_result = {
+                    'query_text': query,
+                    'ground_truth_doc_ids': [str(doc_id) for doc_id in target_doc_ids],
+                    'retrieved_doc_ids_ranked': []
+                }
+                raw_results.append(raw_result)
                 continue
         
-        # 计算最终指标
-        if total > 0:
-            mrr = mrr_total / total
-            hitk = hitk_total / total
-        else:
-            mrr = 0.0
-            hitk = 0.0
-        
-        results = {
-            'MRR': mrr,
-            f'Hit@{top_k}': hitk,
-            'total_samples': total
-        }
-        
-        print(f"\n评测完成:")
-        print(f"MRR: {mrr:.4f}")
-        print(f"Hit@{top_k}: {hitk:.4f}")
-        print(f"总样本数: {total}")
-        
-        return results
+        print(f"\n检索完成，共处理 {len(raw_results)} 个样本")
+        return raw_results
 
 def main():
     """主函数 - 演示如何使用适配器"""

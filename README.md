@@ -59,3 +59,14 @@ generator = load_generator(
 )
 4. 后处理
 5. 检索-生成协同优化：rerank （TODO in future）
+
+## TODO
+
+### GPU设备管理优化
+- [x] 实现重排序器多设备降级策略：`cuda:0` → `cuda:1` → `cpu`
+- [x] 添加GPU内存检查机制，避免OOM错误
+- [x] 修改 `QwenReranker` 类支持自动设备选择
+- [x] 更新UI加载函数支持多设备降级
+- [ ] 测试多设备降级策略在不同GPU配置下的表现
+- [ ] 优化设备选择算法，考虑GPU负载和温度
+- [ ] 添加设备切换的实时监控和日志

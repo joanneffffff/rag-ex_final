@@ -40,7 +40,7 @@ class EncoderConfig:
 class RerankerConfig:
     model_name: str = "Qwen/Qwen3-Reranker-0.6B"
     cache_dir: str = RERANKER_CACHE_DIR
-    device: Optional[str] = "cuda:0"  # 重排序器使用cuda:0
+    device: Optional[str] = "cuda:1"  # 重排序器使用cuda:1，避免与编码器冲突
     use_quantization: bool = True
     quantization_type: str = "4bit"  # 改为4bit量化以节省GPU内存
     use_flash_attention: bool = False  # 关闭Flash Attention优化
