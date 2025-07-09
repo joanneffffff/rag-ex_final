@@ -14,8 +14,11 @@ import torch
 sys.path.append(str(Path(__file__).parent.parent))
 
 from xlm.ui.optimized_rag_ui import OptimizedRagUI
-from config.parameters_cuda1_conservative import config as conservative_config
-from config.parameters import Config
+# --- 修改开始 ---
+# 移除对 parameters_cuda1_conservative 的导入，因为它不再是默认的备用配置
+# from config.parameters_cuda1_conservative import config as conservative_config 
+from config.parameters import Config, config as default_main_config # 导入 Config 类和 parameters.py 中的默认 config 对象
+# --- 修改结束 ---
 
 class RagSystemAdapter:
     """
@@ -28,10 +31,12 @@ class RagSystemAdapter:
         初始化RAG系统适配器 - 使用与run_optimized_ui相同的初始化方式
         
         Args:
-            config: 配置对象，如果为None则使用保守配置
+            config: 配置对象，如果为None则使用 config/parameters.py 中的默认配置
         """
-        # 默认使用保守配置以节省显存
-        self.config = config or conservative_config
+        # --- 修改开始 ---
+        # 如果外部没有传入 config 对象，则默认使用 config/parameters.py 中的 config
+        self.config = config or default_main_config 
+        # --- 修改结束 ---
         self.ui = None
         
         # 使用与run_optimized_ui相同的初始化方式
@@ -114,11 +119,15 @@ class RagSystemAdapter:
                 language = 'zh'
             else:
                 language = 'en'
-        except:
-            # 如果langdetect失败，使用字符检测
+        except ImportError: # Changed from generic 'except' to specific 'ImportError' for clarity
+            # If langdetect fails, use character detection
             chinese_chars = sum(1 for char in query if '\u4e00' <= char <= '\u9fff')
             language = 'zh' if chinese_chars > 0 else 'en'
-        
+        except Exception as e: # Catch other potential exceptions from langdetect
+            print(f"Language detection failed: {e}. Falling back to character-based detection.")
+            chinese_chars = sum(1 for char in query if '\u4e00' <= char <= '\u9fff')
+            language = 'zh' if chinese_chars > 0 else 'en'
+            
         print(f"检测到的语言: {language}")
         
         # 调用UI的_unified_rag_processing方法进行检索
@@ -326,8 +335,10 @@ class RagSystemAdapter:
                 from langdetect import detect
                 query_language = detect(query)
                 is_chinese_query = query_language.startswith('zh')
-            except:
-                # 如果语言检测失败，根据查询内容判断
+            except ImportError: # Changed from generic 'except' to specific 'ImportError' for clarity
+                is_chinese_query = any('\u4e00' <= char <= '\u9fff' for char in query)
+            except Exception as e: # Catch other potential exceptions from langdetect
+                print(f"Language detection failed: {e}. Falling back to character-based detection.")
                 is_chinese_query = any('\u4e00' <= char <= '\u9fff' for char in query)
             
             # 提取文档内容（只有中文查询使用智能内容选择）
@@ -448,7 +459,7 @@ class RagSystemAdapter:
         # 根据mode和配置文件自动设置use_prefilter（如果未指定）
         if use_prefilter is None:
             if self.ui is None:
-                use_prefilter = True  # 默认值
+                use_prefilter = True  # 默认值，理论上不会发生
             elif mode == "baseline":
                 # baseline模式：根据配置文件决定是否使用预过滤
                 use_prefilter = self.ui.config.retriever.use_prefilter
@@ -483,7 +494,7 @@ class RagSystemAdapter:
                     # 如果是字符串，尝试解析为列表
                     try:
                         target_doc_ids = json.loads(target_doc_ids)
-                    except:
+                    except json.JSONDecodeError: # Added specific exception for clarity
                         target_doc_ids = [target_doc_ids]
                 elif not isinstance(target_doc_ids, list):
                     target_doc_ids = [target_doc_ids]
@@ -555,13 +566,13 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description="RAG系统适配器评测脚本")
-    parser.add_argument('--eval_data_path', type=str, default='data/alphafin/alphafin_eval_samples.json', 
-                       help='评测数据集路径')
+    parser.add_argument('--eval_data_path', type=str, default='data/alphafin/alphafin_eval_samples.jsonl', 
+                        help='评测数据集路径')
     parser.add_argument('--mode', type=str, default='baseline', 
-                       choices=['baseline', 'prefilter', 'reranker'], 
-                       help='检索模式')
+                        choices=['baseline', 'prefilter', 'reranker'], 
+                        help='检索模式')
     parser.add_argument('--top_k', type=int, default=10, 
-                       help='检索返回的文档数量')
+                        help='检索返回的文档数量')
     
     args = parser.parse_args()
     
@@ -583,4 +594,4 @@ def main():
     print("评测完成！")
 
 if __name__ == "__main__":
-    main() 
+    main()

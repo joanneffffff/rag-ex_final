@@ -6,7 +6,7 @@
 set -e  # 遇到错误时退出
 
 # 默认配置
-DEFAULT_EVAL_DATA="data/alphafin/alphafin_eval_samples.json"
+DEFAULT_EVAL_DATA="data/alphafin/alphafin_eval_samples.jsonl"
 DEFAULT_OUTPUT_DIR="experiment_results"
 DEFAULT_LOG_DIR="experiment_logs"
 

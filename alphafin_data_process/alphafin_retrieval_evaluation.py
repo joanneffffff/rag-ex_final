@@ -134,7 +134,7 @@ def evaluate_mrr_and_hitk(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="AlphaFin检索系统评测脚本（所有输出均为中文）")
-    parser.add_argument('--data_path', type=str, default='data/alphafin/alphafin_eval_samples.json', help='评测数据集路径（JSON），包含generated_question和doc_id字段')
+    parser.add_argument('--data_path', type=str, default='data/alphafin/alphafin_eval_samples.jsonl', help='评测数据集路径（JSONL），包含generated_question和doc_id字段')
     parser.add_argument('--retrieval_data_path', type=str, default='data/alphafin/alphafin_final_clean.json', help='检索系统数据文件路径（AlphaFin完整数据集）')
     parser.add_argument('--mode', type=str, default='baseline', choices=['baseline', 'prefilter', 'reranker'], help='检索模式：baseline(仅FAISS), prefilter(元数据过滤+FAISS), reranker(元数据过滤+FAISS+重排序)')
     parser.add_argument('--top_k', type=int, default=10, help='检索返回top_k')

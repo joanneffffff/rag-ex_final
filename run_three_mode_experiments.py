@@ -327,7 +327,7 @@ def main():
     """主函数"""
     parser = argparse.ArgumentParser(description="三种检索模式对比实验脚本")
     parser.add_argument('--eval_data_path', type=str, 
-                       default='data/alphafin/alphafin_eval_samples.json',
+                       default='data/alphafin/alphafin_eval_samples.jsonl',
                        help='评测数据集路径')
     parser.add_argument('--output_dir', type=str, 
                        default='experiment_results',
