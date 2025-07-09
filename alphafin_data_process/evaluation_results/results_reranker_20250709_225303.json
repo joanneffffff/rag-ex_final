@@ -1,0 +1,26 @@
+{
+  "top_1": {
+    "MRR": 0.0,
+    "Hit@1": 0.0,
+    "total_samples": 1,
+    "retrieval_time_seconds": 28.027504444122314
+  },
+  "top_3": {
+    "MRR": 0.0,
+    "Hit@3": 0.0,
+    "total_samples": 1,
+    "retrieval_time_seconds": 28.027504444122314
+  },
+  "top_5": {
+    "MRR": 0.0,
+    "Hit@5": 0.0,
+    "total_samples": 1,
+    "retrieval_time_seconds": 28.027504444122314
+  },
+  "top_10": {
+    "MRR": 0.0,
+    "Hit@10": 0.0,
+    "total_samples": 1,
+    "retrieval_time_seconds": 28.027504444122314
+  }
+}

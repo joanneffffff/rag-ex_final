@@ -180,7 +180,7 @@ class QwenReranker:
         self,
         query: str,
         documents: List[str],
-        batch_size: int = 2  # 减少批处理大小以节省内存
+        batch_size: int = 1  # 减少到1以避免内存不足
     ) -> List[Tuple[str, float]]:
         """
         对文档进行重排序（优化内存使用）
@@ -219,6 +219,15 @@ class QwenReranker:
                 # 清理GPU内存
                 del inputs
                 if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                    
+                # 强制垃圾回收
+                import gc
+                gc.collect()
+                
+                # 更频繁的内存清理
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
                     torch.cuda.empty_cache()
                     
             except RuntimeError as e:

@@ -41,8 +41,8 @@ except ImportError:
     print("警告: 多阶段检索系统不可用，将使用传统检索")
     MULTI_STAGE_AVAILABLE = False
 
-def try_load_qwen_reranker(model_name, cache_dir=None, device=None):
-    """尝试加载Qwen重排序器，支持指定设备和回退策略"""
+def try_load_qwen_reranker(model_name, cache_dir=None):
+    """尝试加载Qwen重排序器，支持GPU 0和CPU回退"""
     try:
         import torch
         from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -54,36 +54,30 @@ def try_load_qwen_reranker(model_name, cache_dir=None, device=None):
         print(f"尝试使用8bit量化加载QwenReranker...")
         print(f"加载重排序器模型: {model_name}")
         
-        # 使用指定的设备，如果没有指定则使用GPU 0
-        if device is None:
-            device = "cuda:0"  # 默认使用GPU 0
-        
-        print(f"- 设备: {device}")
-        print(f"- 缓存目录: {cache_dir}")
-        print(f"- 量化: True (8bit)")
-        print(f"- Flash Attention: False")
-        
-        # 检查设备类型
-        if device.startswith("cuda"):
+        # 首先尝试GPU 0
+        if torch.cuda.is_available() and torch.cuda.device_count() > 0:
+            device = "cuda:0"  # 明确指定GPU 0
+            print(f"- 设备: {device}")
+            print(f"- 缓存目录: {cache_dir}")
+            print(f"- 量化: True (8bit)")
+            print(f"- Flash Attention: False")
+            
             try:
-                # 解析GPU ID
-                gpu_id = int(device.split(":")[1]) if ":" in device else 0
-                
-                # 检查GPU内存
-                gpu_memory = torch.cuda.get_device_properties(gpu_id).total_memory
-                allocated_memory = torch.cuda.memory_allocated(gpu_id)
+                # 检查GPU 0的可用内存
+                gpu_memory = torch.cuda.get_device_properties(0).total_memory
+                allocated_memory = torch.cuda.memory_allocated(0)
                 free_memory = gpu_memory - allocated_memory
                 
-                print(f"- GPU {gpu_id} 总内存: {gpu_memory / 1024**3:.1f}GB")
-                print(f"- GPU {gpu_id} 已用内存: {allocated_memory / 1024**3:.1f}GB")
-                print(f"- GPU {gpu_id} 可用内存: {free_memory / 1024**3:.1f}GB")
+                print(f"- GPU 0 总内存: {gpu_memory / 1024**3:.1f}GB")
+                print(f"- GPU 0 已用内存: {allocated_memory / 1024**3:.1f}GB")
+                print(f"- GPU 0 可用内存: {free_memory / 1024**3:.1f}GB")
                 
                 # 如果可用内存少于2GB，回退到CPU
                 if free_memory < 2 * 1024**3:  # 2GB
-                    print(f"- GPU {gpu_id} 内存不足，回退到CPU")
+                    print("- GPU 0 内存不足，回退到CPU")
                     device = "cpu"
                 else:
-                    # 尝试在指定GPU上加载
+                    # 尝试在GPU 0上加载
                     tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
                     model = AutoModelForSequenceClassification.from_pretrained(
                         model_name,
@@ -98,13 +92,13 @@ def try_load_qwen_reranker(model_name, cache_dir=None, device=None):
                     return QwenReranker(model_name, device=device, cache_dir=cache_dir)
                     
             except Exception as e:
-                print(f"- GPU {gpu_id} 加载失败: {e}")
+                print(f"- GPU 0 加载失败: {e}")
                 print("- 回退到CPU")
                 device = "cpu"
         
         # CPU回退
-        device = "cpu"  # 确保device变量总是有定义
         if device == "cpu" or not torch.cuda.is_available():
+            device = "cpu"
             print(f"- 设备: {device}")
             print(f"- 缓存目录: {cache_dir}")
             print(f"- 量化: False (CPU模式)")
@@ -315,8 +309,7 @@ class OptimizedRagUI:
         if self.enable_reranker:
             self.reranker = try_load_qwen_reranker(
                 model_name=config.reranker.model_name,
-                cache_dir=config.reranker.cache_dir,
-                device=config.reranker.device  # 使用配置文件中的设备设置
+                cache_dir=config.reranker.cache_dir
             )
             if self.reranker is None:
                 print("⚠️ 重排序器加载失败，将禁用重排序功能")
@@ -701,7 +694,7 @@ class OptimizedRagUI:
             reranked_items = self.reranker.rerank(
                 query=question,
                 documents=doc_texts,
-                batch_size=self.config.reranker.batch_size  # 使用配置文件中的批处理大小
+                batch_size=1  # 减小到1以避免GPU内存不足
             )
             
             # 将重排序结果映射回文档（使用索引位置映射）

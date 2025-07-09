@@ -71,7 +71,7 @@ class RagSystemAdapter:
         Args:
             query: 查询文本
             top_k: 返回的文档数量
-            mode: 检索模式（baseline=仅FAISS, prefilter=元数据过滤+FAISS, reranker=元数据过滤+FAISS+重排序）
+            mode: 检索模式（baseline=仅FAISS, prefilter=元数据过滤+FAISS, reranker=元数据过滤+FAISS+重排序, reranker_no_prefilter=FAISS+重排序）
             use_prefilter: 是否使用预过滤（如果为None，则根据mode和配置文件自动设置，使用时会自动启用映射功能）
             
         Returns:
@@ -90,6 +90,9 @@ class RagSystemAdapter:
         elif mode == "reranker":
             # reranker模式：强制使用预过滤
             use_prefilter = True
+        elif mode == "reranker_no_prefilter":
+            # 新的reranker模式：不使用预过滤，但使用重排序
+            use_prefilter = False
         else:
             # 其他模式：使用传入的参数或配置文件设置
             if use_prefilter is None:
@@ -104,7 +107,8 @@ class RagSystemAdapter:
         print(f"Top-K: {top_k}")
         
         # 根据mode设置reranker_checkbox
-        reranker_checkbox = (mode == 'reranker')
+        reranker_checkbox = (mode == 'reranker' or mode == 'reranker_no_prefilter')
+        print(f"DEBUG: mode={mode}, reranker_checkbox={reranker_checkbox}")
         
         # 检测语言
         try:
@@ -130,10 +134,8 @@ class RagSystemAdapter:
             
         print(f"检测到的语言: {language}")
         
-        # 调用UI的_unified_rag_processing方法进行检索
-        answer, context_html = self.ui._unified_rag_processing(query, language, reranker_checkbox)
-        
-        # 从UI的检索结果中提取文档信息
+        # 直接使用UI的组件进行检索，不调用_unified_rag_processing方法
+        print(f"DEBUG: 开始检索，mode={mode}, reranker_checkbox={reranker_checkbox}, use_prefilter={use_prefilter}")
         results = self._extract_retrieval_results_from_ui(query, language, reranker_checkbox, top_k, use_prefilter)
         
         print(f"检索完成，返回 {len(results)} 个文档")
@@ -215,6 +217,7 @@ class RagSystemAdapter:
                                 unique_docs.append((doc, faiss_score))
                         
                         # 1.5 对chunk应用重排序器（如果启用reranker模式）
+                        print(f"DEBUG: reranker_checkbox={reranker_checkbox}, self.ui.reranker={self.ui.reranker is not None}")
                         if reranker_checkbox and self.ui.reranker:
                             print("对chunk应用重排序器...")
                             reranked_docs = []
@@ -269,6 +272,7 @@ class RagSystemAdapter:
                                     if doc_id in doc_id_to_original_map:
                                         reranked_docs.append(doc_id_to_original_map[doc_id])
                                         reranked_scores.append(rerank_score)
+                                        print(f"DEBUG: ✅ 中文流程映射文档 {i+1} (doc_id: {doc_id})，重排序分数: {rerank_score:.4f}")
                             
                             try:
                                 sorted_pairs = sorted(zip(reranked_docs, reranked_scores), key=lambda x: x[1], reverse=True)
@@ -325,6 +329,7 @@ class RagSystemAdapter:
             return []
         
         # 3. 可选的重排序（如果启用reranker模式） - 与UI完全相同的逻辑
+        print(f"DEBUG: 统一RAG流程 reranker_checkbox={reranker_checkbox}, self.ui.reranker={self.ui.reranker is not None}")
         if reranker_checkbox and self.ui.reranker:
             print(f"应用重排序器... 输入数量: {len(retrieved_documents)}")
             reranked_docs = []
@@ -376,10 +381,14 @@ class RagSystemAdapter:
             reranked_items = self.ui.reranker.rerank(
                 query=query,
                 documents=doc_texts,
-                batch_size=1  # 减小到1以避免GPU内存不足
+                batch_size=self.ui.config.reranker.batch_size  # 使用配置文件中的批处理大小
             )
             
             # 将重排序结果映射回文档（使用索引位置映射）
+            print(f"DEBUG: 重排序器返回 {len(reranked_items)} 个结果")
+            print(f"DEBUG: 原始文档数量: {len(retrieved_documents)}")
+            
+            # 使用索引位置映射，与旧版本保持一致
             for i, (doc_text, rerank_score) in enumerate(reranked_items):
                 if i < len(retrieved_documents):
                     # 使用索引位置获取对应的doc_id
@@ -390,12 +399,23 @@ class RagSystemAdapter:
                     if doc_id in doc_id_to_original_map:
                         reranked_docs.append(doc_id_to_original_map[doc_id])
                         reranked_scores.append(rerank_score)
+                else:
+                    print(f"DEBUG: ❌ 索引 {i} 超出范围，跳过")
             
             # 按重排序分数排序
+            print(f"DEBUG: 重排序前文档数量: {len(retrieved_documents)}")
+            print(f"DEBUG: 重排序后文档数量: {len(reranked_docs)}")
+            
             sorted_pairs = sorted(zip(reranked_docs, reranked_scores), key=lambda x: x[1], reverse=True)
             retrieved_documents = [doc for doc, _ in sorted_pairs[:self.ui.config.retriever.rerank_top_k]]
             retriever_scores = [score for _, score in sorted_pairs[:self.ui.config.retriever.rerank_top_k]]
             print(f"重排序后数量: {len(retrieved_documents)}")
+            
+            # 显示重排序前后的前3个文档
+            print("DEBUG: 重排序后前3个文档:")
+            for i, (doc, score) in enumerate(sorted_pairs[:3]):
+                doc_id = getattr(doc.metadata, 'doc_id', 'N/A')
+                print(f"  {i+1}. {doc_id} - 分数: {score:.4f}")
         else:
             print("跳过重排序器...")
         

@@ -1,0 +1,20 @@
+[
+  {
+    "query_text": "中国中冶(601618.SH)在2017年6月30日的资产负债表中，其净资产是多少？",
+    "ground_truth_doc_ids": [
+      "raw_doc_142708"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "raw_doc_142708",
+      "raw_doc_158692",
+      "raw_doc_160331",
+      "raw_doc_155638",
+      "raw_doc_141994",
+      "raw_doc_148008",
+      "raw_doc_148244",
+      "raw_doc_147580",
+      "raw_doc_159958",
+      "raw_doc_150681"
+    ]
+  }
+]

@@ -35,7 +35,7 @@ class ExperimentRunner:
         
         # 实验配置
         self.experiment_config = {
-            'modes': ['baseline', 'prefilter', 'reranker'],
+            'modes': ['baseline', 'prefilter', 'reranker', 'reranker_no_prefilter'],
             'top_k_list': [1, 3, 5, 10],
             'use_prefilter': True,
             'max_samples': None  # 可以设置为数字进行快速测试

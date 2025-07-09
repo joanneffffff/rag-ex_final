@@ -181,7 +181,7 @@ def run_evaluation_background(
     """
     # 设置默认参数
     if modes is None:
-        modes = ['baseline', 'prefilter', 'reranker']
+        modes = ['baseline', 'prefilter', 'reranker', 'reranker_no_prefilter']
     if top_k_list is None:
         top_k_list = [1, 3, 5, 10]
     
