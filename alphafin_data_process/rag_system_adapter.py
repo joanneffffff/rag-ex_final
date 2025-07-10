@@ -220,67 +220,55 @@ class RagSystemAdapter:
                         print(f"DEBUG: reranker_checkbox={reranker_checkbox}, self.ui.reranker={self.ui.reranker is not None}")
                         if reranker_checkbox and self.ui.reranker:
                             print("对chunk应用重排序器...")
-                            reranked_docs = []
-                            reranked_scores = []
                             
-                            # 提取文档内容（中文数据：summary + context，英文数据：context）
-                            doc_texts = []
-                            doc_id_to_original_map = {}  # 使用doc_id进行映射
-                            for doc, _ in unique_docs:
-                                # 获取doc_id
+                            # 使用chinese_retrieval_system的rerank方法，它正确处理索引
+                            # 将unique_docs转换为candidate_results格式 [(doc_idx, faiss_score), ...]
+                            candidate_results = []
+                            for doc, faiss_score in unique_docs:
+                                # 从doc_id获取原始索引
                                 doc_id = getattr(doc.metadata, 'doc_id', None)
-                                if doc_id is None:
-                                    # 如果没有doc_id，使用content的hash作为唯一标识
-                                    doc_id = hashlib.md5(doc.content.encode('utf-8')).hexdigest()[:16]
+                                if doc_id:
+                                    # 在原始数据中找到对应的索引
+                                    for idx, record in enumerate(self.ui.chinese_retrieval_system.data):
+                                        if record.get('doc_id') == doc_id:
+                                            candidate_results.append((idx, faiss_score))
+                                            break
+                            
+                            if candidate_results:
+                                # 使用chinese_retrieval_system的rerank方法
+                                reranked_results = self.ui.chinese_retrieval_system.rerank(
+                                    query=query,
+                                    candidate_results=candidate_results,
+                                    top_k=self.ui.config.retriever.rerank_top_k
+                                )
                                 
-                                if hasattr(doc, 'metadata') and hasattr(doc.metadata, 'language') and doc.metadata.language == 'chinese':
-                                    # 中文数据：尝试组合summary和context
-                                    summary = ""
-                                    if hasattr(doc.metadata, 'summary') and doc.metadata.summary:
-                                        summary = doc.metadata.summary
-                                    else:
-                                        # 如果没有summary，使用context的前200字符作为summary
-                                        summary = doc.content[:200] + "..." if len(doc.content) > 200 else doc.content
-                                    
-                                    # 组合summary和context，避免过长
-                                    combined_text = f"摘要：{summary}\n\n详细内容：{doc.content}"
-                                    # 限制总长度，避免超出重排序器的token限制
-                                    if len(combined_text) > 4000:  # 假设重排序器限制为4000字符
-                                        combined_text = f"摘要：{summary}\n\n详细内容：{doc.content[:3500]}..."
-                                    doc_texts.append(combined_text)
-                                    doc_id_to_original_map[doc_id] = doc  # 使用doc_id映射
-                                else:
-                                    # 英文数据：只使用context
-                                    doc_texts.append(doc.content)
-                                    doc_id_to_original_map[doc_id] = doc  # 使用doc_id映射
-                            
-                            # 使用QwenReranker的rerank方法
-                            reranked_items = self.ui.reranker.rerank(
-                                query=query,
-                                documents=doc_texts,
-                                batch_size=4
-                            )
-                            
-                            # 将重排序结果映射回文档（使用索引位置映射）
-                            for i, (doc_text, rerank_score) in enumerate(reranked_items):
-                                if i < len(unique_docs):
-                                    # 使用索引位置获取对应的doc_id
-                                    doc_id = getattr(unique_docs[i][0].metadata, 'doc_id', None)
-                                    if doc_id is None:
-                                        doc_id = hashlib.md5(unique_docs[i][0].content.encode('utf-8')).hexdigest()[:16]
-                                    
-                                    if doc_id in doc_id_to_original_map:
-                                        reranked_docs.append(doc_id_to_original_map[doc_id])
-                                        reranked_scores.append(rerank_score)
-                                        print(f"DEBUG: ✅ 中文流程映射文档 {i+1} (doc_id: {doc_id})，重排序分数: {rerank_score:.4f}")
-                            
-                            try:
-                                sorted_pairs = sorted(zip(reranked_docs, reranked_scores), key=lambda x: x[1], reverse=True)
-                                unique_docs = [(doc, score) for doc, score in sorted_pairs[:self.ui.config.retriever.rerank_top_k]]
-                                print(f"chunk重排序完成，保留前 {len(unique_docs)} 个文档")
-                            except Exception as e:
-                                print(f"重排序异常: {e}")
+                                # 将重排序结果转换回DocumentWithMetadata格式
                                 unique_docs = []
+                                for doc_idx, faiss_score, combined_score in reranked_results:
+                                    if doc_idx < len(self.ui.chinese_retrieval_system.data):
+                                        original_doc = self.ui.chinese_retrieval_system.data[doc_idx]
+                                        chunks = self.ui.chinese_retrieval_system.doc_to_chunks_mapping.get(doc_idx, [])
+                                        if chunks:
+                                            content = chunks[0]
+                                            doc_id = original_doc.get('doc_id', str(doc_idx))
+                                            from xlm.dto.dto import DocumentWithMetadata, DocumentMetadata
+                                            doc = DocumentWithMetadata(
+                                                content=content,
+                                                metadata=DocumentMetadata(
+                                                    source=str(original_doc.get('company_name', '')),
+                                                    created_at="",
+                                                    author="",
+                                                    language="chinese",
+                                                    doc_id=str(doc_id),
+                                                    origin_doc_id=str(doc_id)
+                                                )
+                                            )
+                                            unique_docs.append((doc, combined_score))
+                                
+                                print(f"chunk重排序完成，保留前 {len(unique_docs)} 个文档")
+                            else:
+                                print("无法找到候选结果进行重排序")
+                                unique_docs = unique_docs[:top_k]
                         else:
                             print("跳过重排序器...")
                             unique_docs = unique_docs[:top_k]
@@ -328,94 +316,101 @@ class RagSystemAdapter:
         if not retrieved_documents:
             return []
         
-        # 3. 可选的重排序（如果启用reranker模式） - 与UI完全相同的逻辑
+        # 3. 可选的重排序（如果启用reranker模式） - 修复映射问题
         print(f"DEBUG: 统一RAG流程 reranker_checkbox={reranker_checkbox}, self.ui.reranker={self.ui.reranker is not None}")
         if reranker_checkbox and self.ui.reranker:
             print(f"应用重排序器... 输入数量: {len(retrieved_documents)}")
-            reranked_docs = []
-            reranked_scores = []
             
-            # 检测查询语言
+            # 检测查询语言 - 修复语言检测逻辑
             try:
                 from langdetect import detect
                 query_language = detect(query)
                 is_chinese_query = query_language.startswith('zh')
-            except ImportError: # Changed from generic 'except' to specific 'ImportError' for clarity
+                print(f"DEBUG: 语言检测结果: {query_language}, is_chinese_query: {is_chinese_query}")
+            except ImportError:
                 is_chinese_query = any('\u4e00' <= char <= '\u9fff' for char in query)
-            except Exception as e: # Catch other potential exceptions from langdetect
+                print(f"DEBUG: 使用字符检测, is_chinese_query: {is_chinese_query}")
+            except Exception as e:
                 print(f"Language detection failed: {e}. Falling back to character-based detection.")
                 is_chinese_query = any('\u4e00' <= char <= '\u9fff' for char in query)
+                print(f"DEBUG: 回退到字符检测, is_chinese_query: {is_chinese_query}")
             
-            # 提取文档内容（只有中文查询使用智能内容选择）
+            # 强制中文查询使用中文数据
+            if any('\u4e00' <= char <= '\u9fff' for char in query):
+                is_chinese_query = True
+                print(f"DEBUG: 检测到中文字符，强制使用中文数据")
+            
+            # 提取文档内容和索引信息
             doc_texts = []
-            doc_id_to_original_map = {}  # 使用doc_id进行映射
-            for doc in retrieved_documents:
-                # 获取doc_id
-                doc_id = getattr(doc.metadata, 'doc_id', None)
-                if doc_id is None:
-                    # 如果没有doc_id，使用content的hash作为唯一标识
-                    doc_id = hashlib.md5(doc.content.encode('utf-8')).hexdigest()[:16]
-                
-                if is_chinese_query and hasattr(doc, 'metadata') and hasattr(doc.metadata, 'language') and doc.metadata.language == 'chinese':
-                    # 中文数据：尝试组合summary和context
-                    summary = ""
-                    if hasattr(doc.metadata, 'summary') and doc.metadata.summary:
-                        summary = doc.metadata.summary
-                    else:
-                        # 如果没有summary，使用context的前200字符作为summary
-                        summary = doc.content[:200] + "..." if len(doc.content) > 200 else doc.content
-                    
-                    # 组合summary和context，避免过长
-                    combined_text = f"摘要：{summary}\n\n详细内容：{doc.content}"
-                    # 限制总长度，避免超出重排序器的token限制
-                    if len(combined_text) > 4000:  # 假设重排序器限制为4000字符
-                        combined_text = f"摘要：{summary}\n\n详细内容：{doc.content[:3500]}..."
-                    doc_texts.append(combined_text)
-                    doc_id_to_original_map[doc_id] = doc  # 使用doc_id映射
-                else:
-                    # 英文数据或非中文数据：只使用context
-                    doc_texts.append(doc.content if hasattr(doc, 'content') else str(doc))
-                    doc_id_to_original_map[doc_id] = doc  # 使用doc_id映射
+            doc_indices = []  # 保存原始索引
+            doc_ids = []      # 保存doc_id
             
-            # 使用QwenReranker的rerank方法
-            reranked_items = self.ui.reranker.rerank(
+            for i, doc in enumerate(retrieved_documents):
+                # 获取文档内容
+                if hasattr(doc, 'content'):
+                    content = doc.content
+                else:
+                    content = str(doc)
+                
+                # 限制内容长度
+                if len(content) > 2000:
+                    content = content[:2000] + "..."
+                
+                doc_texts.append(content)
+                doc_indices.append(i)
+                doc_id = getattr(doc.metadata, 'doc_id', f'doc_{i}')
+                doc_ids.append(doc_id)
+            
+            # 使用QwenReranker的rerank_with_indices方法
+            reranked_items = self.ui.reranker.rerank_with_indices(
                 query=query,
                 documents=doc_texts,
-                batch_size=self.ui.config.reranker.batch_size  # 使用配置文件中的批处理大小
+                doc_indices=doc_indices,
+                doc_ids=doc_ids,
+                batch_size=self.ui.config.reranker.batch_size
             )
             
-            # 将重排序结果映射回文档（使用索引位置映射）
+            # 将重排序结果映射回文档（直接使用索引）
             print(f"DEBUG: 重排序器返回 {len(reranked_items)} 个结果")
-            print(f"DEBUG: 原始文档数量: {len(retrieved_documents)}")
             
-            # 使用索引位置映射，与旧版本保持一致
-            for i, (doc_text, rerank_score) in enumerate(reranked_items):
-                if i < len(retrieved_documents):
-                    # 使用索引位置获取对应的doc_id
-                    doc_id = getattr(retrieved_documents[i].metadata, 'doc_id', None)
-                    if doc_id is None:
-                        doc_id = hashlib.md5(retrieved_documents[i].content.encode('utf-8')).hexdigest()[:16]
-                    
-                    if doc_id in doc_id_to_original_map:
-                        reranked_docs.append(doc_id_to_original_map[doc_id])
-                        reranked_scores.append(rerank_score)
+            # 分析重排序分数
+            if reranked_items:
+                scores = [score for _, _, score in reranked_items]
+                score_range = max(scores) - min(scores)
+                print(f"DEBUG: 重排序分数范围: {min(scores):.4f} - {max(scores):.4f}, 差异: {score_range:.4f}")
+                
+                if score_range < 0.01:
+                    print("DEBUG: ⚠️ 分数差异很小，排序可能不会改变")
+                elif score_range < 0.1:
+                    print("DEBUG: ⚠️ 分数差异较小，排序变化可能不明显")
                 else:
-                    print(f"DEBUG: ❌ 索引 {i} 超出范围，跳过")
+                    print("DEBUG: ✅ 分数差异较大，排序应该有明显变化")
+            
+            reranked_docs = []
+            reranked_scores = []
+            for original_index, doc_id, rerank_score in reranked_items:
+                if original_index < len(retrieved_documents):
+                    original_doc = retrieved_documents[original_index]
+                    reranked_docs.append(original_doc)
+                    reranked_scores.append(rerank_score)
+                    print(f"DEBUG: ✅ 成功映射文档 (doc_id: {doc_id}, index: {original_index})，重排序分数: {rerank_score:.4f}")
+                else:
+                    print(f"DEBUG: ❌ 索引超出范围: {original_index} >= {len(retrieved_documents)}")
             
             # 按重排序分数排序
-            print(f"DEBUG: 重排序前文档数量: {len(retrieved_documents)}")
-            print(f"DEBUG: 重排序后文档数量: {len(reranked_docs)}")
-            
-            sorted_pairs = sorted(zip(reranked_docs, reranked_scores), key=lambda x: x[1], reverse=True)
-            retrieved_documents = [doc for doc, _ in sorted_pairs[:self.ui.config.retriever.rerank_top_k]]
-            retriever_scores = [score for _, score in sorted_pairs[:self.ui.config.retriever.rerank_top_k]]
-            print(f"重排序后数量: {len(retrieved_documents)}")
-            
-            # 显示重排序前后的前3个文档
-            print("DEBUG: 重排序后前3个文档:")
-            for i, (doc, score) in enumerate(sorted_pairs[:3]):
-                doc_id = getattr(doc.metadata, 'doc_id', 'N/A')
-                print(f"  {i+1}. {doc_id} - 分数: {score:.4f}")
+            if reranked_docs:
+                sorted_pairs = sorted(zip(reranked_docs, reranked_scores), key=lambda x: x[1], reverse=True)
+                retrieved_documents = [doc for doc, _ in sorted_pairs[:self.ui.config.retriever.rerank_top_k]]
+                retriever_scores = [score for _, score in sorted_pairs[:self.ui.config.retriever.rerank_top_k]]
+                print(f"重排序后数量: {len(retrieved_documents)}")
+                
+                # 显示重排序后的前3个文档
+                print("DEBUG: 重排序后前3个文档:")
+                for i, (doc, score) in enumerate(sorted_pairs[:3]):
+                    doc_id = getattr(doc.metadata, 'doc_id', 'N/A')
+                    print(f"  {i+1}. {doc_id} - 分数: {score:.4f}")
+            else:
+                print("DEBUG: 重排序映射失败，保持原始排序")
         else:
             print("跳过重排序器...")
         

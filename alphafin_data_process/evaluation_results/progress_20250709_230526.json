@@ -1,7 +1,11 @@
 {
   "timestamp": "20250709_230526",
-  "current_mode": "reranker",
-  "processed_samples": 100,
-  "last_update": "2025-07-09T23:40:58.084119",
-  "status": "running"
+  "status": "completed",
+  "total_modes": 2,
+  "completed_modes": [
+    "reranker",
+    "reranker_no_prefilter"
+  ],
+  "completion_time": "2025-07-10T00:23:08.188068",
+  "total_samples": 100
 }

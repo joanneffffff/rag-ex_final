@@ -33,7 +33,7 @@ class EncoderConfig:
     # english_model_path: str = "models/finetuned_finbert_simple_continued_fixed"
     cache_dir: str = EMBEDDING_CACHE_DIR
     device: Optional[str] = "cuda:0"  # 编码器使用cuda:0
-    batch_size: int = 32  # 从32增加到64，利用充足的GPU内存加速处理
+    batch_size: int = 64  # 从32增加到64，利用充足的GPU内存加速处理
     max_length: int = 512
 
 @dataclass
@@ -51,7 +51,7 @@ class RerankerConfig:
 class RetrieverConfig:
     use_faiss: bool = True  # Changed default to True for efficiency
     num_threads: int = 4
-    batch_size: int = 32  # 从32增加到64，利用充足的GPU内存加速处理
+    batch_size: int = 64  # 从32增加到64，利用充足的GPU内存加速处理
     use_gpu: bool = torch.cuda.is_available() # Dynamically set default based on hardware
     max_context_length: int = 100
     # 重排序相关配置

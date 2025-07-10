@@ -24,5 +24,31 @@
       "total_samples": 100,
       "retrieval_time_seconds": 1951.030919790268
     }
+  },
+  "reranker_no_prefilter": {
+    "top_1": {
+      "MRR": 0.6,
+      "Hit@1": 0.6,
+      "total_samples": 100,
+      "retrieval_time_seconds": 2530.087260723114
+    },
+    "top_3": {
+      "MRR": 0.7033333333333335,
+      "Hit@3": 0.82,
+      "total_samples": 100,
+      "retrieval_time_seconds": 2530.087260723114
+    },
+    "top_5": {
+      "MRR": 0.7223333333333334,
+      "Hit@5": 0.9,
+      "total_samples": 100,
+      "retrieval_time_seconds": 2530.087260723114
+    },
+    "top_10": {
+      "MRR": 0.7283333333333334,
+      "Hit@10": 0.94,
+      "total_samples": 100,
+      "retrieval_time_seconds": 2530.087260723114
+    }
   }
 }
