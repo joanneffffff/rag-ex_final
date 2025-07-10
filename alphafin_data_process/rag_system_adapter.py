@@ -361,21 +361,25 @@ class RagSystemAdapter:
                 doc_id = getattr(doc.metadata, 'doc_id', f'doc_{i}')
                 doc_ids.append(doc_id)
             
-            # 使用QwenReranker的rerank_with_indices方法
-            reranked_items = self.ui.reranker.rerank_with_indices(
-                query=query,
-                documents=doc_texts,
-                doc_indices=doc_indices,
-                doc_ids=doc_ids,
-                batch_size=self.ui.config.reranker.batch_size
-            )
+            # 使用QwenReranker的rerank_with_doc_ids方法
+            try:
+                reranked_items = self.ui.reranker.rerank_with_doc_ids(
+                    query=query,
+                    documents=doc_texts,
+                    doc_ids=doc_ids,
+                    batch_size=self.ui.config.reranker.batch_size
+                )
+                print(f"DEBUG: ✅ rerank_with_doc_ids方法调用成功，返回{len(reranked_items)}个结果")
+            except Exception as e:
+                print(f"DEBUG: ❌ rerank_with_doc_ids方法调用失败: {e}")
+                reranked_items = []
             
-            # 将重排序结果映射回文档（直接使用索引）
+            # 将重排序结果映射回文档（使用doc_id正确映射）
             print(f"DEBUG: 重排序器返回 {len(reranked_items)} 个结果")
             
             # 分析重排序分数
             if reranked_items:
-                scores = [score for _, _, score in reranked_items]
+                scores = [score for _, score in reranked_items]
                 score_range = max(scores) - min(scores)
                 print(f"DEBUG: 重排序分数范围: {min(scores):.4f} - {max(scores):.4f}, 差异: {score_range:.4f}")
                 
@@ -388,14 +392,23 @@ class RagSystemAdapter:
             
             reranked_docs = []
             reranked_scores = []
-            for original_index, doc_id, rerank_score in reranked_items:
-                if original_index < len(retrieved_documents):
-                    original_doc = retrieved_documents[original_index]
-                    reranked_docs.append(original_doc)
+            
+            # 创建doc_id到原始文档的映射
+            doc_id_to_original_map = {}
+            for i, doc in enumerate(retrieved_documents):
+                doc_id = getattr(doc.metadata, 'doc_id', None)
+                if doc_id is None:
+                    doc_id = hashlib.md5(doc.content.encode('utf-8')).hexdigest()[:16]
+                doc_id_to_original_map[doc_id] = doc
+            
+            # 将重排序结果映射回文档（reranker直接返回doc_id，无需复杂映射）
+            for doc_text, rerank_score, doc_id in reranked_items:
+                if doc_id in doc_id_to_original_map:
+                    reranked_docs.append(doc_id_to_original_map[doc_id])
                     reranked_scores.append(rerank_score)
-                    print(f"DEBUG: ✅ 成功映射文档 (doc_id: {doc_id}, index: {original_index})，重排序分数: {rerank_score:.4f}")
+                    print(f"DEBUG: ✅ 成功映射文档 (doc_id: {doc_id})，重排序分数: {rerank_score:.4f}")
                 else:
-                    print(f"DEBUG: ❌ 索引超出范围: {original_index} >= {len(retrieved_documents)}")
+                    print(f"DEBUG: ❌ doc_id不在映射中: {doc_id}")
             
             # 按重排序分数排序
             if reranked_docs:

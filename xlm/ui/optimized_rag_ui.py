@@ -697,24 +697,29 @@ class OptimizedRagUI:
                     doc_texts.append(doc.content if hasattr(doc, 'content') else str(doc))
                     doc_id_to_original_map[doc_id] = doc  # 使用doc_id映射
             
-            # 使用QwenReranker的rerank方法
-            reranked_items = self.reranker.rerank(
+            # 使用QwenReranker的rerank_with_doc_ids方法
+            doc_ids = []
+            for doc in retrieved_documents:
+                doc_id = getattr(doc.metadata, 'doc_id', None)
+                if doc_id is None:
+                    doc_id = hashlib.md5(doc.content.encode('utf-8')).hexdigest()[:16]
+                doc_ids.append(doc_id)
+            
+            reranked_items = self.reranker.rerank_with_doc_ids(
                 query=question,
                 documents=doc_texts,
+                doc_ids=doc_ids,
                 batch_size=self.config.reranker.batch_size  # 使用配置文件中的批处理大小
             )
             
-            # 将重排序结果映射回文档（使用索引位置映射）
-            for i, (doc_text, rerank_score) in enumerate(reranked_items):
-                if i < len(retrieved_documents):
-                    # 使用索引位置获取对应的doc_id
-                    doc_id = getattr(retrieved_documents[i].metadata, 'doc_id', None)
-                    if doc_id is None:
-                        doc_id = hashlib.md5(retrieved_documents[i].content.encode('utf-8')).hexdigest()[:16]
-                    
-                    if doc_id in doc_id_to_original_map:
-                        reranked_docs.append(doc_id_to_original_map[doc_id])
-                        reranked_scores.append(rerank_score)
+            # 将重排序结果映射回文档（reranker直接返回doc_id，无需复杂映射）
+            for doc_text, rerank_score, doc_id in reranked_items:
+                if doc_id in doc_id_to_original_map:
+                    reranked_docs.append(doc_id_to_original_map[doc_id])
+                    reranked_scores.append(rerank_score)
+                    print(f"DEBUG: ✅ 成功映射文档 (doc_id: {doc_id})，重排序分数: {rerank_score:.4f}")
+                else:
+                    print(f"DEBUG: ❌ doc_id不在映射中: {doc_id}")
             
             # 按重排序分数排序
             sorted_pairs = sorted(zip(reranked_docs, reranked_scores), key=lambda x: x[1], reverse=True)

@@ -253,6 +253,134 @@ class QwenReranker:
         results.sort(key=lambda x: x[1], reverse=True)
         
         return results
+
+    def rerank_with_doc_ids(
+        self,
+        query: str,
+        documents: List[str],
+        doc_ids: List[str],
+        batch_size: int = 1
+    ) -> List[Tuple[str, float, str]]:
+        """
+        对文档进行重排序并返回doc_id
+        
+        Args:
+            query: 查询文本
+            documents: 文档列表
+            doc_ids: 文档ID列表（与documents对应）
+            batch_size: 批处理大小
+            
+        Returns:
+            重排序后的(文档文本, 分数, doc_id)列表
+        """
+        if not documents or not doc_ids or len(documents) != len(doc_ids):
+            print("警告：文档列表和doc_id列表不匹配或为空")
+            return []
+        
+        # 格式化所有文档
+        formatted_pairs = []
+        for doc, doc_id in zip(documents, doc_ids):
+            formatted_text = self.format_instruction(None, query, doc)
+            formatted_pairs.append((formatted_text, doc, doc_id))
+        
+        # 批处理重排序
+        all_scores = []
+        for i in range(0, len(formatted_pairs), batch_size):
+            batch_pairs = formatted_pairs[i:i + batch_size]
+            batch_texts = [pair[0] for pair in batch_pairs]
+            
+            try:
+                # 处理输入
+                inputs = self.process_inputs(batch_texts)
+                
+                # 计算分数
+                batch_scores = self.compute_logits(inputs)
+                all_scores.extend(batch_scores)
+                
+                # 清理GPU内存
+                del inputs
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                    
+                # 强制垃圾回收
+                import gc
+                gc.collect()
+                
+                # 更频繁的内存清理
+                if torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                    torch.cuda.empty_cache()
+                    
+            except RuntimeError as e:
+                if "out of memory" in str(e):
+                    print(f"GPU内存不足，尝试减小批处理大小...")
+                    # 如果内存不足，尝试更小的批处理
+                    if batch_size > 1:
+                        # 递归调用，使用更小的批处理大小
+                        return self.rerank_with_doc_ids(query, documents, doc_ids, batch_size=batch_size // 2)
+                    else:
+                        print("批处理大小已最小化，仍内存不足，尝试CPU处理...")
+                        # 最后尝试CPU处理
+                        return self._rerank_with_doc_ids_on_cpu(query, documents, doc_ids)
+                else:
+                    raise e
+        
+        # 组合文档、分数和doc_id
+        results = []
+        for i, (formatted_text, doc, doc_id) in enumerate(formatted_pairs):
+            results.append((doc, all_scores[i], doc_id))
+        
+        # 按分数降序排序
+        results.sort(key=lambda x: x[1], reverse=True)
+        
+        return results
+
+    def _rerank_with_doc_ids_on_cpu(self, query: str, documents: List[str], doc_ids: List[str]) -> List[Tuple[str, float, str]]:
+        """
+        CPU回退重排序（当GPU内存不足时使用）
+        
+        Args:
+            query: 查询文本
+            documents: 文档列表
+            doc_ids: 文档ID列表
+            
+        Returns:
+            重排序后的(文档文本, 分数, doc_id)列表
+        """
+        print("使用CPU进行重排序...")
+        
+        # 临时将模型移动到CPU
+        original_device = next(self.model.parameters()).device
+        self.model = self.model.cpu()
+        
+        try:
+            # 格式化所有文档
+            formatted_pairs = []
+            for doc, doc_id in zip(documents, doc_ids):
+                formatted_text = self.format_instruction(None, query, doc)
+                formatted_pairs.append((formatted_text, doc, doc_id))
+            
+            # 逐个处理（CPU模式）
+            all_scores = []
+            for formatted_text, doc, doc_id in formatted_pairs:
+                inputs = self.process_inputs([formatted_text])
+                score = self.compute_logits(inputs)[0]
+                all_scores.append(score)
+                del inputs
+            
+            # 组合文档、分数和doc_id
+            results = []
+            for i, (formatted_text, doc, doc_id) in enumerate(formatted_pairs):
+                results.append((doc, all_scores[i], doc_id))
+            
+            # 按分数降序排序
+            results.sort(key=lambda x: x[1], reverse=True)
+            
+            return results
+            
+        finally:
+            # 恢复模型到原始设备
+            self.model = self.model.to(original_device)
     
     def _rerank_on_cpu(self, query: str, documents: List[str]) -> List[Tuple[str, float]]:
         """
