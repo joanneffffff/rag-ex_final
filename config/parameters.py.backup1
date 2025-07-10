@@ -40,7 +40,7 @@ class EncoderConfig:
 class RerankerConfig:
     model_name: str = "Qwen/Qwen3-Reranker-0.6B"
     cache_dir: str = RERANKER_CACHE_DIR
-    device: Optional[str] = "cuda:0"  # 重排序器使用cuda:1，避免与编码器冲突
+    device: Optional[str] = "cuda:1"  # 重排序器使用cuda:1，避免与编码器冲突
     use_quantization: bool = True
     quantization_type: str = "4bit"  # 改为4bit量化以节省GPU内存
     use_flash_attention: bool = False  # 关闭Flash Attention优化
@@ -55,7 +55,7 @@ class RetrieverConfig:
     use_gpu: bool = torch.cuda.is_available() # Dynamically set default based on hardware
     max_context_length: int = 100
     # 重排序相关配置
-    retrieval_top_k: int = 100  # FAISS检索的top-k
+    retrieval_top_k: int = 20  # FAISS检索的top-k
     rerank_top_k: int = 10      # 重排序后的top-k，从10增加到20
     # 预过滤配置
     use_prefilter: bool = True  # 是否使用预过滤功能（使用时会自动启用股票代码和公司名称映射）
@@ -88,10 +88,10 @@ class SystemConfig:
 @dataclass
 class GeneratorConfig:
     # 可选的生成器模型
-    # model_name : str = "Qwen/Qwen2-0.5B-Instruct"  # 原始小模型
+    model_name : str = "Qwen/Qwen2-0.5B-Instruct"  # 原始小模型
     # model_name: str = "Qwen/Qwen2-1.5B-Instruct"  # 原始小模型
     # model_name: str = "Qwen/Qwen3-8B"  # Qwen3-8B基础版本，更大的模型，替代Fin-R1
-    model_name: str = "SUFE-AIFLM-Lab/Fin-R1"  # 上海财经大学金融推理大模型，专门针对金融领域优化
+    # model_name: str = "SUFE-AIFLM-Lab/Fin-R1"  # 上海财经大学金融推理大模型，专门针对金融领域优化
     cache_dir: str = GENERATOR_CACHE_DIR
     device: Optional[str] = "cuda:1"
     
@@ -99,7 +99,7 @@ class GeneratorConfig:
     use_quantization: bool = True  # 启用量化
     quantization_type: str = "4bit"  # 使用4bit量化以节省内存
     use_flash_attention: bool = False  # 启用Flash Attention优化
-    max_new_tokens: int = 8196  # 增加到4096以生成更完整的答案
+    max_new_tokens: int = 2048  # 增加到4096以生成更完整的答案
     # 对于Fin-R1模型，这些参数会被忽略，但保留在配置中以防其他模型使用
     temperature: float = 0.1  # Fin-R1不使用此参数
     top_p: float = 0.7  # Fin-R1不使用此参数
@@ -128,7 +128,7 @@ class GeneratorConfig:
     enable_performance_monitoring: bool = True  # 启用性能监控
 
     # 超时和性能配置
-    max_generation_time: int = 300  # 生成超时时间（秒），增加到5分钟
+    max_generation_time: int = 30  # 生成超时时间（秒），增加到5分钟
 
 @dataclass
 class Config:

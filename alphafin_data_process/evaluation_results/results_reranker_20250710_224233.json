@@ -1,0 +1,26 @@
+{
+  "top_1": {
+    "MRR": 0.47,
+    "Hit@1": 0.47,
+    "total_samples": 100,
+    "retrieval_time_seconds": 2186.321231365204
+  },
+  "top_3": {
+    "MRR": 0.5566666666666666,
+    "Hit@3": 0.65,
+    "total_samples": 100,
+    "retrieval_time_seconds": 2186.321231365204
+  },
+  "top_5": {
+    "MRR": 0.5706666666666667,
+    "Hit@5": 0.71,
+    "total_samples": 100,
+    "retrieval_time_seconds": 2186.321231365204
+  },
+  "top_10": {
+    "MRR": 0.5776666666666667,
+    "Hit@10": 0.76,
+    "total_samples": 100,
+    "retrieval_time_seconds": 2186.321231365204
+  }
+}

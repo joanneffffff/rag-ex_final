@@ -379,7 +379,7 @@ class RagSystemAdapter:
             
             # 分析重排序分数
             if reranked_items:
-                scores = [score for _, score in reranked_items]
+                scores = [score for _, score, _ in reranked_items]
                 score_range = max(scores) - min(scores)
                 print(f"DEBUG: 重排序分数范围: {min(scores):.4f} - {max(scores):.4f}, 差异: {score_range:.4f}")
                 

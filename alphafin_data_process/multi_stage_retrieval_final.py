@@ -833,7 +833,22 @@ class MultiStageRetrievalSystem:
         
         # 使用Qwen重排序器进行重排序
         try:
-            reranked_results = self.qwen_reranker.rerank(query, docs_for_rerank, batch_size=1)  # 减小到1以避免GPU内存不足
+            # 准备doc_ids用于新方法
+            doc_ids = []
+            for doc_idx, faiss_score in candidate_results:
+                if doc_idx < len(self.data):
+                    doc_id = self.data[doc_idx].get('doc_id', f'doc_{doc_idx}')
+                    doc_ids.append(doc_id)
+                else:
+                    doc_ids.append(f'doc_{doc_idx}')
+            
+            # 使用新的rerank_with_doc_ids方法
+            reranked_results = self.qwen_reranker.rerank_with_doc_ids(
+                query=query,
+                documents=docs_for_rerank,
+                doc_ids=doc_ids,
+                batch_size=1  # 减小到1以避免GPU内存不足
+            )
             print(f"重排序器处理完成，返回 {len(reranked_results)} 个结果")
         except Exception as e:
             print(f"重排序失败: {e}")
@@ -842,10 +857,10 @@ class MultiStageRetrievalSystem:
         
         # 将重排序结果映射回原始文档索引
         final_results = []
-        for doc_text, reranker_score in reranked_results:
+        for doc_text, reranker_score, doc_id in reranked_results:
             # 找到对应的原始文档索引
-            for i, (doc_idx, faiss_score) in enumerate(doc_to_rerank_mapping):
-                if i < len(docs_for_rerank) and docs_for_rerank[i] == doc_text:
+            for i, (doc_idx, faiss_score) in enumerate(candidate_results):
+                if doc_idx < len(self.data) and self.data[doc_idx].get('doc_id') == doc_id:
                     # 组合分数：FAISS分数 + 重排序分数
                     combined_score = faiss_score + reranker_score
                     final_results.append((doc_idx, faiss_score, combined_score))

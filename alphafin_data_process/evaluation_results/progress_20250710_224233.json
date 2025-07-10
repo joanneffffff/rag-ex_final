@@ -1,0 +1,11 @@
+{
+  "timestamp": "20250710_224233",
+  "status": "completed",
+  "total_modes": 2,
+  "completed_modes": [
+    "reranker",
+    "reranker_no_prefilter"
+  ],
+  "completion_time": "2025-07-11T00:08:33.719391",
+  "total_samples": 100
+}

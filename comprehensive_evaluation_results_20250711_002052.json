@@ -1,0 +1,331 @@
+{
+  "results": [
+    {
+      "query": "What is the total assets as of June 30, 2019?",
+      "expected_answer": "948,578",
+      "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the total assets as of June 30, 2019. From the provided table context, I need to locate the relevant entries that p。",
+      "extracted_answer": "30",
+      "evaluation": {
+        "exact_match": false,
+        "f1_score": 0.0
+      },
+      "answer_from": "table",
+      "predicted_answer_from": "unified",
+      "decision_confidence": 1.0,
+      "is_difficult_decision": false,
+      "context_type": "unified",
+      "content_ratio": {
+        "table_ratio": 0.0,
+        "text_ratio": 0.0,
+        "mixed_ratio": 0.0
+      },
+      "generation_time": 39.1745126247406
+    },
+    {
+      "query": "What are the Fiscal years included in the table?",
+      "expected_answer": "2019; 2018",
+      "generated_answer": "<think> Okay, let me try to figure out the fiscal years included in this table. So, looking at the table context provided, there's a table with several rows and categories. The key here is to locate where the fiscal years are mentioned。",
+      "extracted_answer": "Okay let me try to figure out the fiscal years included in this table. So looking at the table context provided there's a table with several rows and categories. The key here is to locate where the fiscal years are mentioned",
+      "evaluation": {
+        "exact_match": false,
+        "f1_score": 0.0
+      },
+      "answer_from": "table",
+      "predicted_answer_from": "unified",
+      "decision_confidence": 1.0,
+      "is_difficult_decision": false,
+      "context_type": "unified",
+      "content_ratio": {
+        "table_ratio": 0.0,
+        "text_ratio": 0.0,
+        "mixed_ratio": 0.0
+      },
+      "generation_time": 42.514060497283936
+    },
+    {
+      "query": "What is the average annual total assets for both Fiscal years?",
+      "expected_answer": "995684.5",
+      "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the average annual total assets for both fiscal years. From the provided table context, I need to locate the relevant data points. First, I'll look。",
+      "extracted_answer": "Okay let's tackle this question step by step. The user is asking for the average annual total assets for both fiscal years. From the provided table context I need to locate the relevant data points. First I'll look",
+      "evaluation": {
+        "exact_match": false,
+        "f1_score": 0.0
+      },
+      "answer_from": "table",
+      "predicted_answer_from": "unified",
+      "decision_confidence": 1.0,
+      "is_difficult_decision": false,
+      "context_type": "unified",
+      "content_ratio": {
+        "table_ratio": 0.0,
+        "text_ratio": 0.0,
+        "mixed_ratio": 0.0
+      },
+      "generation_time": 45.72424650192261
+    },
+    {
+      "query": "What is the percentage change of total assets from fiscal year 2018 to 2019?",
+      "expected_answer": "-9.03",
+      "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the percentage change in total assets from fiscal year 2018 to 2019. First, I need to locate the relevant data。",
+      "extracted_answer": "2018",
+      "evaluation": {
+        "exact_match": false,
+        "f1_score": 0.0
+      },
+      "answer_from": "table",
+      "predicted_answer_from": "unified",
+      "decision_confidence": 1.0,
+      "is_difficult_decision": false,
+      "context_type": "unified",
+      "content_ratio": {
+        "table_ratio": 0.0,
+        "text_ratio": 0.0,
+        "mixed_ratio": 0.0
+      },
+      "generation_time": 48.80680704116821
+    },
+    {
+      "query": "What is the difference between the Restructuring costs and other reserves in fiscal year 2019 and 2018?",
+      "expected_answer": "643",
+      "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the difference between the Restructuring costs and other reserves in fiscal year 2019 and 2018. First, I need。",
+      "extracted_answer": "2019",
+      "evaluation": {
+        "exact_match": false,
+        "f1_score": 0.0
+      },
+      "answer_from": "table",
+      "predicted_answer_from": "unified",
+      "decision_confidence": 1.0,
+      "is_difficult_decision": false,
+      "context_type": "unified",
+      "content_ratio": {
+        "table_ratio": 0.0,
+        "text_ratio": 0.0,
+        "mixed_ratio": 0.0
+      },
+      "generation_time": 49.07631993293762
+    },
+    {
+      "query": "What method did the company use when Topic 606 in fiscal 2019 was adopted?",
+      "expected_answer": "the modified retrospective method",
+      "generated_answer": "<think> Okay, let me try to figure this out. The question is asking what method the company used when they adopted Topic 606 in fiscal 2019. I need to look through the provided text to find the relevant。",
+      "extracted_answer": "606",
+      "evaluation": {
+        "exact_match": false,
+        "f1_score": 0.0
+      },
+      "answer_from": "text",
+      "predicted_answer_from": "unified",
+      "decision_confidence": 1.0,
+      "is_difficult_decision": false,
+      "context_type": "unified",
+      "content_ratio": {
+        "table_ratio": 0.0,
+        "text_ratio": 0.0,
+        "mixed_ratio": 0.0
+      },
+      "generation_time": 51.82040286064148
+    },
+    {
+      "query": "How much was the cumulative-effect adjustment to the opening balance of fiscal 2019 retained earnings?",
+      "expected_answer": "$0.5 million",
+      "generated_answer": "<think> Okay, let me try to figure this out. The question is asking for the cumulative-effect adjustment to the opening balance of fiscal 2019 retained earnings. I need to look through the provided text to find where this information is。",
+      "extracted_answer": "2019",
+      "evaluation": {
+        "exact_match": false,
+        "f1_score": 0.0
+      },
+      "answer_from": "text",
+      "predicted_answer_from": "unified",
+      "decision_confidence": 1.0,
+      "is_difficult_decision": false,
+      "context_type": "unified",
+      "content_ratio": {
+        "table_ratio": 0.0,
+        "text_ratio": 0.0,
+        "mixed_ratio": 0.0
+      },
+      "generation_time": 54.880770683288574
+    },
+    {
+      "query": "What does the table show?",
+      "expected_answer": "primary components of the deferred tax assets and liabilities",
+      "generated_answer": "<think> Okay, let me try to figure out what the table shows. So, I need to look at the provided table context and see what kind of data it contains. From the examples above, I remember that sometimes tables can have different headers。",
+      "extracted_answer": "Okay let me try to figure out what the table shows. So I need to look at the provided table context and see what kind of data it contains. From the examples above I remember that sometimes tables can have different headers",
+      "evaluation": {
+        "exact_match": false,
+        "f1_score": 0.11764705882352941
+      },
+      "answer_from": "text",
+      "predicted_answer_from": "unified",
+      "decision_confidence": 1.0,
+      "is_difficult_decision": false,
+      "context_type": "unified",
+      "content_ratio": {
+        "table_ratio": 0.0,
+        "text_ratio": 0.0,
+        "mixed_ratio": 0.0
+      },
+      "generation_time": 55.1133553981781
+    },
+    {
+      "query": "What costs are associated under capital expenditure?",
+      "expected_answer": "associated with acquiring property, plant and equipment and placing it into service",
+      "generated_answer": "<think> Okay, let's tackle this question: \"What costs are associated under capital expenditure?\" First, I need to recall what capital expendituretypically includes. From my knowledge, capital expenditures refer to funds used by companies to。",
+      "extracted_answer": "Okay let's tackle this question: \"What costs are associated under capital expenditure?\" First I need to recall what capital expendituretypically includes. From my knowledge capital expenditures refer to funds used by companies to",
+      "evaluation": {
+        "exact_match": false,
+        "f1_score": 0.04444444444444444
+      },
+      "answer_from": "text",
+      "predicted_answer_from": "unified",
+      "decision_confidence": 1.0,
+      "is_difficult_decision": false,
+      "context_type": "unified",
+      "content_ratio": {
+        "table_ratio": 0.0,
+        "text_ratio": 0.0,
+        "mixed_ratio": 0.0
+      },
+      "generation_time": 55.07352018356323
+    },
+    {
+      "query": "What caused the increase in capital expenditures related to wireless?",
+      "expected_answer": "result of investments made to upgrade our wireless network to continue delivering reliable performance for our customers.",
+      "generated_answer": "<think> Okay, let me try to figure out why there was an increase in capital expenditures related to wireless. Hmm, I need to look through the provided table and text contexts to find relevant information. First, I'll start by understanding what。",
+      "extracted_answer": "Okay let me try to figure out why there was an increase in capital expenditures related to wireless. Hmm I need to look through the provided table and text contexts to find relevant information. First I'll start by understanding what",
+      "evaluation": {
+        "exact_match": false,
+        "f1_score": 0.07017543859649122
+      },
+      "answer_from": "text",
+      "predicted_answer_from": "unified",
+      "decision_confidence": 1.0,
+      "is_difficult_decision": false,
+      "context_type": "unified",
+      "content_ratio": {
+        "table_ratio": 0.0,
+        "text_ratio": 0.0,
+        "mixed_ratio": 0.0
+      },
+      "generation_time": 58.04659676551819
+    },
+    {
+      "query": "What are the balances (without Adoption of Topic 606, in millions) of inventories and other accrued liabilities, respectively?",
+      "expected_answer": "1,568.6; 690.5",
+      "generated_answer": "<think> Okay, let me try to figure this out. So the question is asking for the balancesof inventories and other accrued liabilities, respectively. First, I need to look through the provided。",
+      "extracted_answer": "Okay let me try to figure this out. So the question is asking for the balancesof inventories and other accrued liabilities respectively. First I need to look through the provided",
+      "evaluation": {
+        "exact_match": false,
+        "f1_score": 0.0
+      },
+      "answer_from": "table-text",
+      "predicted_answer_from": "unified",
+      "decision_confidence": 1.0,
+      "is_difficult_decision": false,
+      "context_type": "unified",
+      "content_ratio": {
+        "table_ratio": 0.0,
+        "text_ratio": 0.0,
+        "mixed_ratio": 0.0
+      },
+      "generation_time": 62.17249345779419
+    },
+    {
+      "query": "What is the percentage of adjustment to the balance of as reported prepaid expenses and other current assets?",
+      "expected_answer": "17.7",
+      "generated_answer": "<think> Okay, let me try to figure this out. The question is asking for the percentage of adjustment to the balance of as reported prepaid expenses and other current assets. First, I need to look back at the provided table and text.",
+      "extracted_answer": "Okay let me try to figure this out. The question is asking for the percentage of adjustment to the balance of as reported prepaid expenses and other current assets. First I need to look back at the provided table and text",
+      "evaluation": {
+        "exact_match": false,
+        "f1_score": 0.0
+      },
+      "answer_from": "table-text",
+      "predicted_answer_from": "unified",
+      "decision_confidence": 1.0,
+      "is_difficult_decision": false,
+      "context_type": "unified",
+      "content_ratio": {
+        "table_ratio": 0.0,
+        "text_ratio": 0.0,
+        "mixed_ratio": 0.0
+      },
+      "generation_time": 63.85021615028381
+    },
+    {
+      "query": "What is the percentage change of the balance of inventories after being adjusted?",
+      "expected_answer": "-0.2",
+      "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the percentage change of the balance of inventories after being adjusted. From the provided table context, I need to locate the relevant data for inventories before and。",
+      "extracted_answer": "Okay let's tackle this question step by step. The user is asking for the percentage change of the balance of inventories after being adjusted. From the provided table context I need to locate the relevant data for inventories before and",
+      "evaluation": {
+        "exact_match": false,
+        "f1_score": 0.0
+      },
+      "answer_from": "table-text",
+      "predicted_answer_from": "unified",
+      "decision_confidence": 1.0,
+      "is_difficult_decision": false,
+      "context_type": "unified",
+      "content_ratio": {
+        "table_ratio": 0.0,
+        "text_ratio": 0.0,
+        "mixed_ratio": 0.0
+      },
+      "generation_time": 64.88234376907349
+    },
+    {
+      "query": "What is the ratio of total current assets balance, as reported, to total current liabilities balance, as reported?",
+      "expected_answer": "3.61",
+      "generated_answer": "<think> Okay, let's tackle this question step by step. The user is asking for the ratio of total current assets balance, as reported, to total current liabilities balance, as reported. First, I need to locate both the total current。",
+      "extracted_answer": "Okay let's tackle this question step by step. The user is asking for the ratio of total current assets balance as reported to total current liabilities balance as reported. First I need to locate both the total current",
+      "evaluation": {
+        "exact_match": false,
+        "f1_score": 0.0
+      },
+      "answer_from": "table-text",
+      "predicted_answer_from": "unified",
+      "decision_confidence": 1.0,
+      "is_difficult_decision": false,
+      "context_type": "unified",
+      "content_ratio": {
+        "table_ratio": 0.0,
+        "text_ratio": 0.0,
+        "mixed_ratio": 0.0
+      },
+      "generation_time": 64.89767289161682
+    },
+    {
+      "query": "Which years does the table provide information for R&D, sales and marketing, and G&A expenses?",
+      "expected_answer": "2019; 2018; 2017",
+      "generated_answer": "<think> Okay, let me try to figure this out. So the question is asking which years the table provides information for R&D, sales and marketing, and G&A expenses. First, I need to look at the table context provided.",
+      "extracted_answer": "Okay let me try to figure this out. So the question is asking which years the table provides information for R&D sales and marketing and G&A expenses. First I need to look at the table context provided",
+      "evaluation": {
+        "exact_match": false,
+        "f1_score": 0.0
+      },
+      "answer_from": "table-text",
+      "predicted_answer_from": "unified",
+      "decision_confidence": 1.0,
+      "is_difficult_decision": false,
+      "context_type": "unified",
+      "content_ratio": {
+        "table_ratio": 0.0,
+        "text_ratio": 0.0,
+        "mixed_ratio": 0.0
+      },
+      "generation_time": 68.17270827293396
+    }
+  ],
+  "analysis": {
+    "total_samples": 15,
+    "valid_samples": 15,
+    "error_samples": 0,
+    "exact_match_rate": 0.0,
+    "average_f1_score": 0.015484462790964337,
+    "average_generation_time": 54.947068468729654,
+    "performance": {
+      "total_time": 824.242758512497,
+      "avg_time_per_sample": 54.949517234166464
+    }
+  }
+}
