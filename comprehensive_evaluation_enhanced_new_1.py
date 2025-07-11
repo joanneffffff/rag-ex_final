@@ -209,31 +209,35 @@ def calculate_f1_score(prediction: str, ground_truth: str) -> float:
 def _parse_template_string_to_messages(template_full_string: str, query: str, context: str = "", table_context: str = "", text_context: str = "") -> List[Dict[str, str]]:
     """
     解析模板字符串并格式化为消息列表。
-    根据当前模板设计，处理分离的上下文，并精确解析 SYSTEM 和 USER 块。
+    根据当前模板设计，主要处理分离的上下文。
     """
     # 替换模板中的占位符
+    # 确保只替换实际存在于模板中的占位符
     formatted_template = template_full_string.replace("{query}", query)
+
+    # 强制使用分离的上下文占位符，因为新模板已固定为这种格式
+    # 理论上 context_content 不应该出现在新模板中，这里移除相关处理
     formatted_template = formatted_template.replace("{table_context}", table_context)
     formatted_template = formatted_template.replace("{text_context}", text_context)
-    
+
     # 解析 ===SYSTEM=== 和 ===USER=== 标签
     # 这里的正则表达式需要精确匹配 SYSTEM/USER 块
     # 使用非贪婪匹配 .*? 和明确的结束边界 (?=...)
     system_match = re.search(r'===SYSTEM===\n(.*?)(?=\n===USER===|$)', formatted_template, re.DOTALL)
     user_match = re.search(r'===USER===\n(.*?)$', formatted_template, re.DOTALL) # 匹配到字符串末尾
-    
+
     messages = []
-    
+
     if system_match:
         system_content = system_match.group(1).strip()
         if system_content:
             messages.append({"role": "system", "content": system_content})
-    
+
     if user_match:
         user_content = user_match.group(1).strip()
         if user_content:
             messages.append({"role": "user", "content": user_content})
-    
+
     return messages
 
 def load_and_format_template(template_name: str, context: str, query: str) -> List[Dict[str, str]]:
@@ -249,14 +253,13 @@ def load_and_format_template(template_name: str, context: str, query: str) -> Li
         print(f"❌ 模板文件未找到: {template_path}")
         # 使用与新策略一致的默认模板
         template_full_string = """===SYSTEM===
-You are a helpful assistant that provides well-reasoned and detailed responses.
-You MUST respond with a <think> tag containing your detailed, step-by-step reasoning process. Within the <think> tag, provide the final, direct, and concise answer on a new line prefixed with "FINAL ANSWER: ".
+You are a helpful assistant that answers questions based on the provided context. Your ONLY output MUST be the final, direct, and concise answer enclosed STRICTLY within an <answer> tag.
 
 ===USER===
 Context: {context_content}
 
 Question: {query}
-<think>""" # 更新为 <think> 标签开始
+<answer>""" # 更新为 <answer> 标签
     
     return _parse_template_string_to_messages(template_full_string, query, context=context)
 
@@ -272,8 +275,7 @@ def load_and_format_template_with_separated_context(template_name: str, table_co
         print(f"❌ 模板文件未找到: {template_path}")
         # 使用与新策略一致的默认模板
         template_full_string = """===SYSTEM===
-You are a helpful assistant that provides well-reasoned and detailed responses.
-You MUST respond with a <think> tag containing your detailed, step-by-step reasoning process. Within the <think> tag, provide the final, direct, and concise answer on a new line prefixed with "FINAL ANSWER: ".
+You are a helpful assistant that answers questions based on the provided context. Your ONLY output MUST be the final, direct, and concise answer enclosed STRICTLY within an <answer> tag.
 
 ===USER===
 Table Context: {table_context}
@@ -281,14 +283,14 @@ Table Context: {table_context}
 Text Context: {text_context}
 
 Question: {query}
-<think>""" # 更新为 <think> 标签开始
+<answer>""" # 更新为 <answer> 标签
     
     return _parse_template_string_to_messages(template_full_string, query, table_context=table_context, text_context=text_context)
 
 def get_final_prompt(context: str, query: str) -> List[Dict[str, str]]:
     """使用统一的模板，包含context分离功能"""
-    # 使用包含受控思考过程的新模板
-    template_file = 'unified_english_template_with_controlled_think.txt' # **修改这里**
+    # 使用新的无思考过程模板
+    template_file = 'unified_english_template_no_think.txt' # 请确保这个文件名与您保存的模板文件名一致
     
     # 强制使用上下文分离功能
     if not USE_CONTEXT_SEPARATOR:
@@ -367,19 +369,25 @@ class ComprehensiveEvaluator:
         try:
             table_len_ratio, text_len_ratio = 0.0, 0.0 # 初始化为0
 
+            # 确保在调用 get_final_prompt 之前获取这些比例，如果 context_separator 支持
             if USE_CONTEXT_SEPARATOR:
                 try:
                     # 假设 context_separator.separate_context 能够返回原始的 table/text 长度
-                    # 你需要根据 context_separator 的实际返回来获取长度
-                    # 示例：
-                    # separated_data_raw = context_separator.separate_context_raw(sample["context"]) # 假设有返回原始长度的函数
-                    # total_context_length = len(sample["context"])
-                    # if total_context_length > 0:
-                    #     table_len_ratio = len(separated_data_raw.get('table_content_raw', '')) / total_context_length
-                    #     text_len_ratio = len(separated_data_raw.get('text_content_raw', '')) / total_context_length
-                    pass # 如果 context_separator 无法提供，则保持为0
-                except Exception:
-                    pass # 这里的错误已在 get_final_prompt 中处理，此处忽略
+                    # 这需要 context_separator 模块的支持
+                    separated_data = context_separator.separate_context(sample["context"])
+                    # 假设 separated_data 包含 'table_content_length' 和 'text_content_length'
+                    # 如果 context_separator 不提供，则此部分跳过或自行计算
+                    total_context_length = len(sample["context"])
+                    if total_context_length > 0:
+                        # 这是一个示例，您需要根据 context_separator 的实际返回来获取长度
+                        # 例如：table_len = len(separated_data.get('table_context_raw', ''))
+                        # text_len = len(separated_data.get('text_context_raw', ''))
+                        # table_len_ratio = table_len / total_context_length
+                        # text_len_ratio = text_len / total_context_length
+                        pass # 如果 context_separator 无法提供，则保持为0
+                except Exception as e:
+                    # 分离失败会在 get_final_prompt 中处理，这里捕获是为了避免重复错误信息
+                    pass
 
             messages = get_final_prompt(sample["context"], sample["query"])
             
@@ -401,7 +409,7 @@ class ComprehensiveEvaluator:
                 "extracted_answer": final_answer_to_evaluate, # 经过 extract_final_answer_with_rescue 处理后的答案
                 "evaluation": evaluation,
                 "answer_from": sample.get("answer_from", "unknown"), 
-                "predicted_answer_from": "separated_context_controlled_think", # 更新描述
+                "predicted_answer_from": "separated_context_answer_only",
                 "decision_confidence": 1.0,
                 "is_difficult_decision": False,
                 "context_type": "separated_context",
@@ -430,6 +438,7 @@ class ComprehensiveEvaluator:
     def _convert_messages_to_text(self, messages: List[Dict[str, str]]) -> str:
         """
         将 messages 列表转换为Fin-R1（Qwen2.5 based）期望的ChatML格式字符串。
+        这是最终传递给 LocalLLMGenerator 的字符串。
         """
         if not messages:
             return ""
@@ -444,12 +453,11 @@ class ComprehensiveEvaluator:
                 formatted_prompt += f"<|im_start|>system\n{content.strip()}<|im_end|>\n"
             elif role == "user":
                 formatted_prompt += f"<|im_start|>user\n{content.strip()}<|im_end|>\n"
-            elif role == "assistant": 
+            elif role == "assistant":
                 formatted_prompt += f"<|im_start|>assistant\n{content.strip()}<|im_end|>\n"
         
-        # 移除或注释掉这一行，因为Prompt模板的末尾已经有 <think>，
-        # 且 <think> 会在 user 消息中被解析，模型会理解这是用户请求后开始生成。
-        # formatted_prompt += "<|im_start|>assistant\n" # <-- 移除或注释掉此行
+        # 提示模型开始生成
+        formatted_prompt += "<|im_start|>assistant\n" 
         
         return formatted_prompt
 
