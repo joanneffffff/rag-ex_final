@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-最终版全面评估脚本 - 修复版本
-使用与comprehensive_evaluation_enhanced.py相同的逻辑，但只使用一个统一模板，包含context分离功能
+最终版全面评估脚本 - 修复版本2
+修复Prompt模板与答案提取逻辑的不匹配问题，统一使用<answer>...</answer>标签格式
+目标：使生成器(Fin-R1)的F1分数恢复到并稳定在0.4以上
 """
 
 import warnings
@@ -121,80 +122,99 @@ class ResourceManager:
 resource_manager = ResourceManager()
 
 # ===================================================================
-# 核心辅助函数
+# 核心辅助函数 - 修复版本
 # ===================================================================
 
 def _shared_text_standardizer(text: str) -> str:
     """
-    辅助函数，用于标准化文本，供答案提取和F1分数计算使用。
-    确保移除逗号、处理负数括号、标准化百分号、移除引导词句、移除末尾标点和货币单位。
+    Helper function to standardize text for both answer extraction and F1 score calculation.
+    Ensures commas are removed, negative numbers in parentheses are handled,
+    percentage signs are handled, common introductory phrases are removed,
+    trailing punctuation is removed, and currency symbols/unit words are removed.
     """
     text = text.strip()
-    # 移除数字中的逗号
+    # Remove commas from numbers
     text = text.replace(',', '')
-    # 移除负数括号 (例如 "(33)" -> "-33")
+    # Handle negative numbers in parentheses (e.g., "(33)" -> "-33")
     if text.startswith('(') and text.endswith(')'):
         text = '-' + text[1:-1]
     
-    # 标准化百分号，确保 "15.2%" 和 "15.2 %" 匹配
-    text = text.replace('%', ' %').strip()
-    text = text.replace(' %', '%')
-
-    # 移除常见的引导词句 (应与 Prompt 优化后减少出现)
+    # Remove common introductory phrases (should be less frequent with optimized prompt)
+    # This list should be aligned with phrases you *don't* want in the final answer.
     text = re.sub(r'^(the\s*answer\s*is|it\s*was|the\s*value\s*is|resulting\s*in|this\s*represents|the\s*effect\s*is|therefore|so|thus|in\s*conclusion|final\s*answer\s*is|final\s*number\s*is)\s*', '', text, flags=re.IGNORECASE).strip()
     
-    # 移除末尾可能的多余标点 (例如句号、逗号、分号，但保留百分号)
-    text = re.sub(r'[\.。;,]$', '', text).strip()
+    # Remove trailing punctuation (e.g., periods, commas, semicolons, but ensure percentage sign is removed if numeric)
+    # This regex is made more aggressive to ensure any trailing punctuation OR a standalone % is removed.
+    text = re.sub(r'[\.。;,]$', '', text).strip() # General trailing punctuation
     
-    # 移除常见的货币符号和单位词
+    # <<< NEW ADDITION / REVISION >>>: Explicitly remove percentage sign at the end of a numeric string
+    # This helps when expected_answer is "0.2" but generated is "0.2%"
+    if text.endswith('%'):
+        # Check if the part before % is numeric (allows for negative, decimal numbers)
+        numeric_part_match = re.fullmatch(r'([-+]?[\d.]+)', text[:-1].strip())
+        if numeric_part_match:
+            text = numeric_part_match.group(1) # Keep only the numeric part
+        else:
+            text = text[:-1].strip() # If not purely numeric, just strip the %
+    
+    # Remove common currency symbols and unit words
     text = re.sub(r'(\$|million|billion|usd|eur|pounds|£)', '', text, flags=re.IGNORECASE).strip()
 
     return text
 
 def extract_final_answer_with_rescue(raw_output: str) -> str:
     """
-    从模型的原始输出中提取最终答案。
-    现在从<think>标签内部寻找"FINAL ANSWER: "前缀。
-    如果失败或未找到，则返回空字符串。
+    Extracts the final answer from the model's raw output.
+    It exclusively looks for the <answer> tag. If not found or empty, it returns a specific phrase.
+    This version implements the "I cannot find the answer" explicit fallback.
     """
-    # 1. 尝试从 <think> 标签中提取内容
-    think_match = re.search(r'<think>(.*?)</think>', raw_output, re.DOTALL)
-    if not think_match:
-        # 如果连 <think> 标签都没有，返回空字符串
-        return ""
+    cleaned_output = raw_output.strip()
+    # Define the specific phrase for "answer not found" in English
+    NOT_FOUND_REPLY_ENGLISH = "I cannot find the answer in the provided context."
 
-    think_content = think_match.group(1)
+    # 1. 精确寻找 <answer>...</answer> 标签
+    # Use non-greedy matching .*? to capture content inside the tag
+    match = re.search(r'<answer>(.*?)</answer>', cleaned_output, re.DOTALL)
     
-    # 2. 在 <think> 内容中寻找 "FINAL ANSWER: " 行
-    final_answer_match = re.search(r'FINAL ANSWER:\s*(.*?)(?:\n|$)', think_content, re.IGNORECASE)
-    if final_answer_match:
-        content = final_answer_match.group(1).strip()
-        return _shared_text_standardizer(content)
+    if match:
+        content = match.group(1).strip()
+        # Ensure extracted content is not empty or an empty tag itself (e.g., <answer></answer>)
+        if content and content.lower() not in ['<final></final>', '<answer></answer>', '<final-answer></final-answer>']:
+            return _shared_text_standardizer(content)
     
-    # 3. 如果没有找到 "FINAL ANSWER: " 行，但 <think> 标签存在，
-    #    作为最后的救援，尝试提取 <think> 内容的最后一行（如果它看起来像个答案）
-    lines = [line for line in think_content.strip().split('\n') if line.strip()]
-    if lines:
-        last_line_content = lines[-1]
-        # 简单判断最后一行是否可能是答案（例如，包含数字或字母）
-        if re.search(r'[-+]?\s*\(?[\d,\.]+\)?%?|[a-zA-Z]', last_line_content):
-            return _shared_text_standardizer(last_line_content)
-    
-    # 如果以上都失败，返回空字符串
-    return ""
+    # If no valid <answer> structure is found or content is invalid,
+    # return the specific "not found" phrase.
+    return NOT_FOUND_REPLY_ENGLISH
 
 def calculate_f1_score(prediction: str, ground_truth: str) -> float:
-    """计算F1分数，包含更鲁棒的归一化，与答案提取逻辑保持高度一致"""
-    def normalize_for_f1(text):
-        return _shared_text_standardizer(text).lower().split() # 调用共享函数
+    # Define the specific phrase for "answer not found" (standardized lowercase form)
+    NOT_FOUND_ANSWER_PHRASE = "i cannot find the answer in the provided context."
+
+    # Standardize both prediction and ground truth texts
+    normalized_prediction = _shared_text_standardizer(prediction).lower()
+    normalized_ground_truth = _shared_text_standardizer(ground_truth).lower()
+
+    # 1. Handle cases where the model explicitly states "I cannot find the answer..."
+    if normalized_prediction == NOT_FOUND_ANSWER_PHRASE:
+        # If the ground truth is also "I cannot find the answer...", it's a correct match
+        if normalized_ground_truth == NOT_FOUND_ANSWER_PHRASE:
+            return 1.0
+        # Otherwise, the model said "I cannot find..." but the answer exists, so it's an error
+        else:
+            return 0.0
     
-    prediction_tokens = normalize_for_f1(prediction)
-    ground_truth_tokens = normalize_for_f1(ground_truth)
+    # 2. Handle cases where the ground truth is "I cannot find the answer...", but the model gave a factual answer (which is an error)
+    if normalized_ground_truth == NOT_FOUND_ANSWER_PHRASE:
+        return 0.0
+
+    # 3. Standard F1 score calculation for factual answers
+    prediction_tokens = normalized_prediction.split()
+    ground_truth_tokens = normalized_ground_truth.split()
 
     if not ground_truth_tokens: 
-        return 1.0 if not prediction_tokens else 0.0
+        return 1.0 if not prediction_tokens else 0.0 # If ground truth is empty, predict empty for 1.0 F1
     if not prediction_tokens: 
-        return 0.0
+        return 0.0 # If prediction is empty, but ground truth is not, 0.0 F1
 
     common = Counter(prediction_tokens) & Counter(ground_truth_tokens)
     num_same = sum(common.values())
@@ -209,35 +229,33 @@ def calculate_f1_score(prediction: str, ground_truth: str) -> float:
 def _parse_template_string_to_messages(template_full_string: str, query: str, context: str = "", table_context: str = "", text_context: str = "") -> List[Dict[str, str]]:
     """
     解析模板字符串并格式化为消息列表。
-    根据当前模板设计，主要处理分离的上下文。
+    根据当前模板设计，处理分离的上下文，并精确解析 SYSTEM 和 USER 块。
     """
     # 替换模板中的占位符
-    # 确保只替换实际存在于模板中的占位符
     formatted_template = template_full_string.replace("{query}", query)
-
-    # 强制使用分离的上下文占位符，因为新模板已固定为这种格式
-    # 理论上 context_content 不应该出现在新模板中，这里移除相关处理
     formatted_template = formatted_template.replace("{table_context}", table_context)
     formatted_template = formatted_template.replace("{text_context}", text_context)
-
-    # 解析 ===SYSTEM=== 和 ===USER=== 标签
-    # 这里的正则表达式需要精确匹配 SYSTEM/USER 块
-    # 使用非贪婪匹配 .*? 和明确的结束边界 (?=...)
-    system_match = re.search(r'===SYSTEM===\n(.*?)(?=\n===USER===|$)', formatted_template, re.DOTALL)
-    user_match = re.search(r'===USER===\n(.*?)$', formatted_template, re.DOTALL) # 匹配到字符串末尾
-
+    
+    # --- 关键的正则表达式调整 ---
+    # SYSTEM 块：从 ===SYSTEM=== 后到下一个 ===USER=== 或字符串末尾
+    # 使用 \s* 匹配可能存在的空格或换行符
+    system_match = re.search(r'===SYSTEM===\s*\n(.*?)(?=\n===USER===|\Z)', formatted_template, re.DOTALL)
+    # USER 块：从 ===USER=== 后到字符串末尾
+    # 使用 \s* 匹配可能存在的空格或换行符
+    user_match = re.search(r'===USER===\s*\n(.*?)\Z', formatted_template, re.DOTALL) 
+    
     messages = []
-
+    
     if system_match:
         system_content = system_match.group(1).strip()
         if system_content:
             messages.append({"role": "system", "content": system_content})
-
+    
     if user_match:
         user_content = user_match.group(1).strip()
         if user_content:
             messages.append({"role": "user", "content": user_content})
-
+    
     return messages
 
 def load_and_format_template(template_name: str, context: str, query: str) -> List[Dict[str, str]]:
@@ -253,13 +271,14 @@ def load_and_format_template(template_name: str, context: str, query: str) -> Li
         print(f"❌ 模板文件未找到: {template_path}")
         # 使用与新策略一致的默认模板
         template_full_string = """===SYSTEM===
-You are a helpful assistant that answers questions based on the provided context. Your ONLY output MUST be the final, direct, and concise answer enclosed STRICTLY within an <answer> tag.
+You are a helpful assistant that answers questions based on the provided context.
+Your ONLY output MUST be the final, direct, and concise answer enclosed STRICTLY within an <answer> tag. You MUST NOT include any thinking process, intermediate steps, or conversational filler outside this tag.
 
 ===USER===
 Context: {context_content}
 
 Question: {query}
-<answer>""" # 更新为 <answer> 标签
+<answer>""" # 确保这里是 <answer>
     
     return _parse_template_string_to_messages(template_full_string, query, context=context)
 
@@ -275,7 +294,8 @@ def load_and_format_template_with_separated_context(template_name: str, table_co
         print(f"❌ 模板文件未找到: {template_path}")
         # 使用与新策略一致的默认模板
         template_full_string = """===SYSTEM===
-You are a helpful assistant that answers questions based on the provided context. Your ONLY output MUST be the final, direct, and concise answer enclosed STRICTLY within an <answer> tag.
+You are a helpful assistant that answers questions based on the provided context.
+Your ONLY output MUST be the final, direct, and concise answer enclosed STRICTLY within an <answer> tag. You MUST NOT include any thinking process, intermediate steps, or conversational filler outside this tag.
 
 ===USER===
 Table Context: {table_context}
@@ -283,14 +303,14 @@ Table Context: {table_context}
 Text Context: {text_context}
 
 Question: {query}
-<answer>""" # 更新为 <answer> 标签
+<answer>""" # 确保这里是 <answer>
     
     return _parse_template_string_to_messages(template_full_string, query, table_context=table_context, text_context=text_context)
 
 def get_final_prompt(context: str, query: str) -> List[Dict[str, str]]:
     """使用统一的模板，包含context分离功能"""
-    # 使用新的无思考过程模板
-    template_file = 'unified_english_template_no_think.txt' # 请确保这个文件名与您保存的模板文件名一致
+    # 使用我们最新确定的 Prompt 模板文件名
+    template_file = 'unified_english_template_no_think.txt' # **请务必确保这个文件名与您保存的模板文件名一致**
     
     # 强制使用上下文分离功能
     if not USE_CONTEXT_SEPARATOR:
@@ -438,7 +458,6 @@ class ComprehensiveEvaluator:
     def _convert_messages_to_text(self, messages: List[Dict[str, str]]) -> str:
         """
         将 messages 列表转换为Fin-R1（Qwen2.5 based）期望的ChatML格式字符串。
-        这是最终传递给 LocalLLMGenerator 的字符串。
         """
         if not messages:
             return ""
@@ -453,11 +472,13 @@ class ComprehensiveEvaluator:
                 formatted_prompt += f"<|im_start|>system\n{content.strip()}<|im_end|>\n"
             elif role == "user":
                 formatted_prompt += f"<|im_start|>user\n{content.strip()}<|im_end|>\n"
-            elif role == "assistant":
+            elif role == "assistant": # 示例中可能会有 assistant 轮次
                 formatted_prompt += f"<|im_start|>assistant\n{content.strip()}<|im_end|>\n"
         
-        # 提示模型开始生成
-        formatted_prompt += "<|im_start|>assistant\n" 
+        # <<< 关键修改 >>>
+        # 移除或注释掉这一行，因为Prompt模板的末尾是用户消息的一部分（以 <think> 结尾），
+        # 模型会根据ChatML的规则自动在用户消息后生成助手回应，无需额外添加 <|im_start|>assistant。
+        # formatted_prompt += "<|im_start|>assistant\n" 
         
         return formatted_prompt
 
@@ -593,19 +614,45 @@ def load_evaluation_data(data_path: str, sample_size: Optional[int] = None) -> L
         sys.exit(1)
 
 def main():
-    parser = argparse.ArgumentParser(description="全面评估脚本")
-    parser.add_argument("--model", type=str, default="SUFE-AIFLM-Lab/Fin-R1", help="要评估的LLM名称")
+    parser = argparse.ArgumentParser(description="全面评估脚本 - 修复版本2")
+    parser.add_argument("--model", type=str, default=None, help="要评估的LLM名称（默认使用config/parameters.py中的设置）")
     parser.add_argument("--data_path", type=str, required=True, help="评估数据集文件路径 (jsonl 或 json)")
     parser.add_argument("--sample_size", type=int, default=None, help="要评估的随机样本数量 (None表示全部)")
-    parser.add_argument("--device", type=str, default="cuda:0", help="设备 (cuda:0/cuda:1/cpu/auto)")
+    parser.add_argument("--device", type=str, default=None, help="设备 (cuda:0/cuda:1/cpu/auto，默认使用config/parameters.py中的设置）")
     
     args = parser.parse_args()
     
+    # 使用配置文件中的设置
+    try:
+        from config.parameters import config
+        print("📖 加载配置文件设置...")
+        
+        # 设置模型名称
+        if args.model is None:
+            args.model = config.generator.model_name
+            print(f"📖 使用配置文件中的模型: {args.model}")
+        else:
+            print(f"📖 使用命令行指定的模型: {args.model}")
+        
+        # 设置设备
+        if args.device is None:
+            args.device = config.generator.device
+            print(f"📖 使用配置文件中的设备: {args.device}")
+        else:
+            print(f"📖 使用命令行指定的设备: {args.device}")
+            
+    except ImportError:
+        print("⚠️ 无法导入config/parameters.py，使用默认设置")
+        if args.model is None:
+            args.model = "SUFE-AIFLM-Lab/Fin-R1"
+        if args.device is None:
+            args.device = "cuda:0"
+    
     # 设备设置
-    device = args.device
+    device = args.device or "cuda:0"  # 确保device不为None
     if device == "auto":
         device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    elif device.startswith("cuda"): # 检查是否以cuda开头，允许 cuda:0, cuda:1 等
+    elif device and device.startswith("cuda"): # 检查是否以cuda开头，允许 cuda:0, cuda:1 等
         try:
             if not torch.cuda.is_available():
                 print("❌ CUDA不可用，回退到CPU")
@@ -629,8 +676,11 @@ def main():
     # 加载数据
     eval_data = load_evaluation_data(args.data_path, args.sample_size)
     
+    # 确保模型名称不为None
+    model_name = args.model or "SUFE-AIFLM-Lab/Fin-R1"
+    
     # 创建评估器
-    evaluator = ComprehensiveEvaluator(args.model, device)
+    evaluator = ComprehensiveEvaluator(model_name, device)
     
     try:
         # 运行评估
@@ -641,7 +691,7 @@ def main():
         
         # 保存结果
         timestamp = time.strftime("%Y%m%d_%H%M%S")
-        output_file = f"comprehensive_evaluation_results_{timestamp}.json"
+        output_file = f"comprehensive_evaluation_results_fixed_v2_{timestamp}.json"
         
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(results, f, ensure_ascii=False, indent=2)
