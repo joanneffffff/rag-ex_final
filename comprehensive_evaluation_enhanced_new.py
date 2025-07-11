@@ -154,33 +154,45 @@ def _shared_text_standardizer(text: str) -> str:
 def extract_final_answer_with_rescue(raw_output: str) -> str:
     """
     从模型的原始输出中提取最终答案。
-    现在从<think>标签内部寻找"FINAL ANSWER: "前缀。
+    优先寻找 <final-answer> 标签。其次尝试寻找 "FINAL ANSWER: " 前缀。
     如果失败或未找到，则返回空字符串。
     """
-    # 1. 尝试从 <think> 标签中提取内容
-    think_match = re.search(r'<think>(.*?)</think>', raw_output, re.DOTALL)
-    if not think_match:
-        # 如果连 <think> 标签都没有，返回空字符串
-        return ""
+    cleaned_output = raw_output.strip()
 
-    think_content = think_match.group(1)
+    # --- 1. 首要尝试：寻找 <final-answer> 标签 (模型实际输出的标签) ---
+    # 使用非贪婪匹配 .*? 来捕获 <final-answer> 标签内部的内容
+    final_answer_tag_match = re.search(r'<final-answer>(.*?)</final-answer>', cleaned_output, re.DOTALL)
+    if final_answer_tag_match:
+        content = final_answer_tag_match.group(1).strip()
+        # 确认提取的内容非空，且不只是另一个空标签
+        if content and content.lower() not in ['<final></final>', '<answer></answer>']:
+            return _shared_text_standardizer(content)
+
+    # --- 2. 其次尝试：寻找 "FINAL ANSWER: " 前缀 (Prompt 中指定的格式) ---
+    # 这通常会在 <think> 标签内部或其附近，所以我们可以在整个 cleaned_output 中寻找
+    final_answer_prefix_match = re.search(r'FINAL ANSWER:\s*(.*?)(?:\n|$)', cleaned_output, re.IGNORECASE | re.DOTALL)
+    if final_answer_prefix_match:
+        content = final_answer_prefix_match.group(1).strip()
+        # 排除模型偶尔会在 FINAL ANSWER: 后跟一个空的标签对
+        if content and content.lower() not in ['<final-answer></final-answer>', '<answer></answer>', '<final></final>']:
+            return _shared_text_standardizer(content)
+
+    # --- 3. 最后救援：从 <think> 标签内部的最后部分提取 ---
+    # 如果以上都没有找到，但模型输出了 <think>，则尝试从其内部内容中提取答案。
+    # 这捕获了模型仍然在 <think> 里"思考"并给出答案但没加明确前缀或标签的情况。
+    think_match = re.search(r'<think>(.*?)</think>', cleaned_output, re.DOTALL)
+    if think_match:
+        think_content = think_match.group(1).strip()
+        lines = [line.strip() for line in think_content.split('\n') if line.strip()]
+        if lines:
+            last_line_content = lines[-1]
+            # 简单判断最后一行是否可能是答案（例如，包含数字或字母，且不太长）
+            if re.search(r'[-+]?\s*\(?[\d,\.]+\)?%?|[a-zA-Z]', last_line_content) and \
+               not re.search(r'^(okay|let\'s|wait|but|hmm|alternatively|given|so|thus|first|to|from)', last_line_content, re.IGNORECASE) and \
+               len(last_line_content.split()) < 25: # 增加长度限制，排除过长的思考片段
+                return _shared_text_standardizer(last_line_content)
     
-    # 2. 在 <think> 内容中寻找 "FINAL ANSWER: " 行
-    final_answer_match = re.search(r'FINAL ANSWER:\s*(.*?)(?:\n|$)', think_content, re.IGNORECASE)
-    if final_answer_match:
-        content = final_answer_match.group(1).strip()
-        return _shared_text_standardizer(content)
-    
-    # 3. 如果没有找到 "FINAL ANSWER: " 行，但 <think> 标签存在，
-    #    作为最后的救援，尝试提取 <think> 内容的最后一行（如果它看起来像个答案）
-    lines = [line for line in think_content.strip().split('\n') if line.strip()]
-    if lines:
-        last_line_content = lines[-1]
-        # 简单判断最后一行是否可能是答案（例如，包含数字或字母）
-        if re.search(r'[-+]?\s*\(?[\d,\.]+\)?%?|[a-zA-Z]', last_line_content):
-            return _shared_text_standardizer(last_line_content)
-    
-    # 如果以上都失败，返回空字符串
+    # 如果以上所有尝试都失败，返回空字符串
     return ""
 
 def calculate_f1_score(prediction: str, ground_truth: str) -> float:
