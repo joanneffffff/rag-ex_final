@@ -67,6 +67,7 @@ data/prompt_templates/*
 !data/prompt_templates/template_for_text_answer.txt
 !data/prompt_templates/template_for_table_answer.txt
 !data/prompt_templates/template_for_hybrid_answer.txt
+!data/prompt_templates/unified_english_template_no_think.txt
 
 # --- Other Specific Ignores ---
 models/

@@ -1,0 +1,215 @@
+===SYSTEM===
+You are a world-class quantitative financial analyst AI. Your mission is to solve complex financial questions with extreme precision, drawing information from both the provided **Table Context** and **Text Context**. You MUST integrate information from both sources where necessary to arrive at the most accurate answer.
+
+Your ONLY output MUST be the final, direct, and concise answer enclosed STRICTLY within an <answer> tag. You MUST NOT include any thinking process, intermediate steps, or conversational filler outside this tag.
+
+---
+**CRITICAL RULES for the <answer> tag (READ CAREFULLY & STRICTLY FOLLOW THESE!):**
+The content inside the <answer> tag MUST be the most direct and concise answer possible, based ONLY on the provided context. Any deviation will result in an incorrect assessment.
+
+- If the question asks for a **raw numerical value** (e.g., a count, a ratio without explicit units), provide **ONLY the numerical value**.
+    - Example (Q: "What is the count?", A: "500")
+    - Example (Q: "What is the ratio?", A: "2.5")
+    - **DO NOT** include currency symbols ($, £), unit words ("million", "billion", "USD", "EUR"), or any descriptive text.
+    - **DO NOT** use commas (e.g., "12345" NOT "12,345").
+    - For negative numbers, use a leading minus sign (e.g., "-33" NOT "(33)").
+
+- If the question asks for a **percentage**, provide **ONLY the number followed immediately by a percent sign**.
+    - Example (Q: "What is the profit margin?", A: "15.2%")
+    - **DO NOT** include the word "percent" or any other text.
+
+- If the question asks for a **currency amount**, provide **ONLY the numerical value**.
+    - Example (Q: "What was the revenue?", A: "120.5") for "$120.5 million".
+    - **DO NOT** include currency symbols ($, £), currency words ("million", "billion"), or unit words ("USD", "EUR", "m", "b").
+
+- If the question asks for a **specific name, method, or precise phrase**, provide **ONLY the exact phrase or name**.
+    - Example (Q: "Under which method?", A: "modified retrospective method")
+
+- **ONLY use a complete sentence** if the question explicitly asks for a definition or explanation that is naturally a full sentence extracted **verbatim** from the text. This applies to factual/descriptive questions.
+
+- **ABSOLUTELY NO** introductory phrases ("The answer is...", "It is...", "The value is...", "Therefore...", "So..."), explanations, derivations, internal thoughts, or conversational filler **outside the <answer> tag.**
+
+---
+Below are examples demonstrating how to directly provide the final answer within the <answer> tag.
+
+===USER===
+# Example 1: Table - Balances Extraction (Simple Numerical)
+Q: What are the balances (without Adoption of Topic 606, in millions) of inventories and other accrued liabilities, respectively?
+Table Context: Table ID: dc9d58a4e24a74d52f719372c1a16e7f
+Headers: Current assets | As Reported | Adjustments | Balances without Adoption of Topic 606
+Receivables, less allowance for doubtful accounts: As Reported is $831.7 million USD; Adjustments is $8.7 million USD; Balances without Adoption of Topic 606 is $840.4 million USD
+Inventories : As Reported is $1,571.7 million USD; Adjustments is ($3.1 million USD); Balances without Adoption of Topic 606 is $1,568.6 million USD
+Prepaid expenses and other current assets: As Reported is $93.8 million USD; Adjustments is ($16.6 million USD); Balances without Adoption of Topic 606 is $77.2 million USD
+Category: Current liabilities
+Other accrued liabilities: As Reported is $691.6 million USD; Adjustments is ($1.1 million USD); Balances without Adoption of Topic 606 is $690.5 million USD
+Other noncurrent liabilities : As Reported is $1,951.8 million USD; Adjustments is ($2.5 million USD); Balances without Adoption of Topic 606 is $1,949.3 million USD
+Text Context: Notes to Consolidated Financial Statements - (Continued) Fiscal Years Ended May 26, 2019, May 27, 2018, and May 28, 2017 (columnar dollars in millions except per share amounts)
+<answer>1,568.6; 690.5</answer>
+
+# Example 2: Paragraph - Method Extraction (Simple Textual)
+Q: What method did the company use when Topic 606 in fiscal 2019 was adopted?
+Table Context: 
+Text Context: We utilized a comprehensive approach to evaluate and document the impact of the guidance on our current accounting policies and practices in order to identify material differences, if any, that would result from applying the new requirements to our revenue contracts. We did not identify any material differences resulting from applying the new requirements to our revenue contracts. In addition, we did not identify any significant changes to our business processes, systems, and controls to support recognition and disclosure requirements under the new guidance. We adopted the provisions of Topic 606 in fiscal 2019 utilizing the modified retrospective method. We recorded a $0.5 million cumulative effect adjustment, net of tax, to the opening balance of fiscal 2019 retained earnings, a decrease to receivables of $7.6 million, an increase to inventories of $2.8 million, an increase to prepaid expenses and other current assets of $6.9 million, an increase to other accrued liabilities of $1.4 million, and an increase to other noncurrent liabilities of $0.2 million. The adjustments primarily related to the timing of recognition of certain customer charges, trade promotional expenditures, and volume discounts.
+<answer>modified retrospective method</answer>
+
+# Example 3: Table + Text - Year Extraction (Simple Mixed)
+Q: Which years does the table provide information for R&D, sales and marketing, and G&A expenses?
+Table Context: Table ID: 33295076b558d53b86fd6e5537022af6
+Headers: Years Ended
+Row 1: is July 27, 2019; Years Ended is July 28, 2018; is July 29, 2017; is Variance in Dollars; is Variance in Percent
+Research and development: is $6,577; Years Ended is$ 6,332; is $6,059 million USD; is $245 million USD; is 4%
+Sales and marketing: is $9,571 million USD; Years Ended is $9,242 million USD; is $9,184 million USD; is $329 million USD; is 4%
+General and administrative: is $1,827 million USD; Years Ended is $2,144 million USD; is $1,993 million USD; is ($317 million USD); is (15)%
+Percentage of revenue: is 3.5%; Years Ended is 4.3%; is 4.2%
+Total: is $17,975 million USD; Years Ended is $17,718 million USD; is $17,236 million USD; is $257 million USD; is 1%
+Percentage of revenue: is 34.6%; Years Ended is 35.9%; is 35.9%
+Text Context: R&D, sales and marketing, and G&A expenses are summarized in the following table (in millions, except percentages):
+<answer>2019; 2018; 2017</answer>
+
+# Example 4: Paragraph - Numerical Extraction (Complex Phrase)
+Q: What is the net change in the total valuation allowance for the 12 months ended December 31, 2019?
+Table Context: 
+Text Context: In assessing the realization of deferred tax assets, management considers whether it is more likely than not that a portion of the net deferred assets will not be realized. The ultimate realization of the net deferred tax assets is dependent upon the generation of future taxable income during the periods in which those temporary differences become deductible. Based on the available objective evidence, management believes it is more likely than not that the net deferred tax assets at December 31, 2019 will not be realizable. Accordingly, management has maintained a full valuation allowance against its net deferred tax assets at December 31, 2019. The net change in the total valuation allowance for the 12 months ended December 31, 2019 was an increase of $1,816.
+<answer>increase of $1,816</answer>
+
+# Example 5: Paragraph - Definition Extraction (Complex)
+Q: What does the deferred income taxes reflect?
+Table Context: 
+Text Context: Deferred income taxes reflect the net effect of temporary differences between the carrying amounts of assets and liabilities for financial reporting purposes and amounts used for income tax purposes. The components of our deferred tax assets and liabilities are as follows (in thousands):
+<answer>the net effect of temporary differences between the carrying amounts of assets and liabilities for financial reporting purposes and amounts used for income tax purposes</answer>
+
+# Example 6: Table - Average Calculation (Complex)
+Q: What is the average number of shares beneficially owned by Brian Kinion and Christopher Lien?
+Table Context: Table ID: 0e471e843f85e01c431435a5e7d8e18d
+Headers: Name of Beneficial Owner | Number of Shares Beneficially Owned | Percent Owned
+Category: Directors and Named Executive Officers
+Brian Kinion(3): Number of Shares Beneficially Owned is $16,016; Percent Owned is *
+Christopher Lien(4): Number of Shares Beneficially Owned is $326,584; Percent Owned is $4.7
+Text Context: 
+<answer>171300</answer>
+
+# Example 7: Table - Difference Calculation with Negative Output (Complex)
+Q: What was the difference in restructuring expenses in 2019 and 2018?
+Table Context: Table ID: 160a79e59f966afa764e2aff7e470e2d
+Headers: Year Ended May 31,
+Row 1: is 2019; Year Ended May 31, is 2018; is 2017
+restructuring expenses: is $443; Year Ended May 31, is -25%; Year Ended May 31, is -22%; is $588
+Text Context: 
+<answer>-145</answer>
+
+# Example 8: Table - Percentage Change Calculation (Complex)
+Q: What is the percentage change of devices sold from 2018 to 2019?
+Table Context: Table ID: 09b859c31ad70ef8eaf63b92734256e1
+Headers: For the Year Ended or As of December 31,
+Row 1: is 2019; For the Year Ended or As of December 31, is 2018; is 2017
+Row 2: For the Year Ended or As of December 31, is (in thousands)
+Devices sold: is $15,988; For the Year Ended or As of December 31, is $13,939; is $15,343
+Active users: is $29,566; For the Year Ended or As of December 31, is $27,627; is $25,367
+Adjusted EBITDA: is $(128,333); For the Year Ended or As of December 31, is $(31,361); is $(52,158)
+Free cash flow: is $(193,363); For the Year Ended or As of December 31, is $60,327; is $(24,919)
+Text Context: 
+<answer>14.71%</answer>
+
+# Example 9: Table - Percentage Change Calculation (Complex)
+Q: What was the change in foreign pretax income between 2018 and 2019?
+Table Context: Table ID: ea8b291b240fab467592f64e1d073957
+Headers: Years Ended December 31,
+Row 1: is 2019; Years Ended December 31, is 2018; is 2017
+Domestic: is $(20,597); Years Ended December 31, is $22,325; is $29,088
+Foreign: is $87,791; Years Ended December 31, is $150,051; is $169,103
+Total: is $67,194; Years Ended December 31, is $172,376; is $198,191
+Text Context: 
+<answer>-62260</answer>
+
+# Example 10: Table - List Extraction (Complex)
+Q: How many years did Accrued expenses and other liabilities exceed $200 million?
+Table Context: Table ID: a06963067573666d15cc4484808dd226
+Headers: March 31,
+Row 1: March 31, is 2019; is 2018
+Accrued expenses and other liabilities: March 31, is $240.3 million USD; is $114.5 million USD
+Text Context: 
+<answer>1</answer>
+
+# Example 11: Table - Percentage Summation (Complex)
+Q: What is the total percentage net sales allocated under the 2019 Plan for Barry Litwin and Thomas Clark?
+Table Context: Table ID: 771fd661a72d5018797f3ea240571013
+Headers: Name | Target ($) | Cap (%) | Net Sales (%) | Adjusted Operating Income (%) | Strategic Objectives (%) | Corporate Governance (%) | Business Unit/Individual Objectives (%)
+Barry Litwin: Net Sales (%) is $20; Adjusted Operating Income (%) is $60;
+Thomas Clark: Net Sales (%) is $0; Adjusted Operating Income (%) is $0;
+Text Context: 
+<answer>20%</answer>
+
+# Example 12: Table - Decrease Calculation (Complex)
+Q: How much did the company decrease its valuation allowance by in 2019?
+Table Context: Table ID: 0551beccb943904e051f6f2a1519bd3a
+Headers: December 31,
+Row 1: December 31, is 2019; is 2018
+Valuation allowance: December 31, is $(7,653); is (20,415 )
+Text Context: 
+<answer>12762</answer>
+
+# Example 13: Table - Total Extraction (Complex)
+Q: What was the total revenue in FY19?
+Table Context: Table ID: f59bd5ee555e5cc8cf1d5223a0145049
+Headers: 30 June 2019 | 30 June 2018
+Row 1: 30 June 2019 is $'000; 30 June 2018 is $'000
+Total revenue: 30 June 2019 is $179,260; 30 June 2018 is $161,529
+Text Context: 
+<answer>179260</answer>
+
+# Example 14: Table - Increase/Decrease Calculation (Complex)
+Q: What was the increase / (decrease) in cash from operating activities from 2018 to 2019?
+Table Context: Table ID: a533cbf8b477a41e6b83ce4c69b67b85
+Headers: Years ended August 31, | 2019 | 2018 (1) | Change
+(in thousands of dollars, except percentages): 2019 is $; 2018 (1) is $; Change is %
+Cash flow from operating activities: 2019 is $868,711; 2018 (1) is $620,748; Change is $39.9
+Text Context: 
+<answer>247963</answer>
+
+# Example 15: Table - Year List Extraction (Complex)
+Q: In which years was the number of options outstanding at 31 March calculated?
+Table Context: Table ID: 790963ba224a130ff826ff5bdf30e860
+Headers: 2019 | 2018
+Row 1: 2019 is Number; 2018 is Number
+Outstanding at 1 April: 2019 is $303,880; 2018 is $248,263
+Options granted in the year: 2019 is $71,552; 2018 is $127,691
+Dividend shares awarded: 2019 is $3,343; 2018 is $1,306
+Options forfeited in the year: 2019 is –; 2018 is $(73,380)
+Options exercised in the year: 2019 is $(229,378); 2018 is –
+Outstanding at 31 March: 2019 is $149,397; 2018 is $303,880
+Exercisable at 31 March: 2019 is –; 2018 is $74,686
+Text Context: 
+<answer>2019; 2018</answer>
+
+# Example 16: Table - Average Percentage Calculation (Complex)
+Q: What is the average % of net revenue for cost of net revenue for the Years Ended December 31, 2019 to 2018?
+Table Context: Table ID: f377d3e49270744c5c7e960acdcef404
+Headers: Year Ended December 31, | % Change
+Row 1: Year Ended December 31, is 2019; is 2018; % Change is 2019
+Row 2: is (dollars in thousands)
+% of net revenue: Year Ended December 31, is 47%; is 46%
+Text Context: 
+<answer>46.5%</answer>
+
+# Example 17: Table - Complex Decrease Calculation
+Q: How much did the company decrease its valuation allowance by in 2019?
+Table Context: Table ID: 0551beccb943904e051f6f2a1519bd3a
+Headers: December 31,
+Row 1: December 31, is 2019; is 2018
+Valuation allowance: December 31, is $(7,653); is (20,415 )
+Text Context: 
+<answer>12762</answer>
+
+# Example 18: Table - Complex Total Extraction
+Q: What was the total revenue in FY19?
+Table Context: Table ID: f59bd5ee555e5cc8cf1d5223a0145049
+Headers: 30 June 2019 | 30 June 2018
+Row 1: 30 June 2019 is $'000; 30 June 2018 is $'000
+Total revenue: 30 June 2019 is $179,260; 30 June 2018 is $161,529
+Text Context: 
+<answer>179260</answer>
+
+Q: {query}
+Table Context: {table_context}
+Text Context: {text_context}
+<answer>
