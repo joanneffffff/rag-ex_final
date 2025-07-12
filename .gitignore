@@ -35,6 +35,7 @@ cache/*
 */cache/*
 */models/*
 test_backup/*
+script_backup/*
 
 # --- Data and Generated Output Specific Ignores (CRITICAL for your goal) ---
 
