@@ -833,44 +833,44 @@ class OptimizedRagUI:
                 else:
                     prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question}\n\n回答："
         else:
-            # 英文查询：只使用context
+            # 英文查询：使用与comprehensive_evaluation_enhanced_new_1.py相同的逻辑
+            # 移除混合决策，只使用unified_english_template_no_think.txt模板
             try:
-                from xlm.components.prompt_templates.template_loader import template_loader
-                prompt = template_loader.format_template(
-                    "rag_english_template",
-                    context=context_str,
-                    question=question
-                )
-                if prompt is None:
-                    # 回退到简单英文prompt
-                    prompt = f"Context: {context_str}\nQuestion: {question}\nAnswer:"
+                # 导入RAG系统的英文prompt处理函数
+                from xlm.components.rag_system.rag_system import get_final_prompt_messages_english, _convert_messages_to_chatml
+                messages = get_final_prompt_messages_english(context_str, question)
+                prompt = _convert_messages_to_chatml(messages)
+                print(f"使用统一英文模板: unified_english_template_no_think.txt")
             except Exception as e:
                 print(f"英文模板加载失败: {e}，使用简单英文prompt")
                 prompt = f"Context: {context_str}\nQuestion: {question}\nAnswer:"
         
         try:
-            # 根据语言检测结果决定hybrid_decision参数
+            # 直接使用生成器，不进行混合决策
             if is_chinese_query:
-                hybrid_decision = "multi_stage_chinese"
+                # 中文查询使用原有逻辑
+                answer = self.generator.generate_hybrid_answer(
+                    question=question,
+                    table_context="",  # UI中没有分离的上下文
+                    text_context=context_str,
+                    hybrid_decision="multi_stage_chinese"
+                )
             else:
-                # 英文查询：使用混合决策算法
+                # 英文查询：直接使用prompt生成
+                generated_responses = self.generator.generate(texts=[prompt])
+                answer = generated_responses[0] if generated_responses else "Unable to generate answer"
+                
+                # 对英文查询进行答案提取处理
                 try:
-                    # 导入混合决策函数
-                    from comprehensive_evaluation_enhanced import hybrid_decision_enhanced
-                    decision_result = hybrid_decision_enhanced(context_str, question)
-                    hybrid_decision = decision_result['primary_decision']
-                    print(f"🤖 英文混合决策: {hybrid_decision} (置信度: {decision_result['confidence']:.3f})")
+                    from xlm.components.rag_system.rag_system import extract_final_answer_from_tag
+                    extracted_answer = extract_final_answer_from_tag(answer)
+                    if extracted_answer and extracted_answer.strip():
+                        answer = extracted_answer
+                        print(f"答案提取成功: {extracted_answer[:100]}...")
+                    else:
+                        print("答案提取失败，使用原始响应")
                 except Exception as e:
-                    print(f"混合决策失败: {e}，使用默认hybrid")
-                    hybrid_decision = "hybrid"
-            
-            # 使用generate_hybrid_answer方法，传递混合决策参数
-            answer = self.generator.generate_hybrid_answer(
-                question=question,
-                table_context="",  # UI中没有分离的上下文
-                text_context=context_str,
-                hybrid_decision=hybrid_decision
-            )
+                    print(f"答案提取过程出错: {e}，使用原始响应")
         except Exception as e:
             print(f"生成器调用失败: {e}")
             answer = "生成器调用失败"

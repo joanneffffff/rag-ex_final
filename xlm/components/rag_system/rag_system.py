@@ -7,6 +7,7 @@ import collections
 import re
 from langdetect import detect, LangDetectException
 from typing import List, Union, Optional, Dict, Any
+from pathlib import Path
 
 # 导入增强版英文prompt集成器
 try:
@@ -16,96 +17,195 @@ except ImportError:
     ENHANCED_ENGLISH_AVAILABLE = False
     print("⚠️ 增强版英文prompt集成器不可用，将使用基础模板")
 
-# Define the robust "Golden Prompts" directly in the code (only for English)
-PROMPT_TEMPLATE_EN = """You are a highly analytical and precise financial expert. Your task is to answer the user's question **strictly based on the provided <context> information**.
+# ===================================================================
+# 英文Prompt模板处理函数 - 与comprehensive_evaluation_enhanced_new_1.py保持一致
+# ===================================================================
 
-**CRITICAL: Your output must be a pure, direct answer. Do NOT include any self-reflection, thinking process, prompt analysis, irrelevant comments, format markers (like boxed, numbered lists, bold text), or any form of meta-commentary. Do NOT quote or restate the prompt content. Your answer must end directly and concisely without any follow-up explanations.**
+def _load_template_content_from_file_english(template_file_name: str) -> Optional[str]:
+    """Loads the full string content of an English Prompt template from a specified file."""
+    template_path = Path("data/prompt_templates") / template_file_name
+    try:
+        with open(template_path, 'r', encoding='utf-8') as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        print(f"❌ English Template file not found: {template_path}. Please ensure the file exists.")
+        return None
 
-Requirements:
-1.  **Strictly adhere to the provided <context>. Do not use any external knowledge or make assumptions.**
-2.  If the <context> does not contain sufficient information to answer the question, state: "The answer cannot be found in the provided context."
-3.  For questions involving financial predictions or future outlook, prioritize information explicitly stated as forecasts or outlooks within the <context>. If the <context> specifies a report date, base your answer on that date's perspective.
-4.  Provide a concise and direct answer in complete sentences.
-5.  Do not repeat the question or add conversational fillers.
+def _parse_template_string_to_messages(template_full_string: str, query: str, context: str = "") -> List[Dict[str, str]]:
+    """
+    Parses the template string and creates messages list for English evaluation.
+    This function is adapted from comprehensive_evaluation_enhanced_new_1.py
+    """
+    messages = []
+    
+    # 1. Extract SYSTEM message (everything from ===SYSTEM=== to ===USER===)
+    system_match = re.search(r'===SYSTEM===(.*?)===USER===', template_full_string, re.DOTALL)
+    if system_match:
+        system_content = system_match.group(1).strip()
+        # Clean up unwanted parts from SYSTEM content
+        system_content = re.sub(r'---CRITICAL RULES for the <answer> tag[\s\S]*', '', system_content).strip()
+        system_content = re.sub(r'---[\s\S]*', '', system_content).strip()
+        messages.append({"role": "system", "content": system_content})
+    
+    # 2. Create USER message with the actual query and context
+    # The template has examples, but we'll create a simple format for the actual query
+    user_content = f"Q: {query}\nTable Context: {context}\nText Context: {context}\n<answer>"
+    messages.append({"role": "user", "content": user_content})
 
-Example 1:
-Context: Apple Inc. reported Q3 2023 revenue of $81.8 billion, down 1.4% year-over-year. iPhone sales increased 2.8% to $39.7 billion.
-Question: How did Apple perform in Q3 2023?
-Answer: Apple's Q3 2023 performance was mixed. Total revenue declined 1.4% to $81.8 billion, but iPhone sales grew 2.8% to $39.7 billion.
+    return messages
 
-Example 2:
-Context: Tesla's vehicle deliveries in Q2 2023 reached 466,140 units, up 83% from the previous year. Production capacity utilization improved to 95%.
-Question: What were Tesla's delivery numbers in Q2 2023?
-Answer: Tesla delivered 466,140 vehicles in Q2 2023, representing an 83% increase from the previous year.
+def _convert_messages_to_chatml(messages: List[Dict[str, str]]) -> str:
+    """
+    Converts messages list to ChatML format string expected by Fin-R1 (Qwen2.5 based).
+    """
+    if not messages:
+        return ""
 
-Context:
-{context}
+    formatted_prompt = ""
+    for message in messages:
+        role = message.get("role", "")
+        content = message.get("content", "")
 
-Question: {question}
+        if role == "system":
+            formatted_prompt += f"<|im_start|>system\n{content.strip()}<|im_end|>\n"
+        elif role == "user":
+            formatted_prompt += f"<|im_start|>user\n{content.strip()}<|im_end|>\n"
+        elif role == "assistant":
+            # Assistant role is usually part of few-shot examples
+            formatted_prompt += f"<|im_start|>assistant\n{content.strip()}<|im_end|>\n"
 
-Answer:"""
+    # Append assistant start tag to indicate model should start generating new assistant response
+    formatted_prompt += "<|im_start|>assistant\n"
 
-# 超简洁版本（推荐用于生产环境）
-PROMPT_TEMPLATE_ZH_SIMPLE = """基于上下文信息，用一句话回答用户问题。不要添加任何格式标记、编号或额外说明。
+    return formatted_prompt
 
-**极度重要：你的输出必须是纯粹、直接的回答，不包含任何自我反思、思考过程、对Prompt的分析、与回答无关的额外注释、任何格式标记（如 boxed、数字列表、加粗）、或任何形式的元评论。请勿引用或复述Prompt内容。你的回答必须直接、简洁地结束，不带任何引导语或后续说明。**
+def get_final_prompt_messages_english(context: str, query: str) -> List[Dict[str, str]]:
+    """
+    Constructs the messages list for English evaluation, using the specified template file.
+    This function is adapted from comprehensive_evaluation_enhanced_new_1.py
+    """
+    template_file_name = "unified_english_template_no_think.txt"
+    template_full_string = _load_template_content_from_file_english(template_file_name)
+    
+    if template_full_string is None:
+        # 回退到简单prompt
+        return [{"role": "user", "content": f"Context: {context}\nQuestion: {query}\nAnswer:"}]
 
-上下文：{context}
-问题：{question}
-回答："""
+    return _parse_template_string_to_messages(template_full_string, query, context)
 
-# 简洁版本（平衡质量和长度）
-PROMPT_TEMPLATE_ZH_CLEAN = """基于以下上下文信息，直接回答用户问题。要求：
-1. 只使用提供的信息
-2. 回答要简洁，不超过100字
-3. 不要添加任何格式标记、编号或额外说明
-4. 用自然的中文表达
+# ===================================================================
+# 答案提取函数 - 与comprehensive_evaluation_enhanced_new_1.py保持一致
+# ===================================================================
 
-**极度重要：你的输出必须是纯粹、直接的回答，不包含任何自我反思、思考过程、对Prompt的分析、与回答无关的额外注释、任何格式标记（如 boxed、数字列表、加粗）、或任何形式的元评论。请勿引用或复述Prompt内容。你的回答必须直接、简洁地结束，不带任何引导语或后续说明。**
+def _shared_text_standardizer_english(text: str) -> str:
+    """
+    Helper function to standardize English text for both answer extraction and F1 score calculation.
+    Strictly follows the rules from the English Prompt Template.
+    """
+    text = text.strip()
+    
+    # Lowercase all text
+    text = text.lower()
 
-上下文：{context}
-问题：{question}
-回答："""
+    # 递归替换所有 \text{...} 为 ...（保留内容）
+    while True:
+        new_text = re.sub(r'\\text\{([^}]*)\}', r'\1', text, flags=re.DOTALL)
+        if new_text == text:
+            break
+        text = new_text
+    # 其余 LaTeX 格式直接去掉
+    text = re.sub(r'\\[a-zA-Z]+\{[^}]*\}', '', text)
+    text = re.sub(r'\\[a-zA-Z]+', '', text)
+    
+    # Remove currency symbols and common unit words based on prompt rule
+    text = re.sub(r'\b(million|billion|thousand|trillion|usd|eur|gbp|m|b)\b', '', text, flags=re.IGNORECASE).strip()
+    text = re.sub(r'[\$£€]', '', text).strip()
 
-PROMPT_TEMPLATE_ZH = """基于以下上下文信息，直接回答用户问题。只使用提供的信息，不要添加任何外部知识或格式化内容。
+    # Remove commas from numbers
+    text = text.replace(',', '')
 
-**极度重要：你的输出必须是纯粹、直接的回答，不包含任何自我反思、思考过程、对Prompt的分析、与回答无关的额外注释、任何格式标记（如 boxed、数字列表、加粗）、或任何形式的元评论。请勿引用或复述Prompt内容。你的回答必须直接、简洁地结束，不带任何引导语或后续说明。**
+    # Handle negative numbers in parentheses (e.g., "(33)" -> "-33")
+    if text.startswith('(') and text.endswith(')'):
+        text = '-' + text[1:-1]
+    
+    # Normalize percentages
+    text = text.replace(' percent', '%').replace('pct', '%')
+    text = re.sub(r'(\d+\.?\d*)\s*%', r'\1%', text)
+    
+    # Remove common introductory phrases
+    text = re.sub(r'^(the\s*answer\s*is|it\s*was|the\s*value\s*is|resulting\s*in|this\s*represents|the\s*effect\s*is|therefore|so|thus|in\s*conclusion|final\s*answer\s*is|final\s*number\s*is)\s*', '', text, flags=re.IGNORECASE).strip()
+    
+    # Remove trailing punctuation
+    if text.endswith('%'):
+        text = re.sub(r'[\.,;]$', '', text).strip()
+    else:
+        text = re.sub(r'[\.,;%]$', '', text).strip() 
+    
+    # Final cleanup of whitespace
+    text = ' '.join(text.split()).strip()
 
-示例1：
-上下文：中国平安2023年第一季度实现营业收入2,345.67亿元，同比增长8.5%；净利润为156.78亿元，同比增长12.3%。
-问题：中国平安的业绩如何？
-回答：中国平安2023年第一季度业绩表现良好，营业收入同比增长8.5%至2,345.67亿元，净利润同比增长12.3%至156.78亿元。
+    return text
 
-示例2：
-上下文：腾讯控股2023年上半年游戏业务收入同比下降5.2%，广告业务收入同比增长3.1%。
-问题：腾讯的游戏业务表现如何？
-回答：腾讯2023年上半年游戏业务收入同比下降5.2%，表现不佳。
+def extract_final_answer_from_tag(raw_output: str) -> str:
+    """
+    Extracts the final answer from the model's raw output by looking for the <answer> tag.
+    Returns NOT_FOUND_REPLY_ENGLISH if no valid answer found or tag is empty.
+    """
+    NOT_FOUND_REPLY_ENGLISH = "I cannot find the answer in the provided context."
+    
+    # First, try to find <answer> tags
+    match = re.search(r'<answer>(.*?)</answer>', raw_output, re.DOTALL | re.IGNORECASE)
+    
+    if match:
+        content = match.group(1).strip()
+        # Ensure extracted content is not empty or an empty tag itself (e.g., <answer></answer>)
+        if content and content.lower() not in ['<final></final>', '<answer></answer>', '<final-answer></final-answer>']:
+            
+            # Try to extract the most concise answer from the content
+            # Look for patterns that might contain the actual answer
+            
+            # 1. Look for boxed answers: \boxed{...}
+            # 使用更复杂的正则表达式来处理嵌套大括号
+            boxed_match = re.search(r'\\boxed\{((?:[^{}]|{[^{}]*})*)\}', content)
+            if boxed_match:
+                return _shared_text_standardizer_english(boxed_match.group(1))
+            
+            # 2. Look for percentage patterns: 12.82%
+            percentage_match = re.search(r'(\d+\.?\d*)\s*%', content)
+            if percentage_match:
+                return _shared_text_standardizer_english(percentage_match.group(0))
+            
+            # 3. Look for numerical answers at the end of sentences
+            # This is for cases like "Thus, the answer is 12.82%"
+            final_number_match = re.search(r'(?:thus|therefore|answer is|result is)\s+(?:approximately\s+)?(\d+\.?\d*)', content, re.IGNORECASE)
+            if final_number_match:
+                return _shared_text_standardizer_english(final_number_match.group(1))
+            
+            # 4. Look for the largest numerical value (likely the answer)
+            # This helps when there are multiple numbers in the text
+            numbers = re.findall(r'\b(\d+(?:,\d+)*)\b', content)
+            if numbers:
+                # Convert to integers for comparison, removing commas
+                number_values = [int(num.replace(',', '')) for num in numbers]
+                largest_number = max(number_values)
+                return _shared_text_standardizer_english(str(largest_number))
+            
+            # 5. If no specific pattern found, return the original content
+            return _shared_text_standardizer_english(content)
+    
+    # If no <answer> tags found, look for boxed answers in the entire text
+    # 使用更复杂的正则表达式来处理嵌套大括号
+    boxed_match = re.search(r'\\boxed\{((?:[^{}]|{[^{}]*})*)\}', raw_output)
+    if boxed_match:
+        return _shared_text_standardizer_english(boxed_match.group(1))
+    
+    # If no valid <answer> structure is found or content is invalid,
+    # return the specific "not found" phrase.
+    return NOT_FOUND_REPLY_ENGLISH
 
-上下文：
-{context}
-
-问题：{question}
-
-回答："""
-
-# Chain-of-Thought版本（优化版，隐藏思考过程）
-PROMPT_TEMPLATE_ZH_COT = """你是一位专业的金融分析师。请基于以下上下文信息，通过内部思考来回答用户问题。
-
-**极度重要：你的输出必须是纯粹、直接的回答，不包含任何自我反思、思考过程、对Prompt的分析、与回答无关的额外注释、任何格式标记（如 boxed、数字列表、加粗）、或任何形式的元评论。请勿引用或复述Prompt内容。你的回答必须直接、简洁地结束，不带任何引导语或后续说明。**
-
-重要要求：
-1. 请进行内部思考，但不要输出任何思考步骤或过程
-2. 直接给出最终答案，不要包含"思考"、"步骤"等词汇
-3. 只使用提供的上下文信息，不要添加外部知识
-4. 回答要简洁直接，用自然的中文表达
-
-上下文：
-{context}
-
-问题：{question}
-
-回答："""
-
+# ===================================================================
+# RAG系统类
+# ===================================================================
 
 class RagSystem:
     def __init__(
@@ -183,7 +283,6 @@ class RagSystem:
         if is_chinese_q:
             no_context_message = "未找到合适的语料，请检查数据源。建议使用多阶段检索系统处理中文查询。"
         else:
-            template_name = "rag_english_template"
             no_context_message = "No suitable context found for your question. Please check the data sources."
 
         if not retrieved_documents or (isinstance(retrieved_documents, list) and len(retrieved_documents) == 0):
@@ -222,33 +321,19 @@ class RagSystem:
         else:
             context_str = str(retrieved_documents)
         
-        # 4. Create the final prompt using enhanced logic for English queries
+        # 4. Create the final prompt using unified logic for English queries
         try:
             if is_chinese_q:
                 # 中文查询使用多阶段检索系统，这里只是回退
                 prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{user_input}\n\n回答："
                 template_type = "ZH-MULTI-STAGE"
             else:
-                # 英文查询使用增强版逻辑
-                if self.use_enhanced_english and self.enhanced_english_integrator:
-                    # 使用增强版英文prompt集成器
-                    enhanced_prompt, metadata = self.enhanced_english_integrator.create_enhanced_prompt(
-                        context=context_str, 
-                        question=user_input
-                    )
-                    prompt = enhanced_prompt
-                    template_type = f"EN-ENHANCED-{metadata.get('content_type', 'UNKNOWN').upper()}"
-                    print(f"使用增强版英文prompt，内容类型: {metadata.get('content_type', 'unknown')}")
-                else:
-                    # 使用基础模板
-                    prompt = template_loader.format_template(
-                        template_name,
-                        context=context_str, 
-                        question=user_input
-                    )
-                    if prompt is None:
-                        raise Exception("Template formatting failed")
-                    template_type = "EN-BASIC"
+                # 英文查询使用与comprehensive_evaluation_enhanced_new_1.py相同的逻辑
+                # 移除混合决策，只使用unified_english_template_no_think.txt模板
+                messages = get_final_prompt_messages_english(context_str, user_input)
+                prompt = _convert_messages_to_chatml(messages)
+                template_type = "EN-UNIFIED-TEMPLATE"
+                print(f"使用统一英文模板: unified_english_template_no_think.txt")
         except Exception as e:
             # 回退到简单prompt
             if is_chinese_q:
@@ -264,12 +349,12 @@ class RagSystem:
         except Exception as e:
             raise e
         
-        # 6. 对英文查询进行答案提取处理
-        if not is_chinese_q and self.use_enhanced_english and self.enhanced_english_integrator:
+        # 6. 对英文查询进行答案提取处理 - 使用与comprehensive_evaluation_enhanced_new_1.py相同的逻辑
+        if not is_chinese_q:
             try:
                 # 提取最终答案
                 raw_response = generated_responses[0] if generated_responses else ""
-                extracted_answer = extract_final_answer_with_rescue(raw_response)
+                extracted_answer = extract_final_answer_from_tag(raw_response)
                 
                 # 如果提取成功，替换原始响应
                 if extracted_answer and extracted_answer.strip():
@@ -323,17 +408,6 @@ class RagSystem:
             use_simple=self.use_simple,
             use_enhanced_english=self.use_enhanced_english
         )
-        
-        # 如果是增强版英文处理，添加额外metadata
-        if not is_chinese_q and self.use_enhanced_english and self.enhanced_english_integrator:
-            try:
-                enhanced_metadata = self.enhanced_english_integrator.get_template_info()
-                metadata_dict.update({
-                    "enhanced_features": enhanced_metadata.get("features", []),
-                    "enhanced_version": enhanced_metadata.get("version", "unknown")
-                })
-            except Exception as e:
-                print(f"获取增强metadata失败: {e}")
 
         result = RagOutput(
             retrieved_documents=retrieved_documents,

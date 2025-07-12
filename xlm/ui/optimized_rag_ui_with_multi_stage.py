@@ -425,14 +425,16 @@ class OptimizedRagUIWithMultiStage:
                         # 回退到简单中文prompt
                         prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question}\n\n回答："
                 else:
-                    # 英文查询使用英文prompt模板
-                    prompt = template_loader.format_template(
-                        "rag_english_template",
-                        context=context_str,
-                        question=question
-                    )
-                    if prompt is None:
-                        # 回退到简单英文prompt
+                    # 英文查询：使用与comprehensive_evaluation_enhanced_new_1.py相同的逻辑
+                    # 移除混合决策，只使用unified_english_template_no_think.txt模板
+                    try:
+                        # 导入RAG系统的英文prompt处理函数
+                        from xlm.components.rag_system.rag_system import get_final_prompt_messages_english, _convert_messages_to_chatml
+                        messages = get_final_prompt_messages_english(context_str, question)
+                        prompt = _convert_messages_to_chatml(messages)
+                        print(f"使用统一英文模板: unified_english_template_no_think.txt")
+                    except Exception as e:
+                        print(f"英文模板加载失败: {e}，使用简单英文prompt")
                         prompt = f"Context: {context_str}\nQuestion: {question}\nAnswer:"
                 
                 generated_responses = self.generator.generate(texts=[prompt])
