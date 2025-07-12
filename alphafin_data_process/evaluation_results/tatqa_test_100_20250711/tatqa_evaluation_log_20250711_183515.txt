@@ -1,0 +1,44 @@
+2025-07-11 18:35:15,109 - INFO - TatQA评估日志文件: alphafin_data_process/evaluation_results/tatqa_test_100_20250711/tatqa_evaluation_log_20250711_183515.txt
+2025-07-11 18:35:15,109 - INFO - ================================================================================
+2025-07-11 18:35:15,109 - INFO - 开始TatQA英文数据集检索评估
+2025-07-11 18:35:15,110 - INFO - ================================================================================
+2025-07-11 18:35:15,110 - INFO - 评测数据: evaluate_mrr/tatqa_eval_balanced_100.jsonl
+2025-07-11 18:35:15,110 - INFO - 输出目录: alphafin_data_process/evaluation_results/tatqa_test_100_20250711
+2025-07-11 18:35:15,110 - INFO - 检索模式: ['baseline', 'reranker']
+2025-07-11 18:35:15,110 - INFO - Top-K列表: [1, 3, 5, 10]
+2025-07-11 18:35:15,111 - INFO - 加载TatQA评测数据...
+2025-07-11 18:35:15,114 - INFO - 加载TatQA评测数据: 100 个样本
+2025-07-11 18:35:15,114 - INFO - 初始化RAG系统适配器...
+2025-07-11 18:39:06,868 - INFO - RAG系统适配器初始化成功
+2025-07-11 18:39:06,872 - INFO - 
+==================================================
+2025-07-11 18:39:06,873 - INFO - 开始评测模式: baseline
+2025-07-11 18:39:06,874 - INFO - ==================================================
+2025-07-11 18:39:06,874 - INFO - 
+评测 Top-1...
+2025-07-11 18:39:07,038 - INFO - HTTP Request: GET https://api.gradio.app/pkg-version "HTTP/1.1 200 OK"
+2025-07-11 18:39:08,630 - INFO - 原始数据已保存到: alphafin_data_process/evaluation_results/tatqa_test_100_20250711/raw_results_baseline_20250711_183908.json
+2025-07-11 18:39:08,632 - INFO - Top-1 评测完成，耗时: 1.75秒
+2025-07-11 18:39:08,632 - INFO - 
+评测 Top-3...
+2025-07-11 18:39:09,798 - INFO - 原始数据已保存到: alphafin_data_process/evaluation_results/tatqa_test_100_20250711/raw_results_baseline_20250711_183909.json
+2025-07-11 18:39:09,799 - INFO - Top-3 评测完成，耗时: 1.16秒
+2025-07-11 18:39:09,799 - INFO - 
+评测 Top-5...
+2025-07-11 18:39:11,010 - INFO - 原始数据已保存到: alphafin_data_process/evaluation_results/tatqa_test_100_20250711/raw_results_baseline_20250711_183911.json
+2025-07-11 18:39:11,011 - INFO - Top-5 评测完成，耗时: 1.21秒
+2025-07-11 18:39:11,011 - INFO - 
+评测 Top-10...
+2025-07-11 18:39:12,207 - INFO - 原始数据已保存到: alphafin_data_process/evaluation_results/tatqa_test_100_20250711/raw_results_baseline_20250711_183912.json
+2025-07-11 18:39:12,207 - INFO - Top-10 评测完成，耗时: 1.19秒
+2025-07-11 18:39:12,208 - INFO - 模式 baseline 结果已保存到: alphafin_data_process/evaluation_results/tatqa_test_100_20250711/tatqa_results_baseline_20250711_183912.json
+2025-07-11 18:39:12,208 - INFO - 
+==================================================
+2025-07-11 18:39:12,208 - INFO - 开始评测模式: reranker
+2025-07-11 18:39:12,208 - INFO - ==================================================
+2025-07-11 18:39:12,209 - INFO - 
+评测 Top-1...
+2025-07-11 19:26:19,134 - INFO - 原始数据已保存到: alphafin_data_process/evaluation_results/tatqa_test_100_20250711/raw_results_reranker_20250711_192619.json
+2025-07-11 19:26:19,135 - INFO - Top-1 评测完成，耗时: 2826.92秒
+2025-07-11 19:26:19,135 - INFO - 
+评测 Top-3...

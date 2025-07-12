@@ -15,7 +15,7 @@ import sys
 import os
 
 # 添加项目路径
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from alphafin_data_process.rag_system_adapter import RagSystemAdapter
 
@@ -124,7 +124,7 @@ def run_tatqa_evaluation(
             try:
                 start_time = time.time()
                 
-                results = adapter.evaluate_retrieval_performance(
+                raw_results = adapter.evaluate_retrieval_performance(
                     eval_dataset=eval_data,
                     top_k=top_k,
                     mode=mode
@@ -133,10 +133,26 @@ def run_tatqa_evaluation(
                 end_time = time.time()
                 duration = end_time - start_time
                 
-                # 添加执行时间
-                results['duration_seconds'] = duration
-                results['mode'] = mode
-                results['top_k'] = top_k
+                # 保存原始数据
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                raw_data_file = output_path / f"raw_results_{mode}_{timestamp}.json"
+                with open(raw_data_file, 'w', encoding='utf-8') as f:
+                    json.dump(raw_results, f, ensure_ascii=False, indent=2)
+                logger.info(f"原始数据已保存到: {raw_data_file}")
+                
+                # 计算指标
+                from alphafin_data_process.run_retrieval_evaluation_background import calculate_metrics_from_raw_results
+                metrics = calculate_metrics_from_raw_results(raw_results, top_k)
+                
+                # 构建结果字典
+                results = {
+                    'MRR': metrics.get('MRR', 0.0),
+                    f'Hit@{top_k}': metrics.get(f'Hit@{top_k}', 0.0),
+                    'total_samples': metrics.get('total_samples', 0),
+                    'duration_seconds': duration,
+                    'mode': mode,
+                    'top_k': top_k
+                }
                 
                 mode_results[f"top_{top_k}"] = results
                 logger.info(f"Top-{top_k} 评测完成，耗时: {duration:.2f}秒")

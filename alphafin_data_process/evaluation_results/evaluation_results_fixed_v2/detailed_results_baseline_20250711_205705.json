@@ -1,0 +1,4448 @@
+{
+  "mode": "baseline",
+  "total_samples": 100,
+  "mrr": 0.14214013682396034,
+  "hit_at_1": 0.11,
+  "hit_at_3": 0.16,
+  "hit_at_5": 0.16,
+  "hit_at_10": 0.21,
+  "hit_at_1_count": 11,
+  "hit_at_3_count": 16,
+  "hit_at_5_count": 16,
+  "hit_at_10_count": 21,
+  "results": [
+    {
+      "query": "What is the value of the accounts receivable due from Customer A in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9359"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9359",
+        "train_optimized_4025",
+        "train_optimized_8300",
+        "train_optimized_8299",
+        "eval_optimized_9463",
+        "train_optimized_4022",
+        "train_optimized_8542",
+        "train_optimized_6414",
+        "train_optimized_9012",
+        "train_optimized_6413"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9359",
+        "train_optimized_4025",
+        "train_optimized_8300",
+        "train_optimized_8299",
+        "eval_optimized_9463",
+        "train_optimized_4022",
+        "train_optimized_8542",
+        "train_optimized_6414",
+        "train_optimized_9012",
+        "train_optimized_6413"
+      ],
+      "mrr": 1.0,
+      "rank": 1,
+      "retrieval_scores": [
+        -31.570552825927734,
+        -50.256080627441406,
+        -50.799339294433594,
+        -50.91707229614258,
+        -51.34125518798828,
+        -52.7230224609375,
+        -53.24304962158203,
+        -53.48506164550781,
+        -53.5156135559082,
+        -53.6798210144043
+      ]
+    },
+    {
+      "query": "What does the table represent?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9192"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9322",
+        "train_optimized_5081",
+        "train_optimized_3076",
+        "train_optimized_7998",
+        "train_optimized_6128",
+        "train_optimized_2840",
+        "train_optimized_8571",
+        "train_optimized_2988",
+        "train_optimized_2564",
+        "train_optimized_4673"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9322",
+        "train_optimized_5081",
+        "train_optimized_3076",
+        "train_optimized_7998",
+        "train_optimized_6128",
+        "train_optimized_2840",
+        "train_optimized_8571",
+        "train_optimized_2988",
+        "train_optimized_2564",
+        "train_optimized_4673"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -61.2332649230957,
+        -63.964599609375,
+        -64.90555572509766,
+        -65.68002319335938,
+        -66.30195617675781,
+        -68.24717712402344,
+        -68.81687927246094,
+        -69.00801086425781,
+        -69.052490234375,
+        -69.1729965209961
+      ]
+    },
+    {
+      "query": "Which assets had non-material adjusted carrying values?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9662"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9578",
+        "eval_optimized_9577",
+        "train_optimized_6000",
+        "train_optimized_6003",
+        "train_optimized_3776",
+        "train_optimized_8029",
+        "eval_optimized_9608",
+        "train_optimized_4736",
+        "train_optimized_6911",
+        "train_optimized_2977"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9578",
+        "eval_optimized_9577",
+        "train_optimized_6000",
+        "train_optimized_6003",
+        "train_optimized_3776",
+        "train_optimized_8029",
+        "eval_optimized_9608",
+        "train_optimized_4736",
+        "train_optimized_6911",
+        "train_optimized_2977"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -52.268409729003906,
+        -55.88072967529297,
+        -57.855072021484375,
+        -57.88751220703125,
+        -59.295413970947266,
+        -61.37915802001953,
+        -61.51852035522461,
+        -61.73160171508789,
+        -62.326236724853516,
+        -62.6097297668457
+      ]
+    },
+    {
+      "query": "What was purchased in fiscal 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9627"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_2480",
+        "train_optimized_1710",
+        "train_optimized_377",
+        "train_optimized_1120",
+        "train_optimized_3750",
+        "train_optimized_5324",
+        "train_optimized_5325",
+        "train_optimized_4073",
+        "train_optimized_3471",
+        "train_optimized_2967"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_2480",
+        "train_optimized_1710",
+        "train_optimized_377",
+        "train_optimized_1120",
+        "train_optimized_3750",
+        "train_optimized_5324",
+        "train_optimized_5325",
+        "train_optimized_4073",
+        "train_optimized_3471",
+        "train_optimized_2967"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -51.245887756347656,
+        -51.566436767578125,
+        -58.42454528808594,
+        -66.59599304199219,
+        -68.3533935546875,
+        -68.84030151367188,
+        -69.23222351074219,
+        -70.07054138183594,
+        -70.23124694824219,
+        -70.30197143554688
+      ]
+    },
+    {
+      "query": "What are the Cost of sales and gross margin are subject to?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9627"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5712",
+        "eval_optimized_9447",
+        "train_optimized_5714",
+        "eval_optimized_9448",
+        "train_optimized_1426",
+        "train_optimized_5263",
+        "train_optimized_1423",
+        "train_optimized_7523",
+        "train_optimized_1102",
+        "train_optimized_8861"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5712",
+        "eval_optimized_9447",
+        "train_optimized_5714",
+        "eval_optimized_9448",
+        "train_optimized_1426",
+        "train_optimized_5263",
+        "train_optimized_1423",
+        "train_optimized_7523",
+        "train_optimized_1102",
+        "train_optimized_8861"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -70.93621826171875,
+        -72.92144775390625,
+        -73.15631866455078,
+        -73.37982177734375,
+        -74.37721252441406,
+        -75.82302856445312,
+        -75.98368072509766,
+        -77.55458068847656,
+        -77.81928253173828,
+        -77.88370513916016
+      ]
+    },
+    {
+      "query": "What is the total accounts receivable and long term receivable from Customer B as of September 30, 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9359"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9359",
+        "train_optimized_4842",
+        "train_optimized_4025",
+        "train_optimized_6414",
+        "train_optimized_6413",
+        "train_optimized_8542",
+        "train_optimized_4022",
+        "train_optimized_8300",
+        "train_optimized_8543",
+        "train_optimized_8299"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9359",
+        "train_optimized_4842",
+        "train_optimized_4025",
+        "train_optimized_6414",
+        "train_optimized_6413",
+        "train_optimized_8542",
+        "train_optimized_4022",
+        "train_optimized_8300",
+        "train_optimized_8543",
+        "train_optimized_8299"
+      ],
+      "mrr": 1.0,
+      "rank": 1,
+      "retrieval_scores": [
+        -16.871517181396484,
+        -37.087745666503906,
+        -38.154693603515625,
+        -39.574703216552734,
+        -39.76426696777344,
+        -40.95331954956055,
+        -42.07550811767578,
+        -42.282989501953125,
+        -42.30640411376953,
+        -42.6438102722168
+      ]
+    },
+    {
+      "query": "How much did net sales change between 2017 and 2018?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9321"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5712",
+        "eval_optimized_9448",
+        "train_optimized_5714",
+        "train_optimized_5498",
+        "eval_optimized_9447",
+        "train_optimized_949",
+        "train_optimized_582",
+        "train_optimized_5481",
+        "train_optimized_7085",
+        "train_optimized_5482"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5712",
+        "eval_optimized_9448",
+        "train_optimized_5714",
+        "train_optimized_5498",
+        "eval_optimized_9447",
+        "train_optimized_949",
+        "train_optimized_582",
+        "train_optimized_5481",
+        "train_optimized_7085",
+        "train_optimized_5482"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -42.619014739990234,
+        -42.834529876708984,
+        -52.20791244506836,
+        -52.961238861083984,
+        -53.12172317504883,
+        -53.571144104003906,
+        -54.13571548461914,
+        -55.41606140136719,
+        -56.364227294921875,
+        -56.39491653442383
+      ]
+    },
+    {
+      "query": "Which locations are responsible for driving the increase in sales in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9317"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9321",
+        "train_optimized_8413",
+        "train_optimized_192",
+        "train_optimized_193",
+        "train_optimized_8929",
+        "train_optimized_191",
+        "train_optimized_8411",
+        "train_optimized_8416",
+        "train_optimized_8713",
+        "train_optimized_8907"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9321",
+        "train_optimized_8413",
+        "train_optimized_192",
+        "train_optimized_193",
+        "train_optimized_8929",
+        "train_optimized_191",
+        "train_optimized_8411",
+        "train_optimized_8416",
+        "train_optimized_8713",
+        "train_optimized_8907"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -47.4530029296875,
+        -52.81596755981445,
+        -53.08397674560547,
+        -57.262603759765625,
+        -60.27893829345703,
+        -66.20675659179688,
+        -67.1453857421875,
+        -67.59577941894531,
+        -67.62495422363281,
+        -68.99128723144531
+      ]
+    },
+    {
+      "query": "What is the allocation of goodwill to the appropriate CGU based on?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9687"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_642",
+        "train_optimized_7178",
+        "train_optimized_8428",
+        "train_optimized_4766",
+        "train_optimized_6521",
+        "train_optimized_470",
+        "train_optimized_5531",
+        "train_optimized_6551",
+        "train_optimized_3980",
+        "train_optimized_471"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_642",
+        "train_optimized_7178",
+        "train_optimized_8428",
+        "train_optimized_4766",
+        "train_optimized_6521",
+        "train_optimized_470",
+        "train_optimized_5531",
+        "train_optimized_6551",
+        "train_optimized_3980",
+        "train_optimized_471"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -57.9776496887207,
+        -58.13921356201172,
+        -58.8568000793457,
+        -64.28252410888672,
+        -66.248291015625,
+        -67.47167205810547,
+        -68.84386444091797,
+        -69.36112976074219,
+        -69.61817169189453,
+        -70.00181579589844
+      ]
+    },
+    {
+      "query": "What caused the increase in research and development expense?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9466"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9466",
+        "eval_optimized_10012",
+        "train_optimized_2061",
+        "train_optimized_6669",
+        "train_optimized_7381",
+        "train_optimized_8490",
+        "train_optimized_4643",
+        "train_optimized_6449",
+        "train_optimized_940",
+        "train_optimized_7730"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9466",
+        "eval_optimized_10012",
+        "train_optimized_2061",
+        "train_optimized_6669",
+        "train_optimized_7381",
+        "train_optimized_8490",
+        "train_optimized_4643",
+        "train_optimized_6449",
+        "train_optimized_940",
+        "train_optimized_7730"
+      ],
+      "mrr": 1.0,
+      "rank": 1,
+      "retrieval_scores": [
+        -36.86590576171875,
+        -37.215484619140625,
+        -45.2147102355957,
+        -47.49156188964844,
+        -47.52569580078125,
+        -50.342323303222656,
+        -50.470516204833984,
+        -51.45529556274414,
+        -51.52524948120117,
+        -52.508460998535156
+      ]
+    },
+    {
+      "query": "What does NEO stand for?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_10118"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_4771",
+        "train_optimized_6267",
+        "train_optimized_1403",
+        "train_optimized_3642",
+        "train_optimized_6268",
+        "train_optimized_3699",
+        "eval_optimized_9160",
+        "train_optimized_5725",
+        "train_optimized_6344",
+        "eval_optimized_9161"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_4771",
+        "train_optimized_6267",
+        "train_optimized_1403",
+        "train_optimized_3642",
+        "train_optimized_6268",
+        "train_optimized_3699",
+        "eval_optimized_9160",
+        "train_optimized_5725",
+        "train_optimized_6344",
+        "eval_optimized_9161"
+      ],
+      "mrr": 0.058823529411764705,
+      "rank": 17,
+      "retrieval_scores": [
+        -67.75779724121094,
+        -73.48333740234375,
+        -74.09144592285156,
+        -74.62943267822266,
+        -74.74325561523438,
+        -74.80839538574219,
+        -75.51908874511719,
+        -75.56340026855469,
+        -75.71099853515625,
+        -76.11815643310547
+      ]
+    },
+    {
+      "query": "What was the change in ownership interest held in Golar Partners?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9185"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_897",
+        "train_optimized_4104",
+        "train_optimized_960",
+        "train_optimized_5997",
+        "train_optimized_2110",
+        "train_optimized_1744",
+        "train_optimized_961",
+        "train_optimized_4014",
+        "train_optimized_2765",
+        "train_optimized_2403"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_897",
+        "train_optimized_4104",
+        "train_optimized_960",
+        "train_optimized_5997",
+        "train_optimized_2110",
+        "train_optimized_1744",
+        "train_optimized_961",
+        "train_optimized_4014",
+        "train_optimized_2765",
+        "train_optimized_2403"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -57.16690444946289,
+        -59.456119537353516,
+        -59.98834228515625,
+        -60.596832275390625,
+        -60.7963752746582,
+        -61.24989700317383,
+        -61.40871810913086,
+        -61.55232620239258,
+        -61.57627868652344,
+        -61.577796936035156
+      ]
+    },
+    {
+      "query": "What was the amount of unrecognized stock-based compensation expense related to unvested employee stock options in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9219"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_4730",
+        "eval_optimized_9840",
+        "eval_optimized_9842",
+        "eval_optimized_9841",
+        "train_optimized_6203",
+        "train_optimized_4493",
+        "train_optimized_4463",
+        "train_optimized_6275",
+        "train_optimized_7347",
+        "train_optimized_7460"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_4730",
+        "eval_optimized_9840",
+        "eval_optimized_9842",
+        "eval_optimized_9841",
+        "train_optimized_6203",
+        "train_optimized_4493",
+        "train_optimized_4463",
+        "train_optimized_6275",
+        "train_optimized_7347",
+        "train_optimized_7460"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -42.75217819213867,
+        -49.07310104370117,
+        -49.29985809326172,
+        -49.45515441894531,
+        -51.12778854370117,
+        -52.62528991699219,
+        -52.84189987182617,
+        -53.918174743652344,
+        -54.2651252746582,
+        -54.51403045654297
+      ]
+    },
+    {
+      "query": "What was the cost of internally-developed software in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_10012"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9466",
+        "eval_optimized_10012",
+        "train_optimized_5463",
+        "train_optimized_3100",
+        "eval_optimized_9708",
+        "train_optimized_2061",
+        "train_optimized_8681",
+        "train_optimized_1720",
+        "train_optimized_8078",
+        "train_optimized_6669"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9466",
+        "eval_optimized_10012",
+        "train_optimized_5463",
+        "train_optimized_3100",
+        "eval_optimized_9708",
+        "train_optimized_2061",
+        "train_optimized_8681",
+        "train_optimized_1720",
+        "train_optimized_8078",
+        "train_optimized_6669"
+      ],
+      "mrr": 0.5,
+      "rank": 2,
+      "retrieval_scores": [
+        -68.90705871582031,
+        -69.07652282714844,
+        -75.72608947753906,
+        -76.95436096191406,
+        -77.88754272460938,
+        -78.20570373535156,
+        -78.92374420166016,
+        -80.4410629272461,
+        -82.71990966796875,
+        -82.84811401367188
+      ]
+    },
+    {
+      "query": "What is the percentage increase in Mr Kapuria's salary from his promotion?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_10119"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_10118",
+        "eval_optimized_10119",
+        "train_optimized_4812",
+        "train_optimized_3454",
+        "train_optimized_5044",
+        "train_optimized_2831",
+        "train_optimized_2832",
+        "train_optimized_3642",
+        "eval_optimized_10120",
+        "train_optimized_1403"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_10118",
+        "eval_optimized_10119",
+        "train_optimized_4812",
+        "train_optimized_3454",
+        "train_optimized_5044",
+        "train_optimized_2831",
+        "train_optimized_2832",
+        "train_optimized_3642",
+        "eval_optimized_10120",
+        "train_optimized_1403"
+      ],
+      "mrr": 0.5,
+      "rank": 2,
+      "retrieval_scores": [
+        -47.05070495605469,
+        -47.27356719970703,
+        -48.23223876953125,
+        -51.980960845947266,
+        -54.77235412597656,
+        -54.824703216552734,
+        -55.82196807861328,
+        -55.83804702758789,
+        -56.46244812011719,
+        -59.64835739135742
+      ]
+    },
+    {
+      "query": "What did the net income in the fourth quarter, 2019, represent?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9645"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9448",
+        "train_optimized_5712",
+        "train_optimized_8664",
+        "train_optimized_949",
+        "train_optimized_5498",
+        "train_optimized_951",
+        "train_optimized_5714",
+        "train_optimized_7085",
+        "train_optimized_5481",
+        "eval_optimized_9447"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9448",
+        "train_optimized_5712",
+        "train_optimized_8664",
+        "train_optimized_949",
+        "train_optimized_5498",
+        "train_optimized_951",
+        "train_optimized_5714",
+        "train_optimized_7085",
+        "train_optimized_5481",
+        "eval_optimized_9447"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -42.596641540527344,
+        -45.47093200683594,
+        -46.745262145996094,
+        -46.84577941894531,
+        -47.87296676635742,
+        -49.07611083984375,
+        -49.190799713134766,
+        -49.36772918701172,
+        -49.379241943359375,
+        -49.66236877441406
+      ]
+    },
+    {
+      "query": "The carrying value of the long term debt is held at which value?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9717"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9717",
+        "train_optimized_6497",
+        "train_optimized_7008",
+        "train_optimized_6495",
+        "eval_optimized_9698",
+        "eval_optimized_9699",
+        "train_optimized_263",
+        "train_optimized_5590",
+        "train_optimized_9001",
+        "train_optimized_796"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9717",
+        "train_optimized_6497",
+        "train_optimized_7008",
+        "train_optimized_6495",
+        "eval_optimized_9698",
+        "eval_optimized_9699",
+        "train_optimized_263",
+        "train_optimized_5590",
+        "train_optimized_9001",
+        "train_optimized_796"
+      ],
+      "mrr": 1.0,
+      "rank": 1,
+      "retrieval_scores": [
+        -38.72785186767578,
+        -42.136314392089844,
+        -44.44989776611328,
+        -46.575843811035156,
+        -51.175270080566406,
+        -51.31877136230469,
+        -51.7320556640625,
+        -52.3186149597168,
+        -53.18574523925781,
+        -53.25173568725586
+      ]
+    },
+    {
+      "query": "Where is the common stock traded under the symbol \"MEI.\"?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9928"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_7287",
+        "train_optimized_6940",
+        "train_optimized_6155",
+        "train_optimized_127",
+        "train_optimized_122",
+        "train_optimized_5392",
+        "train_optimized_5616",
+        "train_optimized_4123",
+        "eval_optimized_9332",
+        "train_optimized_7460"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_7287",
+        "train_optimized_6940",
+        "train_optimized_6155",
+        "train_optimized_127",
+        "train_optimized_122",
+        "train_optimized_5392",
+        "train_optimized_5616",
+        "train_optimized_4123",
+        "eval_optimized_9332",
+        "train_optimized_7460"
+      ],
+      "mrr": 0.016666666666666666,
+      "rank": 60,
+      "retrieval_scores": [
+        -52.2043342590332,
+        -52.249061584472656,
+        -52.8043212890625,
+        -53.00680923461914,
+        -53.06912612915039,
+        -53.86510467529297,
+        -54.434226989746094,
+        -54.81425476074219,
+        -55.10142517089844,
+        -55.18501663208008
+      ]
+    },
+    {
+      "query": "What was the total comprehensive income from currency effects and measurement results from hedging transactions and hedging relationships?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_10084"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5481",
+        "train_optimized_5482",
+        "train_optimized_8664",
+        "train_optimized_7085",
+        "eval_optimized_9179",
+        "train_optimized_3017",
+        "train_optimized_8156",
+        "train_optimized_8537",
+        "train_optimized_681",
+        "train_optimized_5501"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5481",
+        "train_optimized_5482",
+        "train_optimized_8664",
+        "train_optimized_7085",
+        "eval_optimized_9179",
+        "train_optimized_3017",
+        "train_optimized_8156",
+        "train_optimized_8537",
+        "train_optimized_681",
+        "train_optimized_5501"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -44.90800094604492,
+        -46.06962585449219,
+        -46.45453643798828,
+        -48.37211608886719,
+        -48.745399475097656,
+        -49.7442741394043,
+        -50.183170318603516,
+        -50.20655059814453,
+        -50.214149475097656,
+        -50.52720260620117
+      ]
+    },
+    {
+      "query": "What is the cumulative amount of net derivative gains from economic hedges that had been recognized in general corporate expenses but not yet allocated to reporting segments?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9921"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_8752",
+        "train_optimized_6807",
+        "train_optimized_6365",
+        "train_optimized_7774",
+        "train_optimized_7281",
+        "train_optimized_4934",
+        "train_optimized_1601",
+        "train_optimized_1266",
+        "train_optimized_7502",
+        "train_optimized_2850"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_8752",
+        "train_optimized_6807",
+        "train_optimized_6365",
+        "train_optimized_7774",
+        "train_optimized_7281",
+        "train_optimized_4934",
+        "train_optimized_1601",
+        "train_optimized_1266",
+        "train_optimized_7502",
+        "train_optimized_2850"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -45.27729034423828,
+        -46.98771667480469,
+        -53.134883880615234,
+        -54.241943359375,
+        -54.353271484375,
+        -54.61928939819336,
+        -55.64897537231445,
+        -55.79364776611328,
+        -56.327064514160156,
+        -56.57605743408203
+      ]
+    },
+    {
+      "query": "The company's debt value increases by what amount if the interest rate decreases by 1% in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9717"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_4261",
+        "train_optimized_4260",
+        "eval_optimized_10131",
+        "train_optimized_1139",
+        "train_optimized_1138",
+        "train_optimized_6195",
+        "train_optimized_3330",
+        "train_optimized_3329",
+        "train_optimized_7882",
+        "train_optimized_7883"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_4261",
+        "train_optimized_4260",
+        "eval_optimized_10131",
+        "train_optimized_1139",
+        "train_optimized_1138",
+        "train_optimized_6195",
+        "train_optimized_3330",
+        "train_optimized_3329",
+        "train_optimized_7882",
+        "train_optimized_7883"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -37.653114318847656,
+        -37.967830657958984,
+        -43.31540298461914,
+        -45.720123291015625,
+        -45.720123291015625,
+        -47.68117904663086,
+        -48.57954406738281,
+        -48.57954406738281,
+        -49.09862518310547,
+        -49.15641784667969
+      ]
+    },
+    {
+      "query": "What was the  accumulated benefit obligation for the United States defined benefit pension plans in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9970"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9970",
+        "eval_optimized_9869",
+        "train_optimized_1760",
+        "train_optimized_1019",
+        "train_optimized_1757",
+        "train_optimized_1010",
+        "train_optimized_1011",
+        "train_optimized_1012",
+        "train_optimized_1020",
+        "train_optimized_1442"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9970",
+        "eval_optimized_9869",
+        "train_optimized_1760",
+        "train_optimized_1019",
+        "train_optimized_1757",
+        "train_optimized_1010",
+        "train_optimized_1011",
+        "train_optimized_1012",
+        "train_optimized_1020",
+        "train_optimized_1442"
+      ],
+      "mrr": 1.0,
+      "rank": 1,
+      "retrieval_scores": [
+        -39.36981201171875,
+        -53.46937942504883,
+        -53.51097106933594,
+        -53.543819427490234,
+        -54.69708251953125,
+        -55.06414794921875,
+        -55.06414794921875,
+        -55.06414794921875,
+        -56.864593505859375,
+        -57.110626220703125
+      ]
+    },
+    {
+      "query": "What was the reason for the change in other income from 2018 to 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9735"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9796",
+        "train_optimized_8537",
+        "train_optimized_7085",
+        "train_optimized_3017",
+        "train_optimized_7469",
+        "train_optimized_879",
+        "train_optimized_8664",
+        "train_optimized_4870",
+        "train_optimized_4871",
+        "train_optimized_8156"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9796",
+        "train_optimized_8537",
+        "train_optimized_7085",
+        "train_optimized_3017",
+        "train_optimized_7469",
+        "train_optimized_879",
+        "train_optimized_8664",
+        "train_optimized_4870",
+        "train_optimized_4871",
+        "train_optimized_8156"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -55.0267219543457,
+        -56.72100830078125,
+        -56.92216873168945,
+        -58.50067138671875,
+        -60.512840270996094,
+        -62.162288665771484,
+        -63.51952362060547,
+        -63.70475769042969,
+        -63.70475769042969,
+        -63.8084716796875
+      ]
+    },
+    {
+      "query": "Which IFRS standard(s) did the Group adopt?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_10069"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5912",
+        "train_optimized_5911",
+        "eval_optimized_9321",
+        "train_optimized_4562",
+        "train_optimized_7631",
+        "train_optimized_2127",
+        "train_optimized_9008",
+        "train_optimized_4796",
+        "train_optimized_5147",
+        "train_optimized_6320"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5912",
+        "train_optimized_5911",
+        "eval_optimized_9321",
+        "train_optimized_4562",
+        "train_optimized_7631",
+        "train_optimized_2127",
+        "train_optimized_9008",
+        "train_optimized_4796",
+        "train_optimized_5147",
+        "train_optimized_6320"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -50.98320770263672,
+        -58.90465545654297,
+        -65.34725189208984,
+        -67.73374938964844,
+        -67.85377502441406,
+        -67.94522094726562,
+        -68.51200103759766,
+        -68.53463745117188,
+        -68.59626770019531,
+        -69.07347106933594
+      ]
+    },
+    {
+      "query": "What was the amount of  expenses for long-term remuneration components in FY2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9371"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_3586",
+        "eval_optimized_9466",
+        "eval_optimized_10012",
+        "train_optimized_6669",
+        "train_optimized_8490",
+        "train_optimized_7730",
+        "train_optimized_7381",
+        "train_optimized_7732",
+        "train_optimized_5463",
+        "eval_optimized_9708"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_3586",
+        "eval_optimized_9466",
+        "eval_optimized_10012",
+        "train_optimized_6669",
+        "train_optimized_8490",
+        "train_optimized_7730",
+        "train_optimized_7381",
+        "train_optimized_7732",
+        "train_optimized_5463",
+        "eval_optimized_9708"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -48.29950714111328,
+        -49.41368103027344,
+        -49.62593078613281,
+        -52.563636779785156,
+        -53.84184646606445,
+        -54.209190368652344,
+        -54.79671096801758,
+        -55.00890350341797,
+        -55.165008544921875,
+        -55.317169189453125
+      ]
+    },
+    {
+      "query": "What does the deferred income taxes reflect?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9241"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9241",
+        "eval_optimized_9242",
+        "train_optimized_8898",
+        "eval_optimized_9344",
+        "eval_optimized_9345",
+        "eval_optimized_9349",
+        "train_optimized_1539",
+        "train_optimized_4761",
+        "train_optimized_7492",
+        "train_optimized_4763"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9241",
+        "eval_optimized_9242",
+        "train_optimized_8898",
+        "eval_optimized_9344",
+        "eval_optimized_9345",
+        "eval_optimized_9349",
+        "train_optimized_1539",
+        "train_optimized_4761",
+        "train_optimized_7492",
+        "train_optimized_4763"
+      ],
+      "mrr": 1.0,
+      "rank": 1,
+      "retrieval_scores": [
+        -39.108604431152344,
+        -40.838008880615234,
+        -41.74258041381836,
+        -42.798988342285156,
+        -42.8342399597168,
+        -43.06858825683594,
+        -46.277618408203125,
+        -46.31211471557617,
+        -46.533660888671875,
+        -47.22300720214844
+      ]
+    },
+    {
+      "query": "What caused the increase in cash flows during the year ended December 31, 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9457"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_7852",
+        "train_optimized_1715",
+        "train_optimized_3675",
+        "train_optimized_3674",
+        "train_optimized_7705",
+        "train_optimized_7687",
+        "train_optimized_7706",
+        "train_optimized_7858",
+        "train_optimized_4352",
+        "train_optimized_6641"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_7852",
+        "train_optimized_1715",
+        "train_optimized_3675",
+        "train_optimized_3674",
+        "train_optimized_7705",
+        "train_optimized_7687",
+        "train_optimized_7706",
+        "train_optimized_7858",
+        "train_optimized_4352",
+        "train_optimized_6641"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -47.617210388183594,
+        -49.53246307373047,
+        -49.793540954589844,
+        -50.42228698730469,
+        -50.666866302490234,
+        -51.53450393676758,
+        -51.60774230957031,
+        -51.691322326660156,
+        -52.33085632324219,
+        -52.632896423339844
+      ]
+    },
+    {
+      "query": "What was the U.S. Federal statutory rate in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9720"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_935",
+        "train_optimized_1192",
+        "train_optimized_6455",
+        "train_optimized_1071",
+        "eval_optimized_9647",
+        "train_optimized_6243",
+        "train_optimized_2477",
+        "train_optimized_2478",
+        "eval_optimized_9809",
+        "train_optimized_4668"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_935",
+        "train_optimized_1192",
+        "train_optimized_6455",
+        "train_optimized_1071",
+        "eval_optimized_9647",
+        "train_optimized_6243",
+        "train_optimized_2477",
+        "train_optimized_2478",
+        "eval_optimized_9809",
+        "train_optimized_4668"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -57.615928649902344,
+        -60.21546173095703,
+        -60.47657012939453,
+        -61.29722213745117,
+        -61.45741653442383,
+        -61.473106384277344,
+        -61.591392517089844,
+        -61.70046615600586,
+        -61.87586212158203,
+        -61.9575080871582
+      ]
+    },
+    {
+      "query": "What are the expected operating fiscal gains in fiscal 2020 and 2021 and thereafter, respectively, based on the company’s forecasts of the timing of recognition of the underlying hedged items?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9921"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_8108",
+        "train_optimized_6556",
+        "train_optimized_7315",
+        "train_optimized_5324",
+        "train_optimized_680",
+        "train_optimized_2967",
+        "train_optimized_1492",
+        "train_optimized_7769",
+        "train_optimized_5325",
+        "train_optimized_6737"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_8108",
+        "train_optimized_6556",
+        "train_optimized_7315",
+        "train_optimized_5324",
+        "train_optimized_680",
+        "train_optimized_2967",
+        "train_optimized_1492",
+        "train_optimized_7769",
+        "train_optimized_5325",
+        "train_optimized_6737"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -54.361778259277344,
+        -55.10126495361328,
+        -55.24583435058594,
+        -57.237884521484375,
+        -58.67609786987305,
+        -59.1767578125,
+        -59.75544738769531,
+        -59.90790557861328,
+        -59.92768478393555,
+        -60.030723571777344
+      ]
+    },
+    {
+      "query": "In which years was the U.S. Federal statutory rate provided?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9720"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_6624",
+        "train_optimized_3844",
+        "train_optimized_3847",
+        "train_optimized_2620",
+        "train_optimized_3845",
+        "train_optimized_1777",
+        "train_optimized_7990",
+        "train_optimized_405",
+        "train_optimized_6260",
+        "train_optimized_4533"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_6624",
+        "train_optimized_3844",
+        "train_optimized_3847",
+        "train_optimized_2620",
+        "train_optimized_3845",
+        "train_optimized_1777",
+        "train_optimized_7990",
+        "train_optimized_405",
+        "train_optimized_6260",
+        "train_optimized_4533"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -53.90165710449219,
+        -57.63703918457031,
+        -57.827125549316406,
+        -58.14277648925781,
+        -59.354881286621094,
+        -60.420738220214844,
+        -60.830238342285156,
+        -61.52342224121094,
+        -61.689239501953125,
+        -61.89255905151367
+      ]
+    },
+    {
+      "query": "What is the total number of exercisable shares excluded for 2019 and 2018 altogether?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9994"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_2453",
+        "eval_optimized_9993",
+        "train_optimized_4493",
+        "train_optimized_4463",
+        "train_optimized_3826",
+        "train_optimized_6400",
+        "train_optimized_8269",
+        "train_optimized_3095",
+        "train_optimized_6397",
+        "train_optimized_2590"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_2453",
+        "eval_optimized_9993",
+        "train_optimized_4493",
+        "train_optimized_4463",
+        "train_optimized_3826",
+        "train_optimized_6400",
+        "train_optimized_8269",
+        "train_optimized_3095",
+        "train_optimized_6397",
+        "train_optimized_2590"
+      ],
+      "mrr": 0.027777777777777776,
+      "rank": 36,
+      "retrieval_scores": [
+        -47.774139404296875,
+        -50.16693115234375,
+        -53.551361083984375,
+        -55.122623443603516,
+        -57.549442291259766,
+        -58.138851165771484,
+        -58.61785125732422,
+        -58.93761444091797,
+        -59.077850341796875,
+        -59.35688018798828
+      ]
+    },
+    {
+      "query": "What is the amount of reimbursements for the cost of annual physical examinations and related travel for Mr. Post?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9989"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_6344",
+        "train_optimized_3642",
+        "train_optimized_5328",
+        "eval_optimized_9586",
+        "eval_optimized_9990",
+        "eval_optimized_9989",
+        "train_optimized_2831",
+        "train_optimized_5329",
+        "train_optimized_5044",
+        "train_optimized_1403"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_6344",
+        "train_optimized_3642",
+        "train_optimized_5328",
+        "eval_optimized_9586",
+        "eval_optimized_9990",
+        "eval_optimized_9989",
+        "train_optimized_2831",
+        "train_optimized_5329",
+        "train_optimized_5044",
+        "train_optimized_1403"
+      ],
+      "mrr": 0.16666666666666666,
+      "rank": 6,
+      "retrieval_scores": [
+        -54.15203094482422,
+        -54.25965881347656,
+        -56.13177490234375,
+        -56.827232360839844,
+        -57.10594177246094,
+        -57.10594177246094,
+        -59.012123107910156,
+        -60.314693450927734,
+        -60.69414520263672,
+        -60.85005569458008
+      ]
+    },
+    {
+      "query": "What drove the income tax benefit?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9959"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9796",
+        "train_optimized_7982",
+        "train_optimized_879",
+        "train_optimized_582",
+        "train_optimized_7085",
+        "train_optimized_949",
+        "eval_optimized_9448",
+        "train_optimized_6688",
+        "train_optimized_5498",
+        "train_optimized_8537"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9796",
+        "train_optimized_7982",
+        "train_optimized_879",
+        "train_optimized_582",
+        "train_optimized_7085",
+        "train_optimized_949",
+        "eval_optimized_9448",
+        "train_optimized_6688",
+        "train_optimized_5498",
+        "train_optimized_8537"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -59.58386993408203,
+        -60.124298095703125,
+        -60.27328109741211,
+        -61.69459533691406,
+        -62.22256088256836,
+        -66.17679595947266,
+        -66.3837890625,
+        -66.96095275878906,
+        -67.16297912597656,
+        -68.05052947998047
+      ]
+    },
+    {
+      "query": "What is the net income per basic share for pro forma year ended September 30, 2018?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9528"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_8664",
+        "train_optimized_8537",
+        "train_optimized_7469",
+        "train_optimized_7085",
+        "train_optimized_3017",
+        "train_optimized_5498",
+        "train_optimized_949",
+        "eval_optimized_9796",
+        "train_optimized_8156",
+        "train_optimized_4909"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_8664",
+        "train_optimized_8537",
+        "train_optimized_7469",
+        "train_optimized_7085",
+        "train_optimized_3017",
+        "train_optimized_5498",
+        "train_optimized_949",
+        "eval_optimized_9796",
+        "train_optimized_8156",
+        "train_optimized_4909"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -39.893165588378906,
+        -47.31904220581055,
+        -47.95392608642578,
+        -48.04535675048828,
+        -49.7497444152832,
+        -50.01060104370117,
+        -50.06361389160156,
+        -51.62192153930664,
+        -52.26024627685547,
+        -52.36283874511719
+      ]
+    },
+    {
+      "query": "What was the percentage change in the total accrued expenses between 2018 and 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9767"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_7737",
+        "train_optimized_7732",
+        "train_optimized_6669",
+        "eval_optimized_9466",
+        "train_optimized_3586",
+        "eval_optimized_10012",
+        "train_optimized_7730",
+        "train_optimized_2061",
+        "train_optimized_7381",
+        "train_optimized_2898"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_7737",
+        "train_optimized_7732",
+        "train_optimized_6669",
+        "eval_optimized_9466",
+        "train_optimized_3586",
+        "eval_optimized_10012",
+        "train_optimized_7730",
+        "train_optimized_2061",
+        "train_optimized_7381",
+        "train_optimized_2898"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -54.34084701538086,
+        -55.04536437988281,
+        -57.4586296081543,
+        -57.691551208496094,
+        -57.743568420410156,
+        -58.06549072265625,
+        -58.81133270263672,
+        -58.838836669921875,
+        -60.52235412597656,
+        -61.96648406982422
+      ]
+    },
+    {
+      "query": "What was the increase in net cash provided by operating activities from 2018 to 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9350"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5498",
+        "train_optimized_949",
+        "train_optimized_3017",
+        "eval_optimized_9448",
+        "train_optimized_7085",
+        "train_optimized_8664",
+        "train_optimized_1426",
+        "train_optimized_5712",
+        "train_optimized_5501",
+        "train_optimized_951"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5498",
+        "train_optimized_949",
+        "train_optimized_3017",
+        "eval_optimized_9448",
+        "train_optimized_7085",
+        "train_optimized_8664",
+        "train_optimized_1426",
+        "train_optimized_5712",
+        "train_optimized_5501",
+        "train_optimized_951"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -56.63704299926758,
+        -57.56888198852539,
+        -64.36937713623047,
+        -65.06800842285156,
+        -66.126220703125,
+        -67.20207977294922,
+        -67.23031616210938,
+        -67.62542724609375,
+        -68.06895446777344,
+        -68.694091796875
+      ]
+    },
+    {
+      "query": "Which year had the lowest percentage difference in basic and diluted net earnings per share?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9331"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9645",
+        "train_optimized_8831",
+        "train_optimized_8561",
+        "train_optimized_4346",
+        "eval_optimized_9881",
+        "train_optimized_7164",
+        "train_optimized_2112",
+        "train_optimized_119",
+        "train_optimized_120",
+        "train_optimized_121"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9645",
+        "train_optimized_8831",
+        "train_optimized_8561",
+        "train_optimized_4346",
+        "eval_optimized_9881",
+        "train_optimized_7164",
+        "train_optimized_2112",
+        "train_optimized_119",
+        "train_optimized_120",
+        "train_optimized_121"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -48.06703186035156,
+        -50.258392333984375,
+        -50.63545608520508,
+        -50.85175323486328,
+        -51.15992736816406,
+        -51.19910430908203,
+        -52.082611083984375,
+        -52.33442687988281,
+        -52.33442687988281,
+        -52.33442687988281
+      ]
+    },
+    {
+      "query": "What is the value of the company's 2023-2024 purchase obligations as a percentage of its total payment due in the 2023-2024 period?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9850"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_3153",
+        "train_optimized_3031",
+        "train_optimized_3030",
+        "train_optimized_6183",
+        "train_optimized_3032",
+        "train_optimized_6181",
+        "eval_optimized_9850",
+        "train_optimized_6182",
+        "train_optimized_3831",
+        "eval_optimized_10131"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_3153",
+        "train_optimized_3031",
+        "train_optimized_3030",
+        "train_optimized_6183",
+        "train_optimized_3032",
+        "train_optimized_6181",
+        "eval_optimized_9850",
+        "train_optimized_6182",
+        "train_optimized_3831",
+        "eval_optimized_10131"
+      ],
+      "mrr": 0.14285714285714285,
+      "rank": 7,
+      "retrieval_scores": [
+        -45.40997314453125,
+        -46.40862274169922,
+        -46.62489318847656,
+        -46.89727020263672,
+        -46.92277526855469,
+        -47.000946044921875,
+        -47.68043899536133,
+        -47.80706024169922,
+        -48.58711624145508,
+        -49.10326385498047
+      ]
+    },
+    {
+      "query": "What was the percentage change in Provisions for post-employment benefits plans (employer’s commitments) in FY2019 from FY2018?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9337"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_1442",
+        "train_optimized_591",
+        "eval_optimized_9970",
+        "train_optimized_4442",
+        "train_optimized_2287",
+        "train_optimized_1019",
+        "train_optimized_1757",
+        "train_optimized_1010",
+        "train_optimized_1011",
+        "train_optimized_1012"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_1442",
+        "train_optimized_591",
+        "eval_optimized_9970",
+        "train_optimized_4442",
+        "train_optimized_2287",
+        "train_optimized_1019",
+        "train_optimized_1757",
+        "train_optimized_1010",
+        "train_optimized_1011",
+        "train_optimized_1012"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -40.333377838134766,
+        -41.642608642578125,
+        -43.13134765625,
+        -43.31367492675781,
+        -43.43793487548828,
+        -43.582366943359375,
+        -43.70101547241211,
+        -43.926483154296875,
+        -43.926483154296875,
+        -43.926483154296875
+      ]
+    },
+    {
+      "query": "What was the percentage change in the Restricted stock unit issuances between 2018 and 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9818"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_6203",
+        "eval_optimized_9891",
+        "train_optimized_4730",
+        "train_optimized_7460",
+        "train_optimized_4493",
+        "train_optimized_6275",
+        "eval_optimized_9993",
+        "train_optimized_5580",
+        "train_optimized_3826",
+        "train_optimized_6868"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_6203",
+        "eval_optimized_9891",
+        "train_optimized_4730",
+        "train_optimized_7460",
+        "train_optimized_4493",
+        "train_optimized_6275",
+        "eval_optimized_9993",
+        "train_optimized_5580",
+        "train_optimized_3826",
+        "train_optimized_6868"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -40.053497314453125,
+        -40.50651550292969,
+        -41.01373291015625,
+        -41.27906799316406,
+        -41.559181213378906,
+        -42.58181381225586,
+        -42.60045623779297,
+        -42.89032745361328,
+        -43.55586242675781,
+        -43.65909194946289
+      ]
+    },
+    {
+      "query": "What was the average income tax benefit for 2018 and 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9796"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9796",
+        "train_optimized_6688",
+        "train_optimized_879",
+        "train_optimized_7982",
+        "train_optimized_7085",
+        "train_optimized_582",
+        "train_optimized_8537",
+        "train_optimized_949",
+        "train_optimized_2837",
+        "eval_optimized_9448"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9796",
+        "train_optimized_6688",
+        "train_optimized_879",
+        "train_optimized_7982",
+        "train_optimized_7085",
+        "train_optimized_582",
+        "train_optimized_8537",
+        "train_optimized_949",
+        "train_optimized_2837",
+        "eval_optimized_9448"
+      ],
+      "mrr": 1.0,
+      "rank": 1,
+      "retrieval_scores": [
+        -54.13043975830078,
+        -58.005348205566406,
+        -61.42888259887695,
+        -61.700748443603516,
+        -62.476112365722656,
+        -64.36531829833984,
+        -65.64807891845703,
+        -66.7029800415039,
+        -67.68534088134766,
+        -67.74649047851562
+      ]
+    },
+    {
+      "query": "What is the average value of raw materials and finished goods in 2018?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9613"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5516",
+        "train_optimized_8621",
+        "train_optimized_3776",
+        "train_optimized_6003",
+        "train_optimized_6000",
+        "train_optimized_1927",
+        "train_optimized_6911",
+        "eval_optimized_9578",
+        "train_optimized_8256",
+        "train_optimized_1063"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5516",
+        "train_optimized_8621",
+        "train_optimized_3776",
+        "train_optimized_6003",
+        "train_optimized_6000",
+        "train_optimized_1927",
+        "train_optimized_6911",
+        "eval_optimized_9578",
+        "train_optimized_8256",
+        "train_optimized_1063"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -46.04054260253906,
+        -47.076934814453125,
+        -52.538902282714844,
+        -54.62846755981445,
+        -55.777122497558594,
+        -56.647132873535156,
+        -56.721832275390625,
+        -57.100852966308594,
+        -57.189964294433594,
+        -57.19024658203125
+      ]
+    },
+    {
+      "query": "What was the basic net loss per share in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9208"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9403",
+        "train_optimized_6769",
+        "train_optimized_7164",
+        "train_optimized_6764",
+        "eval_optimized_9645",
+        "train_optimized_7830",
+        "train_optimized_6194",
+        "train_optimized_6190",
+        "train_optimized_722",
+        "eval_optimized_9404"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9403",
+        "train_optimized_6769",
+        "train_optimized_7164",
+        "train_optimized_6764",
+        "eval_optimized_9645",
+        "train_optimized_7830",
+        "train_optimized_6194",
+        "train_optimized_6190",
+        "train_optimized_722",
+        "eval_optimized_9404"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -56.61651611328125,
+        -60.34185791015625,
+        -60.594146728515625,
+        -62.143795013427734,
+        -62.65447998046875,
+        -63.43067932128906,
+        -63.626373291015625,
+        -65.53535461425781,
+        -65.99024963378906,
+        -66.03614807128906
+      ]
+    },
+    {
+      "query": "What are the 2 main items measured in this table?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_10008"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_682",
+        "train_optimized_5481",
+        "train_optimized_5482",
+        "train_optimized_7709",
+        "eval_optimized_9447",
+        "train_optimized_5501",
+        "train_optimized_8156",
+        "train_optimized_681",
+        "train_optimized_8537",
+        "train_optimized_951"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_682",
+        "train_optimized_5481",
+        "train_optimized_5482",
+        "train_optimized_7709",
+        "eval_optimized_9447",
+        "train_optimized_5501",
+        "train_optimized_8156",
+        "train_optimized_681",
+        "train_optimized_8537",
+        "train_optimized_951"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -56.85115051269531,
+        -56.981868743896484,
+        -57.07379913330078,
+        -58.87989807128906,
+        -58.93750762939453,
+        -59.07383728027344,
+        -59.26447677612305,
+        -59.297725677490234,
+        -60.03396224975586,
+        -60.300758361816406
+      ]
+    },
+    {
+      "query": "How many percent of the total inventory purchases did Supplier A account for in the year 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_10126"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5516",
+        "train_optimized_2981",
+        "train_optimized_2977",
+        "train_optimized_8621",
+        "train_optimized_6003",
+        "train_optimized_4571",
+        "train_optimized_6000",
+        "train_optimized_6911",
+        "train_optimized_8256",
+        "train_optimized_4427"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5516",
+        "train_optimized_2981",
+        "train_optimized_2977",
+        "train_optimized_8621",
+        "train_optimized_6003",
+        "train_optimized_4571",
+        "train_optimized_6000",
+        "train_optimized_6911",
+        "train_optimized_8256",
+        "train_optimized_4427"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -59.14936447143555,
+        -61.21244812011719,
+        -61.903778076171875,
+        -64.1146240234375,
+        -64.2152099609375,
+        -64.64314270019531,
+        -64.9265365600586,
+        -65.25163269042969,
+        -65.45128631591797,
+        -65.45625305175781
+      ]
+    },
+    {
+      "query": "What are the components factored in total inventories?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9381"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5516",
+        "train_optimized_5988",
+        "train_optimized_5216",
+        "eval_optimized_9577",
+        "train_optimized_8621",
+        "train_optimized_3776",
+        "train_optimized_6003",
+        "train_optimized_2981",
+        "train_optimized_2977",
+        "eval_optimized_9578"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5516",
+        "train_optimized_5988",
+        "train_optimized_5216",
+        "eval_optimized_9577",
+        "train_optimized_8621",
+        "train_optimized_3776",
+        "train_optimized_6003",
+        "train_optimized_2981",
+        "train_optimized_2977",
+        "eval_optimized_9578"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -67.83829498291016,
+        -68.19764709472656,
+        -69.08199310302734,
+        -71.62123107910156,
+        -71.63755798339844,
+        -72.080322265625,
+        -72.11647033691406,
+        -73.08644104003906,
+        -73.37842559814453,
+        -73.65999603271484
+      ]
+    },
+    {
+      "query": "What is the company's total operating lease obligations between 2020 to 2022?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9850"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_593",
+        "train_optimized_8791",
+        "train_optimized_8794",
+        "train_optimized_3153",
+        "train_optimized_7102",
+        "train_optimized_8245",
+        "train_optimized_4038",
+        "train_optimized_303",
+        "train_optimized_7765",
+        "train_optimized_305"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_593",
+        "train_optimized_8791",
+        "train_optimized_8794",
+        "train_optimized_3153",
+        "train_optimized_7102",
+        "train_optimized_8245",
+        "train_optimized_4038",
+        "train_optimized_303",
+        "train_optimized_7765",
+        "train_optimized_305"
+      ],
+      "mrr": 0.0125,
+      "rank": 80,
+      "retrieval_scores": [
+        -49.133445739746094,
+        -50.79206848144531,
+        -52.363990783691406,
+        -52.64247131347656,
+        -53.65864944458008,
+        -54.24517059326172,
+        -54.2729377746582,
+        -55.26792526245117,
+        -55.34101104736328,
+        -55.38986587524414
+      ]
+    },
+    {
+      "query": "What were the RSAs granted in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9300"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9300",
+        "train_optimized_2736",
+        "train_optimized_2737",
+        "train_optimized_4234",
+        "train_optimized_4233",
+        "train_optimized_2733",
+        "train_optimized_8597",
+        "train_optimized_1081",
+        "train_optimized_1641",
+        "train_optimized_5717"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9300",
+        "train_optimized_2736",
+        "train_optimized_2737",
+        "train_optimized_4234",
+        "train_optimized_4233",
+        "train_optimized_2733",
+        "train_optimized_8597",
+        "train_optimized_1081",
+        "train_optimized_1641",
+        "train_optimized_5717"
+      ],
+      "mrr": 1.0,
+      "rank": 1,
+      "retrieval_scores": [
+        -66.13206481933594,
+        -67.65471649169922,
+        -69.03538513183594,
+        -69.34954833984375,
+        -69.54421997070312,
+        -72.42046356201172,
+        -73.38253784179688,
+        -75.14417266845703,
+        -75.44939422607422,
+        -75.7596435546875
+      ]
+    },
+    {
+      "query": "What are the number of shares beneficially owned by Brian Kinion and Christopher Lien respectively?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_10155"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5997",
+        "train_optimized_897",
+        "train_optimized_2765",
+        "train_optimized_3955",
+        "train_optimized_4317",
+        "train_optimized_5707",
+        "train_optimized_4104",
+        "train_optimized_1157",
+        "train_optimized_1744",
+        "train_optimized_2869"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5997",
+        "train_optimized_897",
+        "train_optimized_2765",
+        "train_optimized_3955",
+        "train_optimized_4317",
+        "train_optimized_5707",
+        "train_optimized_4104",
+        "train_optimized_1157",
+        "train_optimized_1744",
+        "train_optimized_2869"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -45.30125427246094,
+        -46.83555221557617,
+        -47.202789306640625,
+        -47.577598571777344,
+        -47.71659469604492,
+        -47.87165069580078,
+        -47.96498107910156,
+        -48.03118896484375,
+        -48.058006286621094,
+        -48.19105529785156
+      ]
+    },
+    {
+      "query": "What was the change in Property and equipment, net in 2018 from 2017?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9662"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5777",
+        "train_optimized_6828",
+        "train_optimized_184",
+        "train_optimized_491",
+        "train_optimized_3925",
+        "train_optimized_5509",
+        "eval_optimized_10154",
+        "train_optimized_182",
+        "eval_optimized_10149",
+        "train_optimized_6829"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5777",
+        "train_optimized_6828",
+        "train_optimized_184",
+        "train_optimized_491",
+        "train_optimized_3925",
+        "train_optimized_5509",
+        "eval_optimized_10154",
+        "train_optimized_182",
+        "eval_optimized_10149",
+        "train_optimized_6829"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -48.886878967285156,
+        -51.26837921142578,
+        -52.45260238647461,
+        -52.62959289550781,
+        -52.846527099609375,
+        -52.95503234863281,
+        -53.001251220703125,
+        -53.05339050292969,
+        -53.16411590576172,
+        -53.240020751953125
+      ]
+    },
+    {
+      "query": "What is the Customer Support Revenues of Americas expressed as a percentage of GAAP-based Customer Support Gross Profit for Fiscal year 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9824"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_4188",
+        "train_optimized_4184",
+        "train_optimized_1499",
+        "eval_optimized_10079",
+        "eval_optimized_10082",
+        "eval_optimized_10081",
+        "train_optimized_8326",
+        "train_optimized_1280",
+        "eval_optimized_9321",
+        "train_optimized_192"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_4188",
+        "train_optimized_4184",
+        "train_optimized_1499",
+        "eval_optimized_10079",
+        "eval_optimized_10082",
+        "eval_optimized_10081",
+        "train_optimized_8326",
+        "train_optimized_1280",
+        "eval_optimized_9321",
+        "train_optimized_192"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -49.953941345214844,
+        -51.11703872680664,
+        -53.28940200805664,
+        -53.93063735961914,
+        -53.93063735961914,
+        -54.188270568847656,
+        -56.240394592285156,
+        -56.999053955078125,
+        -57.484657287597656,
+        -59.002197265625
+      ]
+    },
+    {
+      "query": "What was the most significant expense in FY18?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9491"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9466",
+        "eval_optimized_10012",
+        "eval_optimized_9525",
+        "train_optimized_7381",
+        "train_optimized_6669",
+        "train_optimized_2061",
+        "train_optimized_8490",
+        "train_optimized_7730",
+        "train_optimized_6449",
+        "train_optimized_4643"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9466",
+        "eval_optimized_10012",
+        "eval_optimized_9525",
+        "train_optimized_7381",
+        "train_optimized_6669",
+        "train_optimized_2061",
+        "train_optimized_8490",
+        "train_optimized_7730",
+        "train_optimized_6449",
+        "train_optimized_4643"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -40.94232177734375,
+        -41.53106689453125,
+        -45.26055908203125,
+        -46.51601028442383,
+        -47.04106903076172,
+        -48.20580291748047,
+        -51.01506423950195,
+        -51.15338897705078,
+        -52.308197021484375,
+        -52.54210662841797
+      ]
+    },
+    {
+      "query": "What is the percentage change in off-net APRU between 2017 and 2018?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9275"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_6418",
+        "train_optimized_582",
+        "train_optimized_7982",
+        "train_optimized_1429",
+        "train_optimized_790",
+        "train_optimized_583",
+        "train_optimized_6837",
+        "train_optimized_4870",
+        "train_optimized_4871",
+        "train_optimized_219"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_6418",
+        "train_optimized_582",
+        "train_optimized_7982",
+        "train_optimized_1429",
+        "train_optimized_790",
+        "train_optimized_583",
+        "train_optimized_6837",
+        "train_optimized_4870",
+        "train_optimized_4871",
+        "train_optimized_219"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -41.51702880859375,
+        -41.776222229003906,
+        -42.71222686767578,
+        -43.144840240478516,
+        -43.61973190307617,
+        -44.04206848144531,
+        -44.13024139404297,
+        -44.211421966552734,
+        -44.211421966552734,
+        -44.41133499145508
+      ]
+    },
+    {
+      "query": "What was the change in the amount of stock options in 2019 from 2018?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9219"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9840",
+        "eval_optimized_9842",
+        "eval_optimized_9841",
+        "train_optimized_7460",
+        "train_optimized_4464",
+        "train_optimized_4493",
+        "train_optimized_4730",
+        "eval_optimized_9891",
+        "train_optimized_6868",
+        "train_optimized_6203"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9840",
+        "eval_optimized_9842",
+        "eval_optimized_9841",
+        "train_optimized_7460",
+        "train_optimized_4464",
+        "train_optimized_4493",
+        "train_optimized_4730",
+        "eval_optimized_9891",
+        "train_optimized_6868",
+        "train_optimized_6203"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -54.289878845214844,
+        -54.9174919128418,
+        -55.24669647216797,
+        -57.00336456298828,
+        -57.559085845947266,
+        -58.13157272338867,
+        -58.30442428588867,
+        -58.57042694091797,
+        -59.27824020385742,
+        -59.696319580078125
+      ]
+    },
+    {
+      "query": "What is the year with Charges included in discontinued operations?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9549"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9547",
+        "eval_optimized_9549",
+        "train_optimized_3638",
+        "train_optimized_7341",
+        "train_optimized_5687",
+        "train_optimized_3091",
+        "train_optimized_6669",
+        "train_optimized_3586",
+        "train_optimized_4643",
+        "train_optimized_7456"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9547",
+        "eval_optimized_9549",
+        "train_optimized_3638",
+        "train_optimized_7341",
+        "train_optimized_5687",
+        "train_optimized_3091",
+        "train_optimized_6669",
+        "train_optimized_3586",
+        "train_optimized_4643",
+        "train_optimized_7456"
+      ],
+      "mrr": 0.5,
+      "rank": 2,
+      "retrieval_scores": [
+        -54.817317962646484,
+        -56.798736572265625,
+        -56.80137634277344,
+        -60.92744445800781,
+        -61.259246826171875,
+        -62.83245086669922,
+        -63.21049499511719,
+        -63.280242919921875,
+        -63.4244384765625,
+        -63.9127197265625
+      ]
+    },
+    {
+      "query": "What is the increase / (decrease) in the communication figures from 2018 to 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9659"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_4128",
+        "train_optimized_6039",
+        "train_optimized_2545",
+        "train_optimized_241",
+        "train_optimized_2407",
+        "train_optimized_8192",
+        "train_optimized_1093",
+        "train_optimized_3087",
+        "train_optimized_8700",
+        "train_optimized_5858"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_4128",
+        "train_optimized_6039",
+        "train_optimized_2545",
+        "train_optimized_241",
+        "train_optimized_2407",
+        "train_optimized_8192",
+        "train_optimized_1093",
+        "train_optimized_3087",
+        "train_optimized_8700",
+        "train_optimized_5858"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -41.03553771972656,
+        -42.33653259277344,
+        -43.00637435913086,
+        -44.288150787353516,
+        -44.69417953491211,
+        -44.752708435058594,
+        -45.86764144897461,
+        -45.95085144042969,
+        -45.978858947753906,
+        -46.03266906738281
+      ]
+    },
+    {
+      "query": "What was the increase / (decrease) in the RSAs granted from 2018 to 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9300"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_1657",
+        "train_optimized_2736",
+        "eval_optimized_9300",
+        "train_optimized_5594",
+        "train_optimized_3004",
+        "train_optimized_7973",
+        "train_optimized_7972",
+        "train_optimized_4234",
+        "train_optimized_6824",
+        "train_optimized_3005"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_1657",
+        "train_optimized_2736",
+        "eval_optimized_9300",
+        "train_optimized_5594",
+        "train_optimized_3004",
+        "train_optimized_7973",
+        "train_optimized_7972",
+        "train_optimized_4234",
+        "train_optimized_6824",
+        "train_optimized_3005"
+      ],
+      "mrr": 0.3333333333333333,
+      "rank": 3,
+      "retrieval_scores": [
+        -58.63239669799805,
+        -59.49366760253906,
+        -59.49951171875,
+        -59.601539611816406,
+        -60.0305061340332,
+        -60.19710159301758,
+        -60.19710159301758,
+        -60.21986389160156,
+        -60.37306594848633,
+        -60.42765808105469
+      ]
+    },
+    {
+      "query": "What is the impact of tax on the group share of associates' profits in 2018, in terms of % change?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9552"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_7982",
+        "train_optimized_582",
+        "train_optimized_1429",
+        "train_optimized_4870",
+        "train_optimized_4871",
+        "train_optimized_583",
+        "train_optimized_6418",
+        "train_optimized_6837",
+        "train_optimized_7983",
+        "train_optimized_3145"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_7982",
+        "train_optimized_582",
+        "train_optimized_1429",
+        "train_optimized_4870",
+        "train_optimized_4871",
+        "train_optimized_583",
+        "train_optimized_6418",
+        "train_optimized_6837",
+        "train_optimized_7983",
+        "train_optimized_3145"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -42.20104217529297,
+        -42.71678924560547,
+        -49.919090270996094,
+        -50.11801528930664,
+        -50.11801528930664,
+        -50.62131118774414,
+        -50.727813720703125,
+        -51.706993103027344,
+        -51.8665771484375,
+        -53.783546447753906
+      ]
+    },
+    {
+      "query": "What was the percentage change in Gross deferred income tax assets between 2018 and 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9345"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_879",
+        "eval_optimized_9796",
+        "train_optimized_7469",
+        "train_optimized_8537",
+        "train_optimized_6688",
+        "train_optimized_7085",
+        "train_optimized_7982",
+        "train_optimized_949",
+        "train_optimized_5498",
+        "eval_optimized_9448"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_879",
+        "eval_optimized_9796",
+        "train_optimized_7469",
+        "train_optimized_8537",
+        "train_optimized_6688",
+        "train_optimized_7085",
+        "train_optimized_7982",
+        "train_optimized_949",
+        "train_optimized_5498",
+        "eval_optimized_9448"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -40.389068603515625,
+        -42.08910369873047,
+        -46.6721076965332,
+        -47.62982177734375,
+        -47.63202667236328,
+        -48.686119079589844,
+        -48.75292205810547,
+        -49.806888580322266,
+        -50.76225280761719,
+        -51.35686492919922
+      ]
+    },
+    {
+      "query": "What is the value of the 2017 restructuring charges as a percentage of the 2017 total goodwill impairment and restructuring charges?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9642"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_3638",
+        "train_optimized_4600",
+        "train_optimized_7153",
+        "train_optimized_7341",
+        "train_optimized_3637",
+        "eval_optimized_9549",
+        "train_optimized_6216",
+        "eval_optimized_9547",
+        "train_optimized_1379",
+        "train_optimized_7730"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_3638",
+        "train_optimized_4600",
+        "train_optimized_7153",
+        "train_optimized_7341",
+        "train_optimized_3637",
+        "eval_optimized_9549",
+        "train_optimized_6216",
+        "eval_optimized_9547",
+        "train_optimized_1379",
+        "train_optimized_7730"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -50.38156509399414,
+        -57.46794128417969,
+        -64.5505142211914,
+        -64.842041015625,
+        -65.55377197265625,
+        -65.71559143066406,
+        -65.8475341796875,
+        -66.06864166259766,
+        -66.10490417480469,
+        -67.08526611328125
+      ]
+    },
+    {
+      "query": "Which non-returning director has the lowest amount of total compensation?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9989"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5328",
+        "train_optimized_5127",
+        "train_optimized_6344",
+        "train_optimized_480",
+        "train_optimized_6342",
+        "eval_optimized_9990",
+        "eval_optimized_9989",
+        "eval_optimized_10118",
+        "train_optimized_3642",
+        "train_optimized_2831"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5328",
+        "train_optimized_5127",
+        "train_optimized_6344",
+        "train_optimized_480",
+        "train_optimized_6342",
+        "eval_optimized_9990",
+        "eval_optimized_9989",
+        "eval_optimized_10118",
+        "train_optimized_3642",
+        "train_optimized_2831"
+      ],
+      "mrr": 0.14285714285714285,
+      "rank": 7,
+      "retrieval_scores": [
+        -51.450401306152344,
+        -56.661720275878906,
+        -57.37937927246094,
+        -57.61857986450195,
+        -57.72098922729492,
+        -58.298126220703125,
+        -58.298126220703125,
+        -58.46183776855469,
+        -59.984214782714844,
+        -60.96567916870117
+      ]
+    },
+    {
+      "query": "What is the change in Shipping revenues from Years Ended December 31, 2018 to 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9827"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9485",
+        "train_optimized_1426",
+        "train_optimized_1423",
+        "train_optimized_7469",
+        "train_optimized_5498",
+        "train_optimized_3017",
+        "train_optimized_8962",
+        "train_optimized_949",
+        "train_optimized_790",
+        "train_optimized_2550"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9485",
+        "train_optimized_1426",
+        "train_optimized_1423",
+        "train_optimized_7469",
+        "train_optimized_5498",
+        "train_optimized_3017",
+        "train_optimized_8962",
+        "train_optimized_949",
+        "train_optimized_790",
+        "train_optimized_2550"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -55.86155319213867,
+        -56.852386474609375,
+        -57.46620178222656,
+        -57.67342758178711,
+        -58.30529022216797,
+        -58.76084899902344,
+        -59.26341247558594,
+        -60.1727409362793,
+        -60.24358367919922,
+        -60.6347541809082
+      ]
+    },
+    {
+      "query": "What is the Gross accounts receivables for 2019 and 2018 respectively?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9463"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9359",
+        "train_optimized_8542",
+        "train_optimized_8543",
+        "train_optimized_6414",
+        "train_optimized_6413",
+        "train_optimized_5002",
+        "eval_optimized_9325",
+        "train_optimized_4842",
+        "train_optimized_4025",
+        "train_optimized_3055"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9359",
+        "train_optimized_8542",
+        "train_optimized_8543",
+        "train_optimized_6414",
+        "train_optimized_6413",
+        "train_optimized_5002",
+        "eval_optimized_9325",
+        "train_optimized_4842",
+        "train_optimized_4025",
+        "train_optimized_3055"
+      ],
+      "mrr": 0.07692307692307693,
+      "rank": 13,
+      "retrieval_scores": [
+        -41.79072570800781,
+        -48.79702377319336,
+        -51.090370178222656,
+        -51.62144470214844,
+        -51.96923065185547,
+        -55.07019805908203,
+        -55.08893585205078,
+        -55.79974365234375,
+        -55.94098663330078,
+        -56.04252243041992
+      ]
+    },
+    {
+      "query": "What is the average Long-term debt?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9837"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_4260",
+        "train_optimized_1139",
+        "train_optimized_1138",
+        "train_optimized_4261",
+        "train_optimized_2579",
+        "train_optimized_3330",
+        "train_optimized_3329",
+        "train_optimized_600",
+        "eval_optimized_9585",
+        "eval_optimized_10131"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_4260",
+        "train_optimized_1139",
+        "train_optimized_1138",
+        "train_optimized_4261",
+        "train_optimized_2579",
+        "train_optimized_3330",
+        "train_optimized_3329",
+        "train_optimized_600",
+        "eval_optimized_9585",
+        "eval_optimized_10131"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -55.647186279296875,
+        -57.190185546875,
+        -57.190185546875,
+        -57.34919357299805,
+        -58.30686950683594,
+        -59.56591796875,
+        -59.56591796875,
+        -60.05741882324219,
+        -60.728981018066406,
+        -60.96344757080078
+      ]
+    },
+    {
+      "query": "What is the percentage change in the total product sales from 2018 to 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9812"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5712",
+        "eval_optimized_9448",
+        "train_optimized_5498",
+        "train_optimized_5714",
+        "train_optimized_949",
+        "eval_optimized_9447",
+        "train_optimized_582",
+        "train_optimized_8962",
+        "train_optimized_790",
+        "train_optimized_1426"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5712",
+        "eval_optimized_9448",
+        "train_optimized_5498",
+        "train_optimized_5714",
+        "train_optimized_949",
+        "eval_optimized_9447",
+        "train_optimized_582",
+        "train_optimized_8962",
+        "train_optimized_790",
+        "train_optimized_1426"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -51.170135498046875,
+        -52.280906677246094,
+        -60.74406814575195,
+        -61.42717361450195,
+        -63.66099548339844,
+        -64.52552795410156,
+        -65.27865600585938,
+        -65.76118469238281,
+        -66.21295166015625,
+        -66.68474578857422
+      ]
+    },
+    {
+      "query": "What is the increase / (decrease) in 28 nanometers from 2018 to 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9521"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5798",
+        "train_optimized_9086",
+        "train_optimized_5902",
+        "eval_optimized_9823",
+        "eval_optimized_9824",
+        "train_optimized_4128",
+        "train_optimized_3087",
+        "train_optimized_3086",
+        "train_optimized_3654",
+        "train_optimized_3652"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5798",
+        "train_optimized_9086",
+        "train_optimized_5902",
+        "eval_optimized_9823",
+        "eval_optimized_9824",
+        "train_optimized_4128",
+        "train_optimized_3087",
+        "train_optimized_3086",
+        "train_optimized_3654",
+        "train_optimized_3652"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -43.98990249633789,
+        -46.47721862792969,
+        -46.63051223754883,
+        -48.90596008300781,
+        -48.90596008300781,
+        -49.01276779174805,
+        -49.71583938598633,
+        -50.30557632446289,
+        -50.622764587402344,
+        -50.622764587402344
+      ]
+    },
+    {
+      "query": "What is the increase/ (decrease) in media revenue from 2017 to 2018?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9617"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_4128",
+        "train_optimized_8192",
+        "train_optimized_6039",
+        "train_optimized_5858",
+        "eval_optimized_9317",
+        "train_optimized_5859",
+        "train_optimized_8045",
+        "train_optimized_2407",
+        "train_optimized_8702",
+        "train_optimized_8191"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_4128",
+        "train_optimized_8192",
+        "train_optimized_6039",
+        "train_optimized_5858",
+        "eval_optimized_9317",
+        "train_optimized_5859",
+        "train_optimized_8045",
+        "train_optimized_2407",
+        "train_optimized_8702",
+        "train_optimized_8191"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -41.05500030517578,
+        -44.53079605102539,
+        -44.87534713745117,
+        -45.524959564208984,
+        -45.68861389160156,
+        -45.915225982666016,
+        -45.93962860107422,
+        -46.631866455078125,
+        -47.49577331542969,
+        -47.841773986816406
+      ]
+    },
+    {
+      "query": "How many years did Shares issued under the ESPP exceed $2 million?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9891",
+        "eval_optimized_9891"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9891",
+        "train_optimized_6203",
+        "train_optimized_7158",
+        "train_optimized_8624",
+        "train_optimized_6940",
+        "train_optimized_6275",
+        "train_optimized_6204",
+        "train_optimized_22",
+        "train_optimized_5770",
+        "train_optimized_23"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9891",
+        "train_optimized_6203",
+        "train_optimized_7158",
+        "train_optimized_8624",
+        "train_optimized_6940",
+        "train_optimized_6275",
+        "train_optimized_6204",
+        "train_optimized_22",
+        "train_optimized_5770",
+        "train_optimized_23"
+      ],
+      "mrr": 1.0,
+      "rank": 1,
+      "retrieval_scores": [
+        -34.35990524291992,
+        -39.65291213989258,
+        -40.4160270690918,
+        -41.042213439941406,
+        -42.17036819458008,
+        -42.40753936767578,
+        -42.916893005371094,
+        -42.94729232788086,
+        -43.076316833496094,
+        -44.14736557006836
+      ]
+    },
+    {
+      "query": "What was the Projected benefit obligation in 2018?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9870",
+        "eval_optimized_9870"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_3477",
+        "train_optimized_1010",
+        "train_optimized_1011",
+        "train_optimized_1012",
+        "eval_optimized_9970",
+        "train_optimized_4606",
+        "eval_optimized_9353",
+        "eval_optimized_9355",
+        "eval_optimized_9354",
+        "train_optimized_1760"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_3477",
+        "train_optimized_1010",
+        "train_optimized_1011",
+        "train_optimized_1012",
+        "eval_optimized_9970",
+        "train_optimized_4606",
+        "eval_optimized_9353",
+        "eval_optimized_9355",
+        "eval_optimized_9354",
+        "train_optimized_1760"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -55.586978912353516,
+        -57.53329849243164,
+        -57.53329849243164,
+        -57.53329849243164,
+        -67.7757339477539,
+        -68.25701904296875,
+        -68.52674865722656,
+        -71.8477783203125,
+        -72.17680358886719,
+        -73.82952880859375
+      ]
+    },
+    {
+      "query": "What is the percentage change in total net sales from 2018 to 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9830",
+        "eval_optimized_9830"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5712",
+        "eval_optimized_9448",
+        "train_optimized_5714",
+        "train_optimized_5498",
+        "eval_optimized_9447",
+        "train_optimized_949",
+        "train_optimized_5481",
+        "train_optimized_219",
+        "train_optimized_790",
+        "train_optimized_582"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5712",
+        "eval_optimized_9448",
+        "train_optimized_5714",
+        "train_optimized_5498",
+        "eval_optimized_9447",
+        "train_optimized_949",
+        "train_optimized_5481",
+        "train_optimized_219",
+        "train_optimized_790",
+        "train_optimized_582"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -47.6778564453125,
+        -48.282623291015625,
+        -57.1877555847168,
+        -59.45852279663086,
+        -60.6856803894043,
+        -61.67108154296875,
+        -63.134002685546875,
+        -63.95746612548828,
+        -64.92766571044922,
+        -65.15567016601562
+      ]
+    },
+    {
+      "query": "What is the average revenue from Asia Pacific in 2018 and 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9198",
+        "eval_optimized_9198"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_8326",
+        "eval_optimized_9321",
+        "train_optimized_1280",
+        "train_optimized_1499",
+        "train_optimized_8467",
+        "train_optimized_8929",
+        "train_optimized_8413",
+        "train_optimized_4188",
+        "train_optimized_192",
+        "train_optimized_5084"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_8326",
+        "eval_optimized_9321",
+        "train_optimized_1280",
+        "train_optimized_1499",
+        "train_optimized_8467",
+        "train_optimized_8929",
+        "train_optimized_8413",
+        "train_optimized_4188",
+        "train_optimized_192",
+        "train_optimized_5084"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -59.85697555541992,
+        -63.21827697753906,
+        -67.93479919433594,
+        -69.10478210449219,
+        -69.25311279296875,
+        -69.65826416015625,
+        -70.18858337402344,
+        -71.00013732910156,
+        -71.19143676757812,
+        -71.57881164550781
+      ]
+    },
+    {
+      "query": "What was the difference in the gross carrying value between Trade Names and Non-compete agreements?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9784",
+        "eval_optimized_9784"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9784",
+        "eval_optimized_9785",
+        "train_optimized_8462",
+        "train_optimized_8466",
+        "train_optimized_8071",
+        "train_optimized_8375",
+        "train_optimized_8374",
+        "train_optimized_8068",
+        "train_optimized_4742",
+        "train_optimized_5744"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9784",
+        "eval_optimized_9785",
+        "train_optimized_8462",
+        "train_optimized_8466",
+        "train_optimized_8071",
+        "train_optimized_8375",
+        "train_optimized_8374",
+        "train_optimized_8068",
+        "train_optimized_4742",
+        "train_optimized_5744"
+      ],
+      "mrr": 1.0,
+      "rank": 1,
+      "retrieval_scores": [
+        -48.755287170410156,
+        -50.57716369628906,
+        -53.72089767456055,
+        -55.347900390625,
+        -59.20686340332031,
+        -60.98886489868164,
+        -60.98886489868164,
+        -61.024139404296875,
+        -62.09392547607422,
+        -63.32899475097656
+      ]
+    },
+    {
+      "query": "What was the Restricted stock unit issuances in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9818",
+        "eval_optimized_9818"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9891",
+        "train_optimized_4730",
+        "train_optimized_7460",
+        "train_optimized_4493",
+        "train_optimized_6203",
+        "train_optimized_5219",
+        "train_optimized_3826",
+        "eval_optimized_9993",
+        "train_optimized_5580",
+        "train_optimized_4196"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9891",
+        "train_optimized_4730",
+        "train_optimized_7460",
+        "train_optimized_4493",
+        "train_optimized_6203",
+        "train_optimized_5219",
+        "train_optimized_3826",
+        "eval_optimized_9993",
+        "train_optimized_5580",
+        "train_optimized_4196"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -50.28666305541992,
+        -51.634647369384766,
+        -52.54159927368164,
+        -53.146873474121094,
+        -54.091278076171875,
+        -54.31399154663086,
+        -55.08854675292969,
+        -55.106773376464844,
+        -55.79887390136719,
+        -55.807518005371094
+      ]
+    },
+    {
+      "query": "What was the Change in foreign operations tax exposure reserves in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9296",
+        "eval_optimized_9296"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_7492",
+        "train_optimized_8898",
+        "train_optimized_4763",
+        "train_optimized_4761",
+        "train_optimized_7950",
+        "train_optimized_8339",
+        "eval_optimized_9242",
+        "train_optimized_2082",
+        "eval_optimized_9241",
+        "train_optimized_701"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_7492",
+        "train_optimized_8898",
+        "train_optimized_4763",
+        "train_optimized_4761",
+        "train_optimized_7950",
+        "train_optimized_8339",
+        "eval_optimized_9242",
+        "train_optimized_2082",
+        "eval_optimized_9241",
+        "train_optimized_701"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -51.70792007446289,
+        -52.705570220947266,
+        -52.92235565185547,
+        -53.15105056762695,
+        -53.43115997314453,
+        -53.875213623046875,
+        -55.05620574951172,
+        -55.606689453125,
+        -55.72072982788086,
+        -56.112815856933594
+      ]
+    },
+    {
+      "query": "What was the Unlevered free cash flow in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9724",
+        "eval_optimized_9724"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_6728",
+        "train_optimized_5156",
+        "train_optimized_7852",
+        "train_optimized_1232",
+        "train_optimized_7858",
+        "train_optimized_4692",
+        "train_optimized_1592",
+        "train_optimized_4690",
+        "train_optimized_4691",
+        "train_optimized_1715"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_6728",
+        "train_optimized_5156",
+        "train_optimized_7852",
+        "train_optimized_1232",
+        "train_optimized_7858",
+        "train_optimized_4692",
+        "train_optimized_1592",
+        "train_optimized_4690",
+        "train_optimized_4691",
+        "train_optimized_1715"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -42.82749938964844,
+        -43.398414611816406,
+        -43.51020050048828,
+        -44.13774490356445,
+        -44.75251007080078,
+        -44.93748474121094,
+        -44.96576690673828,
+        -45.0711669921875,
+        -45.0711669921875,
+        -45.82965850830078
+      ]
+    },
+    {
+      "query": "How much were software in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9951",
+        "eval_optimized_9951"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_8413",
+        "train_optimized_3590",
+        "train_optimized_2268",
+        "train_optimized_9082",
+        "train_optimized_8929",
+        "train_optimized_2559",
+        "train_optimized_460",
+        "train_optimized_8869",
+        "train_optimized_8870",
+        "train_optimized_8411"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_8413",
+        "train_optimized_3590",
+        "train_optimized_2268",
+        "train_optimized_9082",
+        "train_optimized_8929",
+        "train_optimized_2559",
+        "train_optimized_460",
+        "train_optimized_8869",
+        "train_optimized_8870",
+        "train_optimized_8411"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -76.00587463378906,
+        -76.41058349609375,
+        -79.77790069580078,
+        -80.22595977783203,
+        -81.17569732666016,
+        -81.82243347167969,
+        -82.34996032714844,
+        -82.3946533203125,
+        -82.82516479492188,
+        -83.31220245361328
+      ]
+    },
+    {
+      "query": "In which years was Inventories calculated?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9381",
+        "eval_optimized_9380"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5216",
+        "train_optimized_5988",
+        "eval_optimized_9578",
+        "eval_optimized_9577",
+        "train_optimized_8030",
+        "train_optimized_4736",
+        "eval_optimized_9608",
+        "train_optimized_8029",
+        "train_optimized_7328",
+        "train_optimized_5187"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5216",
+        "train_optimized_5988",
+        "eval_optimized_9578",
+        "eval_optimized_9577",
+        "train_optimized_8030",
+        "train_optimized_4736",
+        "eval_optimized_9608",
+        "train_optimized_8029",
+        "train_optimized_7328",
+        "train_optimized_5187"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -59.820960998535156,
+        -60.2431526184082,
+        -61.84722900390625,
+        -62.028961181640625,
+        -62.68817138671875,
+        -63.338409423828125,
+        -64.58815002441406,
+        -65.20466613769531,
+        -65.61246490478516,
+        -66.27958679199219
+      ]
+    },
+    {
+      "query": "What is the percentage of capital expenditures for Bell Wireline out of the BCE capital expenditures in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9286",
+        "eval_optimized_9286"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_6669",
+        "train_optimized_1379",
+        "eval_optimized_10012",
+        "train_optimized_1378",
+        "train_optimized_6596",
+        "eval_optimized_9466",
+        "eval_optimized_9525",
+        "train_optimized_7381",
+        "train_optimized_2061",
+        "train_optimized_4410"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_6669",
+        "train_optimized_1379",
+        "eval_optimized_10012",
+        "train_optimized_1378",
+        "train_optimized_6596",
+        "eval_optimized_9466",
+        "eval_optimized_9525",
+        "train_optimized_7381",
+        "train_optimized_2061",
+        "train_optimized_4410"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -58.6389045715332,
+        -59.214134216308594,
+        -60.07088851928711,
+        -61.16416549682617,
+        -62.5423583984375,
+        -62.78318786621094,
+        -62.85063934326172,
+        -63.05317687988281,
+        -63.523529052734375,
+        -64.71484375
+      ]
+    },
+    {
+      "query": "What are the types of impairment losses under Americas in the Consolidated Statements of Operations?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9662",
+        "eval_optimized_9662"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5147",
+        "train_optimized_5178",
+        "train_optimized_5179",
+        "train_optimized_5180",
+        "train_optimized_460",
+        "train_optimized_1566",
+        "train_optimized_8870",
+        "train_optimized_7064",
+        "train_optimized_9008",
+        "train_optimized_26"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5147",
+        "train_optimized_5178",
+        "train_optimized_5179",
+        "train_optimized_5180",
+        "train_optimized_460",
+        "train_optimized_1566",
+        "train_optimized_8870",
+        "train_optimized_7064",
+        "train_optimized_9008",
+        "train_optimized_26"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -56.16619110107422,
+        -57.52467727661133,
+        -58.76771545410156,
+        -59.54623794555664,
+        -61.200931549072266,
+        -62.22074890136719,
+        -63.7220458984375,
+        -64.1419448852539,
+        -64.80931091308594,
+        -65.1860122680664
+      ]
+    },
+    {
+      "query": "What is the percentage change in the payroll and benefits in 2018 and 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9556",
+        "eval_optimized_9556"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_7982",
+        "train_optimized_4870",
+        "train_optimized_4871",
+        "train_optimized_790",
+        "train_optimized_582",
+        "train_optimized_583",
+        "train_optimized_7983",
+        "train_optimized_6837",
+        "train_optimized_6418",
+        "train_optimized_1429"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_7982",
+        "train_optimized_4870",
+        "train_optimized_4871",
+        "train_optimized_790",
+        "train_optimized_582",
+        "train_optimized_583",
+        "train_optimized_7983",
+        "train_optimized_6837",
+        "train_optimized_6418",
+        "train_optimized_1429"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -49.01504135131836,
+        -52.815513610839844,
+        -52.815513610839844,
+        -53.65927505493164,
+        -53.98625946044922,
+        -53.98759460449219,
+        -54.37977600097656,
+        -54.70843505859375,
+        -55.19920349121094,
+        -55.35694122314453
+      ]
+    },
+    {
+      "query": "What is the change in net carrying value between 2018 and 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9408",
+        "eval_optimized_9408"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9448",
+        "train_optimized_5712",
+        "train_optimized_5498",
+        "train_optimized_790",
+        "train_optimized_949",
+        "eval_optimized_9485",
+        "train_optimized_582",
+        "train_optimized_8664",
+        "eval_optimized_9447",
+        "train_optimized_219"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9448",
+        "train_optimized_5712",
+        "train_optimized_5498",
+        "train_optimized_790",
+        "train_optimized_949",
+        "eval_optimized_9485",
+        "train_optimized_582",
+        "train_optimized_8664",
+        "eval_optimized_9447",
+        "train_optimized_219"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -56.2059211730957,
+        -57.96479797363281,
+        -60.001094818115234,
+        -60.90519714355469,
+        -61.672000885009766,
+        -62.74564743041992,
+        -62.754520416259766,
+        -63.779563903808594,
+        -64.86872100830078,
+        -65.2381362915039
+      ]
+    },
+    {
+      "query": "How many years did the Balance at end of period exceed 30,000,000 ?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9818",
+        "eval_optimized_9818"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5439",
+        "train_optimized_3980",
+        "train_optimized_6551",
+        "train_optimized_1311",
+        "train_optimized_1309",
+        "train_optimized_1310",
+        "train_optimized_443",
+        "train_optimized_446",
+        "train_optimized_6521",
+        "train_optimized_8201"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5439",
+        "train_optimized_3980",
+        "train_optimized_6551",
+        "train_optimized_1311",
+        "train_optimized_1309",
+        "train_optimized_1310",
+        "train_optimized_443",
+        "train_optimized_446",
+        "train_optimized_6521",
+        "train_optimized_8201"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -35.532596588134766,
+        -36.815738677978516,
+        -37.70195770263672,
+        -38.85486602783203,
+        -38.85486602783203,
+        -38.85486602783203,
+        -39.0443115234375,
+        -39.500003814697266,
+        -39.660865783691406,
+        -40.56702423095703
+      ]
+    },
+    {
+      "query": "What was the change in the Projected benefit obligation between 2018 and 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9870",
+        "eval_optimized_9870"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_3477",
+        "train_optimized_1010",
+        "train_optimized_1011",
+        "train_optimized_1012",
+        "eval_optimized_9353",
+        "eval_optimized_9970",
+        "train_optimized_4606",
+        "train_optimized_1662",
+        "eval_optimized_9354",
+        "eval_optimized_9355"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_3477",
+        "train_optimized_1010",
+        "train_optimized_1011",
+        "train_optimized_1012",
+        "eval_optimized_9353",
+        "eval_optimized_9970",
+        "train_optimized_4606",
+        "train_optimized_1662",
+        "eval_optimized_9354",
+        "eval_optimized_9355"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -45.124656677246094,
+        -47.45363235473633,
+        -47.45363235473633,
+        -47.45363235473633,
+        -58.914100646972656,
+        -60.016258239746094,
+        -60.146400451660156,
+        -61.088958740234375,
+        -61.63148498535156,
+        -62.746665954589844
+      ]
+    },
+    {
+      "query": "What was the percentage change in the net total between 2018 and 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9742",
+        "eval_optimized_9742"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9448",
+        "train_optimized_5712",
+        "train_optimized_949",
+        "train_optimized_5498",
+        "train_optimized_790",
+        "train_optimized_5714",
+        "train_optimized_219",
+        "train_optimized_4909",
+        "train_optimized_8664",
+        "train_optimized_4912"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9448",
+        "train_optimized_5712",
+        "train_optimized_949",
+        "train_optimized_5498",
+        "train_optimized_790",
+        "train_optimized_5714",
+        "train_optimized_219",
+        "train_optimized_4909",
+        "train_optimized_8664",
+        "train_optimized_4912"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -50.39917755126953,
+        -51.52076721191406,
+        -56.627315521240234,
+        -56.91581726074219,
+        -57.086341857910156,
+        -58.77030944824219,
+        -58.88743591308594,
+        -59.07231903076172,
+        -59.16438293457031,
+        -59.29787826538086
+      ]
+    },
+    {
+      "query": "How much did the company decrease its valuation allowance by in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9345",
+        "eval_optimized_9344"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_8108",
+        "train_optimized_2082",
+        "train_optimized_8107",
+        "train_optimized_4761",
+        "train_optimized_7492",
+        "train_optimized_4763",
+        "train_optimized_7477",
+        "train_optimized_7315",
+        "train_optimized_701",
+        "train_optimized_8718"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_8108",
+        "train_optimized_2082",
+        "train_optimized_8107",
+        "train_optimized_4761",
+        "train_optimized_7492",
+        "train_optimized_4763",
+        "train_optimized_7477",
+        "train_optimized_7315",
+        "train_optimized_701",
+        "train_optimized_8718"
+      ],
+      "mrr": 0.05555555555555555,
+      "rank": 18,
+      "retrieval_scores": [
+        -50.69462203979492,
+        -56.997318267822266,
+        -61.219181060791016,
+        -65.5251693725586,
+        -65.85535430908203,
+        -66.08351135253906,
+        -67.99508666992188,
+        -68.451416015625,
+        -68.9931640625,
+        -70.1212387084961
+      ]
+    },
+    {
+      "query": "What was the Accumulated benefit obligation in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9870",
+        "eval_optimized_9870"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_3477",
+        "eval_optimized_9970",
+        "train_optimized_1010",
+        "train_optimized_1011",
+        "train_optimized_1012",
+        "train_optimized_4606",
+        "eval_optimized_9869",
+        "train_optimized_2287",
+        "eval_optimized_9353",
+        "train_optimized_7550"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_3477",
+        "eval_optimized_9970",
+        "train_optimized_1010",
+        "train_optimized_1011",
+        "train_optimized_1012",
+        "train_optimized_4606",
+        "eval_optimized_9869",
+        "train_optimized_2287",
+        "eval_optimized_9353",
+        "train_optimized_7550"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -57.195831298828125,
+        -57.22862243652344,
+        -57.734291076660156,
+        -57.734291076660156,
+        -57.734291076660156,
+        -61.39875030517578,
+        -63.424530029296875,
+        -66.1702880859375,
+        -66.77178955078125,
+        -67.8475341796875
+      ]
+    },
+    {
+      "query": "What is the percentage change in the net cash from operation activities from 2017 to 2018?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9457",
+        "eval_optimized_9457"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_7704",
+        "train_optimized_7687",
+        "train_optimized_7706",
+        "train_optimized_7705",
+        "train_optimized_7638",
+        "train_optimized_7852",
+        "train_optimized_6640",
+        "train_optimized_8548",
+        "train_optimized_7274",
+        "train_optimized_1715"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_7704",
+        "train_optimized_7687",
+        "train_optimized_7706",
+        "train_optimized_7705",
+        "train_optimized_7638",
+        "train_optimized_7852",
+        "train_optimized_6640",
+        "train_optimized_8548",
+        "train_optimized_7274",
+        "train_optimized_1715"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -43.5893669128418,
+        -44.31303787231445,
+        -45.419647216796875,
+        -47.558170318603516,
+        -47.988582611083984,
+        -47.99765396118164,
+        -48.47239685058594,
+        -49.56301498413086,
+        -49.84672164916992,
+        -49.90108871459961
+      ]
+    },
+    {
+      "query": "What was the amount of  Net unrealized holding gains (losses)  in 2018?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_10088",
+        "eval_optimized_10088"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_7774",
+        "train_optimized_6807",
+        "train_optimized_2957",
+        "train_optimized_1262",
+        "train_optimized_4934",
+        "train_optimized_8752",
+        "train_optimized_5668",
+        "train_optimized_6674",
+        "train_optimized_5669",
+        "train_optimized_2850"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_7774",
+        "train_optimized_6807",
+        "train_optimized_2957",
+        "train_optimized_1262",
+        "train_optimized_4934",
+        "train_optimized_8752",
+        "train_optimized_5668",
+        "train_optimized_6674",
+        "train_optimized_5669",
+        "train_optimized_2850"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -47.95298767089844,
+        -48.969520568847656,
+        -49.19724655151367,
+        -52.74152374267578,
+        -54.027198791503906,
+        -54.09595489501953,
+        -55.823936462402344,
+        -55.86171340942383,
+        -56.021568298339844,
+        -57.333030700683594
+      ]
+    },
+    {
+      "query": "What was the revenue in North America in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9985",
+        "eval_optimized_9983"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9321",
+        "train_optimized_8413",
+        "train_optimized_8326",
+        "train_optimized_192",
+        "train_optimized_4188",
+        "train_optimized_8929",
+        "train_optimized_8907",
+        "train_optimized_4184",
+        "eval_optimized_10081",
+        "eval_optimized_9620"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9321",
+        "train_optimized_8413",
+        "train_optimized_8326",
+        "train_optimized_192",
+        "train_optimized_4188",
+        "train_optimized_8929",
+        "train_optimized_8907",
+        "train_optimized_4184",
+        "eval_optimized_10081",
+        "eval_optimized_9620"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -52.711212158203125,
+        -54.09393310546875,
+        -57.45208740234375,
+        -58.600181579589844,
+        -59.85862731933594,
+        -61.006202697753906,
+        -61.34346008300781,
+        -62.167091369628906,
+        -62.20278549194336,
+        -62.31100845336914
+      ]
+    },
+    {
+      "query": "What was the change in the revenue from South America between 2017 and 2018?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9985",
+        "eval_optimized_9983"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9321",
+        "train_optimized_8326",
+        "train_optimized_5084",
+        "train_optimized_8907",
+        "train_optimized_8929",
+        "train_optimized_8413",
+        "train_optimized_5085",
+        "train_optimized_1499",
+        "train_optimized_2176",
+        "eval_optimized_9620"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9321",
+        "train_optimized_8326",
+        "train_optimized_5084",
+        "train_optimized_8907",
+        "train_optimized_8929",
+        "train_optimized_8413",
+        "train_optimized_5085",
+        "train_optimized_1499",
+        "train_optimized_2176",
+        "eval_optimized_9620"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -53.71229553222656,
+        -58.552799224853516,
+        -65.74386596679688,
+        -66.0137939453125,
+        -66.6341323852539,
+        -66.9715805053711,
+        -67.05213928222656,
+        -68.0535888671875,
+        -68.12085723876953,
+        -68.12783813476562
+      ]
+    },
+    {
+      "query": "Which years does the table provide information for the company's property and equipment?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9193",
+        "eval_optimized_9193"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_3776",
+        "train_optimized_4736",
+        "eval_optimized_9608",
+        "train_optimized_8029",
+        "train_optimized_6000",
+        "train_optimized_1108",
+        "train_optimized_8030",
+        "train_optimized_6003",
+        "train_optimized_7328",
+        "train_optimized_6862"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_3776",
+        "train_optimized_4736",
+        "eval_optimized_9608",
+        "train_optimized_8029",
+        "train_optimized_6000",
+        "train_optimized_1108",
+        "train_optimized_8030",
+        "train_optimized_6003",
+        "train_optimized_7328",
+        "train_optimized_6862"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -53.43821716308594,
+        -54.134544372558594,
+        -54.92900848388672,
+        -55.325897216796875,
+        -56.93100357055664,
+        -58.1069221496582,
+        -59.37543487548828,
+        -59.67450714111328,
+        -60.59288787841797,
+        -60.726051330566406
+      ]
+    },
+    {
+      "query": "What was the Expected long-term return on plan assets assumption used in calculating net periodic benefit cost based on?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9354",
+        "eval_optimized_9353"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9353",
+        "train_optimized_1662",
+        "eval_optimized_9354",
+        "eval_optimized_9355",
+        "train_optimized_1661",
+        "train_optimized_7550",
+        "train_optimized_1760",
+        "train_optimized_1010",
+        "train_optimized_1011",
+        "train_optimized_1012"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9353",
+        "train_optimized_1662",
+        "eval_optimized_9354",
+        "eval_optimized_9355",
+        "train_optimized_1661",
+        "train_optimized_7550",
+        "train_optimized_1760",
+        "train_optimized_1010",
+        "train_optimized_1011",
+        "train_optimized_1012"
+      ],
+      "mrr": 1.0,
+      "rank": 1,
+      "retrieval_scores": [
+        -44.23951721191406,
+        -48.987884521484375,
+        -49.688236236572266,
+        -51.185546875,
+        -51.5770263671875,
+        -56.701114654541016,
+        -61.55269241333008,
+        -62.62919616699219,
+        -62.62919616699219,
+        -62.62919616699219
+      ]
+    },
+    {
+      "query": "What was the cash and cash equivalents in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_10050",
+        "eval_optimized_10050"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9457",
+        "train_optimized_1821",
+        "train_optimized_1675",
+        "train_optimized_3524",
+        "train_optimized_312",
+        "train_optimized_3125",
+        "train_optimized_1817",
+        "train_optimized_1330",
+        "train_optimized_309",
+        "train_optimized_5880"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9457",
+        "train_optimized_1821",
+        "train_optimized_1675",
+        "train_optimized_3524",
+        "train_optimized_312",
+        "train_optimized_3125",
+        "train_optimized_1817",
+        "train_optimized_1330",
+        "train_optimized_309",
+        "train_optimized_5880"
+      ],
+      "mrr": 0.02564102564102564,
+      "rank": 39,
+      "retrieval_scores": [
+        -44.456207275390625,
+        -45.53823471069336,
+        -45.63384246826172,
+        -45.71067428588867,
+        -47.083831787109375,
+        -47.125038146972656,
+        -48.459381103515625,
+        -48.4630126953125,
+        -48.845947265625,
+        -48.91407775878906
+      ]
+    },
+    {
+      "query": "What is the average deferral of revenues from 2017-2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9171",
+        "eval_optimized_9171"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9242",
+        "eval_optimized_9241",
+        "train_optimized_3473",
+        "train_optimized_3472",
+        "train_optimized_8898",
+        "eval_optimized_9344",
+        "train_optimized_3450",
+        "train_optimized_3471",
+        "train_optimized_3241",
+        "train_optimized_8108"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9242",
+        "eval_optimized_9241",
+        "train_optimized_3473",
+        "train_optimized_3472",
+        "train_optimized_8898",
+        "eval_optimized_9344",
+        "train_optimized_3450",
+        "train_optimized_3471",
+        "train_optimized_3241",
+        "train_optimized_8108"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -57.496368408203125,
+        -58.06650161743164,
+        -58.48883819580078,
+        -58.90003967285156,
+        -59.55955505371094,
+        -60.072235107421875,
+        -60.23879623413086,
+        -60.27467727661133,
+        -60.40911865234375,
+        -60.431304931640625
+      ]
+    },
+    {
+      "query": "What was the total credit facility in 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_10023",
+        "eval_optimized_10023"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_5446",
+        "eval_optimized_9359",
+        "train_optimized_5105",
+        "train_optimized_5442",
+        "eval_optimized_10026",
+        "eval_optimized_10023",
+        "train_optimized_931",
+        "eval_optimized_9975",
+        "train_optimized_45",
+        "train_optimized_2170"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_5446",
+        "eval_optimized_9359",
+        "train_optimized_5105",
+        "train_optimized_5442",
+        "eval_optimized_10026",
+        "eval_optimized_10023",
+        "train_optimized_931",
+        "eval_optimized_9975",
+        "train_optimized_45",
+        "train_optimized_2170"
+      ],
+      "mrr": 0.16666666666666666,
+      "rank": 6,
+      "retrieval_scores": [
+        -58.41650390625,
+        -58.69781494140625,
+        -59.42741012573242,
+        -59.737159729003906,
+        -60.207305908203125,
+        -62.30289077758789,
+        -62.90667724609375,
+        -63.00018310546875,
+        -63.538108825683594,
+        -63.908233642578125
+      ]
+    },
+    {
+      "query": "What was the revenue from Traditional & Other Products for Network Solutions?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9452",
+        "eval_optimized_9452"
+      ],
+      "retrieved_doc_ids": [
+        "eval_optimized_9655",
+        "train_optimized_6320",
+        "eval_optimized_9452",
+        "train_optimized_2127",
+        "train_optimized_8869",
+        "eval_optimized_9654",
+        "train_optimized_2559",
+        "train_optimized_1566",
+        "train_optimized_8413",
+        "train_optimized_2176"
+      ],
+      "converted_retrieved_doc_ids": [
+        "eval_optimized_9655",
+        "train_optimized_6320",
+        "eval_optimized_9452",
+        "train_optimized_2127",
+        "train_optimized_8869",
+        "eval_optimized_9654",
+        "train_optimized_2559",
+        "train_optimized_1566",
+        "train_optimized_8413",
+        "train_optimized_2176"
+      ],
+      "mrr": 0.3333333333333333,
+      "rank": 3,
+      "retrieval_scores": [
+        -54.391719818115234,
+        -54.831085205078125,
+        -54.848106384277344,
+        -56.04561996459961,
+        -58.344879150390625,
+        -58.36347198486328,
+        -59.39897155761719,
+        -59.61516189575195,
+        -59.70396423339844,
+        -59.91908264160156
+      ]
+    },
+    {
+      "query": "What was the difference between total debt obligations and purchase obligations?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9581",
+        "eval_optimized_9581"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_3831",
+        "train_optimized_3153",
+        "train_optimized_600",
+        "train_optimized_9090",
+        "train_optimized_1816",
+        "train_optimized_3031",
+        "train_optimized_8990",
+        "train_optimized_1813",
+        "train_optimized_7173",
+        "eval_optimized_9471"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_3831",
+        "train_optimized_3153",
+        "train_optimized_600",
+        "train_optimized_9090",
+        "train_optimized_1816",
+        "train_optimized_3031",
+        "train_optimized_8990",
+        "train_optimized_1813",
+        "train_optimized_7173",
+        "eval_optimized_9471"
+      ],
+      "mrr": 0.029411764705882353,
+      "rank": 34,
+      "retrieval_scores": [
+        -50.160804748535156,
+        -51.888145446777344,
+        -53.1947021484375,
+        -55.11607360839844,
+        -55.52831268310547,
+        -56.173927307128906,
+        -56.39552307128906,
+        -56.668434143066406,
+        -56.86796569824219,
+        -57.091697692871094
+      ]
+    },
+    {
+      "query": "What was the net carrying amount before unamortized debt issuance costs in 2018?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9408",
+        "eval_optimized_9408"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_3867",
+        "train_optimized_1087",
+        "train_optimized_1089",
+        "train_optimized_3863",
+        "eval_optimized_9410",
+        "train_optimized_4957",
+        "train_optimized_4952",
+        "eval_optimized_9408",
+        "train_optimized_3528",
+        "train_optimized_95"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_3867",
+        "train_optimized_1087",
+        "train_optimized_1089",
+        "train_optimized_3863",
+        "eval_optimized_9410",
+        "train_optimized_4957",
+        "train_optimized_4952",
+        "eval_optimized_9408",
+        "train_optimized_3528",
+        "train_optimized_95"
+      ],
+      "mrr": 0.125,
+      "rank": 8,
+      "retrieval_scores": [
+        -36.40117263793945,
+        -37.753318786621094,
+        -38.12213134765625,
+        -38.30120086669922,
+        -38.86181640625,
+        -38.932716369628906,
+        -39.04331970214844,
+        -39.13959503173828,
+        -46.02521896362305,
+        -47.799095153808594
+      ]
+    },
+    {
+      "query": "What is the respective revenue from Asia Pacific in 2018 and 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9198",
+        "eval_optimized_9198"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_8326",
+        "eval_optimized_9321",
+        "train_optimized_8467",
+        "train_optimized_1499",
+        "train_optimized_1280",
+        "train_optimized_8929",
+        "train_optimized_8413",
+        "train_optimized_5084",
+        "train_optimized_192",
+        "eval_optimized_9620"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_8326",
+        "eval_optimized_9321",
+        "train_optimized_8467",
+        "train_optimized_1499",
+        "train_optimized_1280",
+        "train_optimized_8929",
+        "train_optimized_8413",
+        "train_optimized_5084",
+        "train_optimized_192",
+        "eval_optimized_9620"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -60.541473388671875,
+        -65.08198547363281,
+        -68.04119873046875,
+        -68.48233032226562,
+        -70.46444702148438,
+        -71.02229309082031,
+        -71.77694702148438,
+        -71.84657287597656,
+        -72.61083984375,
+        -72.68067932128906
+      ]
+    },
+    {
+      "query": "What was the change in the provision for doubtful receivables between 2018 and 2019?",
+      "ground_truth_doc_ids": [
+        "eval_optimized_9326",
+        "eval_optimized_9326"
+      ],
+      "retrieved_doc_ids": [
+        "train_optimized_1641",
+        "train_optimized_3333",
+        "train_optimized_1657",
+        "train_optimized_6280",
+        "train_optimized_6824",
+        "train_optimized_7082",
+        "train_optimized_1081",
+        "train_optimized_4234",
+        "train_optimized_2776",
+        "train_optimized_2736"
+      ],
+      "converted_retrieved_doc_ids": [
+        "train_optimized_1641",
+        "train_optimized_3333",
+        "train_optimized_1657",
+        "train_optimized_6280",
+        "train_optimized_6824",
+        "train_optimized_7082",
+        "train_optimized_1081",
+        "train_optimized_4234",
+        "train_optimized_2776",
+        "train_optimized_2736"
+      ],
+      "mrr": 0.0,
+      "rank": null,
+      "retrieval_scores": [
+        -56.26814651489258,
+        -57.15403747558594,
+        -57.23517608642578,
+        -58.26473617553711,
+        -58.39998245239258,
+        -58.933868408203125,
+        -59.4951171875,
+        -60.411529541015625,
+        -60.72907257080078,
+        -60.83567428588867
+      ]
+    }
+  ]
+}

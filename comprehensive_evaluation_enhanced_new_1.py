@@ -125,6 +125,10 @@ resource_manager = ResourceManager()
 # 核心辅助函数 - 修复版本
 # ===================================================================
 
+# ===================================================================
+# 核心辅助函数 (_shared_text_standardizer 保持不变)
+# ===================================================================
+
 def _shared_text_standardizer(text: str) -> str:
     """
     Helper function to standardize text for both answer extraction and F1 score calculation.
@@ -147,7 +151,7 @@ def _shared_text_standardizer(text: str) -> str:
     # This regex is made more aggressive to ensure any trailing punctuation OR a standalone % is removed.
     text = re.sub(r'[\.。;,]$', '', text).strip() # General trailing punctuation
     
-    # <<< NEW ADDITION / REVISION >>>: Explicitly remove percentage sign at the end of a numeric string
+    # Explicitly remove percentage sign at the end of a numeric string
     # This helps when expected_answer is "0.2" but generated is "0.2%"
     if text.endswith('%'):
         # Check if the part before % is numeric (allows for negative, decimal numbers)
@@ -182,6 +186,7 @@ def extract_final_answer_with_rescue(raw_output: str) -> str:
         if content and content.lower() not in ['<final></final>', '<answer></answer>', '<final-answer></final-answer>']:
             return _shared_text_standardizer(content)
     
+    # <<< 关键修复：确保这里返回的是短语 >>>
     # If no valid <answer> structure is found or content is invalid,
     # return the specific "not found" phrase.
     return NOT_FOUND_REPLY_ENGLISH

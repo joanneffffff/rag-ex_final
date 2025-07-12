@@ -1,0 +1,3 @@
+2025-07-11 19:53:52,382 - INFO - TATQA评估日志文件: evaluate_mrr/test_logs/tatqa_evaluation_log_20250711_195352.txt
+2025-07-11 19:53:52,383 - INFO - 测试日志消息
+2025-07-11 19:56:55,554 - INFO - HTTP Request: GET https://api.gradio.app/pkg-version "HTTP/1.1 200 OK"

@@ -1,0 +1,152 @@
+[
+  {
+    "query": "What information does this table contain?",
+    "context": "Table ID: b3d63fb06110ad7e91c9e765227c1d27\nTable columns: , June 30,, .\nRow 1 data: June 30, is 2019, Value is 2018.\nCategory: Deferred tax assets.\nFor Non-capital loss carryforwards: June 30, is 161119, Value is 129436.\nFor Capital loss carryforwards: June 30, is 155, Value is 417.\nFor Undeducted scientific research and development expenses: June 30, is 137253, Value is 123114.\nFor Depreciation and amortization: June 30, is 683777, Value is 829369.\nFor Restructuring costs and other reserves: June 30, is 17845, Value is 17202.\nFor Deferred revenue: June 30, is 53254, Value is 62726.\nFor Other: June 30, is 59584, Value is 57461.\nFor Total deferred tax asset: June 30, is 1112987, Value is 1219725.\nFor Valuation Allowance: June 30, is $(77,328), Value is $(80,924).\nCategory: Deferred tax liabilities.\nFor Scientific research and development tax credits: June 30, is $(14,482), Value is $(13,342).\nFor Other: June 30, is a negative 72599, Value is a negative 82668.\nFor Deferred tax liabilities: June 30, is $(87,081), Value is $(96,010).\nFor Net deferred tax asset: June 30, is 948578, Value is 1042791.\nCategory: Comprised of:.\nFor Long-term assets: June 30, is 1004450, Value is 1122729.\nFor Long-term liabilities: June 30, is a negative 55872, Value is a negative 79938.\nRow 20 data: June 30, is 948578, Value is 1042791.",
+    "answer": "Answer for document 1",
+    "doc_id": "eval_optimized_9139",
+    "relevant_doc_ids": [
+      "eval_optimized_9139"
+    ],
+    "answer_from": "table"
+  },
+  {
+    "query": "What information does this table contain?",
+    "context": "Table ID: 1424e718ab72e7d0bc792bbed0f42df6\nTable columns: (In millions of dollars, except capital intensity), Years ended December 31, , .\nAll monetary amounts are in millions of USD.\nRow 1 data: Years ended December 31 is 2019, Value is 2018, Value is %Chg.\nCategory: Capital expenditures 1.\nFor Wireless: (In millions of dollars, except capital intensity) is Wireless, Years ended December 31 is 1320, Value is 1086, Value is 22.\nFor Cable: (In millions of dollars, except capital intensity) is Cable, Years ended December 31 is 1153, Value is 1429, Value is a negative 19.\nFor Media: (In millions of dollars, except capital intensity) is Media, Years ended December 31 is 102, Value is 90, Value is 13.\nFor Corporate: (In millions of dollars, except capital intensity) is Corporate, Years ended December 31 is 232, Value is 185, Value is 25.\nFor Capital expenditures 1: (In millions of dollars, except capital intensity) is Capital expenditures 1, Years ended December 31 is 2807, Value is 2790, Value is 1.\nFor Capital intensity 2: (In millions of dollars, except capital intensity) is Capital intensity 2, Years ended December 31 is 18.6%, Value is 18.5%, Value is 0.1 pts.",
+    "answer": "Answer for document 2",
+    "doc_id": "eval_optimized_9144",
+    "relevant_doc_ids": [
+      "eval_optimized_9144"
+    ],
+    "answer_from": "table"
+  },
+  {
+    "query": "What information does this table contain?",
+    "context": "Table ID: 5f0466453acb53d17eee77ec763d9a98\nTable columns: , , Year Ended December 31,, .\nAll monetary amounts are in percentage.\nRow 1 data: Value is 2019, Year Ended December 31, is 2018, Value is 2017.\nFor Balance at January 1: Value is 1402, Year Ended December 31, is 1271, Value is 276.\nFor Increases for tax positions related to the current year: Value is —, Year Ended December 31, is 131, Value is 995.\nFor Decreases for tax positions related to the current year: Value is a negative 1402, Year Ended December 31, is —, Value is —.\nFor Balance at December 31: Value is $—, Year Ended December 31, is 1402, Value is 1271.",
+    "answer": "Answer for document 3",
+    "doc_id": "eval_optimized_9149",
+    "relevant_doc_ids": [
+      "eval_optimized_9149"
+    ],
+    "answer_from": "table"
+  },
+  {
+    "query": "What information does this table contain?",
+    "context": "Table ID: 5e5f8b76df669b1a32df3074c2c551be\nTable columns: Remuneration key performance indicator, 2019 actual, 2019 threshold, 2019 target, 2019 maximum, Remuneration measure.\nAll monetary amounts are in millions of USD.\nFor Group operating profit (£m): Remuneration key performance indicator is Group operating profit (£m), 2019 actual is 277.3, 2019 threshold is 256.7, 2019 target is 270.3, 2019 maximum is 283.8, Remuneration measure is Annual Incentive Plan.\nFor Group cash generation (£m): Remuneration key performance indicator is Group cash generation (£m), 2019 actual is 296.4, 2019 threshold is 270.7, 2019 target is 285.0, 2019 maximum is 299.2, Remuneration measure is Annual Incentive Plan.\nFor Group ROCE (%): Remuneration key performance indicator is Group ROCE (%), 2019 actual is 54.5, 2019 threshold is 50.1, 2019 target is 52.7, 2019 maximum is 55.3, Remuneration measure is Annual Incentive Plan.\nFor 2017-2019 EPS (%): Remuneration key performance indicator is 2017-2019 EPS (%), 2019 actual is 57.5, 2019 threshold is 27.6, 2019 target is N/A, 2019 maximum is 52.3, Remuneration measure is Performance Share Plan.\nFor 2017-2019 relative TSR (percentile TSR): Remuneration key performance indicator is 2017-2019 relative TSR (percentile TSR), 2019 actual is 94th, 2019 threshold is 50th, 2019 target is N/A, 2019 maximum is 75th, Remuneration measure is Performance Share Plan.",
+    "answer": "Answer for document 4",
+    "doc_id": "eval_optimized_9150",
+    "relevant_doc_ids": [
+      "eval_optimized_9150"
+    ],
+    "answer_from": "table"
+  },
+  {
+    "query": "What information does this table contain?",
+    "context": "Table ID: eb68753385d270d4b17f5b370691851a\nTable columns: RMB’Million (Level 1), RMB’Million (Level 2), RMB’Million (Level 3), RMB’Million (Total).\nAll monetary amounts are in millions of USD.\nFor FVPL: RMB’Million (Level 1) is FVPL, RMB’Million (Level 2) is 14766, RMB’Million (Level 3) is 5091, RMB’Million (Total) is 116079, Column 5 is 135936.\nFor FVOCI: RMB’Million (Level 1) is FVOCI, RMB’Million (Level 2) is 74707, RMB’Million (Level 3) is –, RMB’Million (Total) is 7014, Column 5 is 81721.\nFor OFA: RMB’Million (Level 1) is OFA, RMB’Million (Level 2) is –, RMB’Million (Level 3) is 375, RMB’Million (Total) is –, Column 5 is 375.\nFor Other financial liabilities: RMB’Million (Level 1) is Other financial liabilities, RMB’Million (Level 2) is –, RMB’Million (Level 3) is 523, RMB’Million (Total) is 1873, Column 5 is 2396.\nCategory: As at 31 December 2018.\nFor FVPL: RMB’Million (Level 1) is FVPL, RMB’Million (Level 2) is 10875, RMB’Million (Level 3) is 5009, RMB’Million (Total) is 81993, Column 5 is 97877.\nFor FVOCI: RMB’Million (Level 1) is FVOCI, RMB’Million (Level 2) is 41578, RMB’Million (Level 3) is –, RMB’Million (Total) is 1941, Column 5 is 43519.\nFor OFA: RMB’Million (Level 1) is OFA, RMB’Million (Level 2) is –, RMB’Million (Level 3) is 2032, RMB’Million (Total) is –, Column 5 is 2032.\nFor Other financial liabilities: RMB’Million (Level 1) is Other financial liabilities, RMB’Million (Level 2) is –, RMB’Million (Level 3) is 40, RMB’Million (Total) is 4466, Column 5 is 4506.",
+    "answer": "Answer for document 5",
+    "doc_id": "eval_optimized_9155",
+    "relevant_doc_ids": [
+      "eval_optimized_9155"
+    ],
+    "answer_from": "table"
+  },
+  {
+    "query": "What information does this table contain?",
+    "context": "Table ID: dbab56c6c9ced463d8eb498d67c8bc9c\nTable columns: NEO, Base Salary (FY19 EAIP NEO Payout Amounts), Annual Incentive Target (%), Company Performance Funding (%), Individual Performance Factor (%), Individual Payout Amount ($)(4).\nFor Gregory S Clark(1): NEO is Gregory S. Clark(1), Base Salary (FY19 EAIP NEO Payout Amounts) is 1000000, Annual Incentive Target (%) is 150, Company Performance Funding (%) is n/a, Individual Performance Factor (%) is n/a, Individual Payout Amount ($)(4) is 0.\nFor Nicholas R Noviello(2): NEO is Nicholas R. Noviello(2), Base Salary (FY19 EAIP NEO Payout Amounts) is 650000, Annual Incentive Target (%) is 100, Company Performance Funding (%) is n/a, Individual Performance Factor (%) is n/a, Individual Payout Amount ($)(4) is 487500.\nFor Amy L Cappellanti-Wolf(3): NEO is Amy L. Cappellanti-Wolf(3), Base Salary (FY19 EAIP NEO Payout Amounts) is 440000, Annual Incentive Target (%) is 70, Company Performance Funding (%) is 35.6, Individual Performance Factor (%) is 100, Individual Payout Amount ($)(4) is 109648.\nFor Samir Kapuria(3): NEO is Samir Kapuria(3), Base Salary (FY19 EAIP NEO Payout Amounts) is 450000, Annual Incentive Target (%) is 100, Company Performance Funding (%) is 35.6, Individual Performance Factor (%) is 100, Individual Payout Amount ($)(4) is 152172.\nFor Scott C Taylor(3): NEO is Scott C. Taylor(3), Base Salary (FY19 EAIP NEO Payout Amounts) is 600000, Annual Incentive Target (%) is 100, Company Performance Funding (%) is 35.6, Individual Performance Factor (%) is 100, Individual Payout Amount ($)(4) is 213600.",
+    "answer": "Answer for document 6",
+    "doc_id": "eval_optimized_9161",
+    "relevant_doc_ids": [
+      "eval_optimized_9161"
+    ],
+    "answer_from": "table"
+  },
+  {
+    "query": "What information does this table contain?",
+    "context": "Table ID: f4e5e687e6185cabde6d70a4d37f729f\nTable columns: Fiscal Year 2019, Three Months Ended.\nAll monetary amounts are in thousands of USD.\nFor Net revenue: Fiscal Year 2019 is Net revenue, Three Months Ended is 6573453, Column 3 is 6135602, Column 4 is 6066990, Column 5 is 6506275.\nFor Gross profit(4): Fiscal Year 2019 is Gross profit(4), Three Months Ended is 495078, Column 3 is 443799, Column 4 is 454874, Column 5 is 519650.\nFor Operating income(1)(4): Fiscal Year 2019 is Operating income(1)(4), Three Months Ended is 189745, Column 3 is 140918, Column 4 is 153983, Column 5 is 216710.\nFor Net income(2)(3)(4): Fiscal Year 2019 is Net income(2)(3)(4), Three Months Ended is 53761, Column 3 is 44032, Column 4 is 67607, Column 5 is 124074.\nFor Net income attributable to Jabil Inc(2)(3)(4): Fiscal Year 2019 is Net income attributable to Jabil Inc.(2)(3)(4), Three Months Ended is 52675, Column 3 is 43482, Column 4 is 67354, Column 5 is 123600.\nCategory: Earnings per share attributable to the stockholders of Jabil Inc.\nFor Basic: Fiscal Year 2019 is Basic, Three Months Ended is 0.34, Column 3 is 0.28, Column 4 is 0.44, Column 5 is 0.77.\nFor Diluted: Fiscal Year 2019 is Diluted, Three Months Ended is 0.34, Column 3 is 0.28, Column 4 is 0.43, Column 5 is 0.76.",
+    "answer": "Answer for document 7",
+    "doc_id": "eval_optimized_9166",
+    "relevant_doc_ids": [
+      "eval_optimized_9166"
+    ],
+    "answer_from": "table"
+  },
+  {
+    "query": "What information does this table contain?",
+    "context": "Table ID: db8d48c3fd57f4b9d317ed95b3a5b496\nTable columns: , , December 31,, .\nAll monetary amounts are in percentage.\nRow 1 data: Value is 2019, December 31, is 2018, Value is 2017.\nFor Beginning balances: Value is 36836, December 31, is 42432, Value is 49904.\nFor Deferral of revenue: Value is 45040, December 31, is 40003, Value is 46193.\nFor Recognition of deferred revenue: Value is a negative 41034, December 31, is a negative 45599, Value is a negative 53665.\nFor Ending balances: Value is 40842, December 31, is 36836, Value is 42432.",
+    "answer": "Answer for document 8",
+    "doc_id": "eval_optimized_9174",
+    "relevant_doc_ids": [
+      "eval_optimized_9174"
+    ],
+    "answer_from": "table"
+  },
+  {
+    "query": "What information does this table contain?",
+    "context": "Table ID: 5ce1713d9128f3759369b6274e111c33\nTable columns: Reconciliation of Non-GAAP measure - operating expenses and operating income from continuing operations, excluding certain items (in thousands), Years Ended December 31,, .\nAll monetary amounts are in thousands of USD.\nRow 1 data: Years Ended December 31, is 2019, Value is 2018.\nFor Gross profit from continuing operations, as reported: Reconciliation of Non-GAAP measure - operating expenses and operating income from continuing operations, excluding certain items (in thousands) is Gross profit from continuing operations, as reported, Years Ended December 31, is 315652, Value is 365607.\nCategory: Adjustments to gross profit:.\nFor Stock-based compensation: Reconciliation of Non-GAAP measure - operating expenses and operating income from continuing operations, excluding certain items (in thousands) is Stock-based compensation, Years Ended December 31, is 525, Value is 742.\nFor Facility expansion and relocation costs: Reconciliation of Non-GAAP measure - operating expenses and operating income from continuing operations, excluding certain items (in thousands) is Facility expansion and relocation costs, Years Ended December 31, is 3891, Value is 1328.\nFor Acquisition-related costs: Reconciliation of Non-GAAP measure - operating expenses and operating income from continuing operations, excluding certain items (in thousands) is Acquisition-related costs, Years Ended December 31, is 8290, Value is 569.\nFor Non-GAAP gross profit: Reconciliation of Non-GAAP measure - operating expenses and operating income from continuing operations, excluding certain items (in thousands) is Non-GAAP gross profit, Years Ended December 31, is 328358, Value is 368246.\nFor Non-GAAP gross margin: Reconciliation of Non-GAAP measure - operating expenses and operating income from continuing operations, excluding certain items (in thousands) is Non-GAAP gross margin, Years Ended December 31, is 41.6%, Value is 51.2%.\nFor Operating expenses from continuing operations, as reported: Reconciliation of Non-GAAP measure - operating expenses and operating income from continuing operations, excluding certain items (in thousands) is Operating expenses from continuing operations, as reported, Years Ended December 31, is 261264, Value is 194054.\nCategory: Adjustments:.\nFor Amortization of intangible assets: Reconciliation of Non-GAAP measure - operating expenses and operating income from continuing operations, excluding certain items (in thousands) is Amortization of intangible assets, Years Ended December 31, is a negative 12168, Value is a negative 5774.\nFor Stock-based compensation: Reconciliation of Non-GAAP measure - operating expenses and operating income from continuing operations, excluding certain items (in thousands) is Stock-based compensation, Years Ended December 31, is a negative 6803, Value is a negative 8961.\nFor Acquisition-related costs: Reconciliation of Non-GAAP measure - operating expenses and operating income from continuing operations, excluding certain items (in thousands) is Acquisition-related costs, Years Ended December 31, is a negative 12002, Value is a negative 1726.\nFor Facility expansion and relocation costs: Reconciliation of Non-GAAP measure - operating expenses and operating income from continuing operations, excluding certain items (in thousands) is Facility expansion and relocation costs, Years Ended December 31, is a negative 948, Value is a negative 518.\nFor Restructuring charges: Reconciliation of Non-GAAP measure - operating expenses and operating income from continuing operations, excluding certain items (in thousands) is Restructuring charges, Years Ended December 31, is a negative 5038, Value is a negative 4239.\nFor Non-GAAP operating expenses: Reconciliation of Non-GAAP measure - operating expenses and operating income from continuing operations, excluding certain items (in thousands) is Non-GAAP operating expenses, Years Ended December 31, is 224305, Value is 172836.\nFor Non-GAAP operating income: Reconciliation of Non-GAAP measure - operating expenses and operating income from continuing operations, excluding certain items (in thousands) is Non-GAAP operating income, Years Ended December 31, is 104053, Value is 195410.",
+    "answer": "Answer for document 9",
+    "doc_id": "eval_optimized_9179",
+    "relevant_doc_ids": [
+      "eval_optimized_9179"
+    ],
+    "answer_from": "table"
+  },
+  {
+    "query": "What information does this table contain?",
+    "context": "Table ID: 2da56df966a1c15057d2661ce589be1c\nTable columns: (in thousands of $), 2018, 2017 (December 31,), Change, % Change.\nFor Share of net earnings in Golar Partners: (in thousands of $) is Share of net earnings in Golar Partners, 2018 is 7001, 2017 (December 31,) is 17702, Change is a negative 10701, % Change is (60)%.\nFor Impairment of investment in Golar Partners: (in thousands of $) is Impairment of investment in Golar Partners, 2018 is a negative 149389, 2017 (December 31,) is —, Change is a negative 149389, % Change is 100%.\nFor Net loss on deemed disposal of investments in Golar Partners: (in thousands of $) is Net loss on deemed disposal of investments in Golar Partners, 2018 is —, 2017 (December 31,) is a negative 16992, Change is 16992, % Change is 100%.\nFor Share of net earnings in other affiliates: (in thousands of $) is Share of net earnings in other affiliates, 2018 is 3711, 2017 (December 31,) is 793, Change is 2918, % Change is 368%.\nRow 5 data: 2018 is a negative 138677, 2017 (December 31,) is 1503, Change is a negative 140180, % Change is (9,327)%.",
+    "answer": "Answer for document 10",
+    "doc_id": "eval_optimized_9186",
+    "relevant_doc_ids": [
+      "eval_optimized_9186"
+    ],
+    "answer_from": "table"
+  },
+  {
+    "query": "What information does this table contain?",
+    "context": "Table ID: 9246b58ea8656eecf7739094d072f0b8\nTable columns: Name, Fees Earned or Paid in Cash ($), Stock Awards ($), Option Awards ($), Total($).\nFor Richard S Hill: Name is Richard S. Hill, Fees Earned or Paid in Cash ($) is 106000, Stock Awards ($) is 149987, Option Awards ($) is —, Total($) is 255987.\nFor Darcy Antonellis: Name is Darcy Antonellis, Fees Earned or Paid in Cash ($) is 55333, Stock Awards ($) is 149987, Option Awards ($) is —, Total($) is 205320.\nFor David C Habiger: Name is David C. Habiger, Fees Earned or Paid in Cash ($) is 70000, Stock Awards ($) is 149987, Option Awards ($) is —, Total($) is 219987.\nFor V Sue Molina: Name is V. Sue Molina, Fees Earned or Paid in Cash ($) is 81000, Stock Awards ($) is 149987, Option Awards ($) is —, Total($) is 230987.\nFor George A Riedel: Name is George A. Riedel, Fees Earned or Paid in Cash ($) is 68333, Stock Awards ($) is 149987, Option Awards ($) is —, Total($) is 218320.\nFor Christopher A Seams: Name is Christopher A. Seams, Fees Earned or Paid in Cash ($) is 82000, Stock Awards ($) is 149987, Option Awards ($) is —, Total($) is 231987.",
+    "answer": "Answer for document 11",
+    "doc_id": "eval_optimized_9204",
+    "relevant_doc_ids": [
+      "eval_optimized_9204"
+    ],
+    "answer_from": "table"
+  },
+  {
+    "query": "What information does this table contain?",
+    "context": "Table ID: 4bf6297fe4aaf51d58b160a778fadc6f\nTable columns: , , Years Ended December 31,, .\nAll monetary amounts are in thousands of USD.\nRow 1 data: Value is 2019, Years Ended December 31, is 2018, Value is 2017.\nRow 2 data: Years Ended December 31, is (in thousands, except per share amounts).\nCategory: Numerator:.\nFor Net loss: Value is $(19,898), Years Ended December 31, is $(26,199), Value is $(9,187).\nCategory: Denominator:.\nFor Weighted average common shares outstanding—basic: Value is 71005, Years Ended December 31, is 68490, Value is 66252.\nFor Dilutive common stock equivalents: Value is —, Years Ended December 31, is —, Value is —.\nFor Weighted average common shares outstanding—diluted: Value is 71005, Years Ended December 31, is 68490, Value is 66252.\nCategory: Net loss per share:.\nFor Basic: Value is $(0.28), Years Ended December 31, is $(0.38), Value is $(0.14).\nFor Diluted: Value is $(0.28), Years Ended December 31, is $(0.38), Value is $(0.14).",
+    "answer": "Answer for document 12",
+    "doc_id": "eval_optimized_9208",
+    "relevant_doc_ids": [
+      "eval_optimized_9208"
+    ],
+    "answer_from": "table"
+  },
+  {
+    "query": "What information does this table contain?",
+    "context": "Table ID: 36d1468e2be20ccc765f76c712ed5e1e\nTable columns: Stock-Based Compensation by Type of Award, December 31, 2019 (Year Ended), December 31, 2018 (Year Ended).\nFor Stock options: Stock-Based Compensation by Type of Award is Stock options, December 31, 2019 (Year Ended) is 2756, December 31, 2018 (Year Ended) is 2926.\nFor RSUs: Stock-Based Compensation by Type of Award is RSUs, December 31, 2019 (Year Ended) is 955, December 31, 2018 (Year Ended) is 1129.\nFor Total stock-based compensation expense: Stock-Based Compensation by Type of Award is Total stock-based compensation expense, December 31, 2019 (Year Ended) is 3711, December 31, 2018 (Year Ended) is 4055.",
+    "answer": "Answer for document 13",
+    "doc_id": "eval_optimized_9218",
+    "relevant_doc_ids": [
+      "eval_optimized_9218"
+    ],
+    "answer_from": "table"
+  },
+  {
+    "query": "What information does this table contain?",
+    "context": "Table ID: a38d13377f754ca4beb5ed5cc9b5c1ec\nTable columns: , , , Year Ended October 31,, , .\nAll monetary amounts are in thousands of USD.\nRow 1 data: Value is 2019, Value is 2018, Year Ended October 31, is 2017, Value is 2016, Value is 2015.\nRow 2 data: Year Ended October 31, is (In thousands, except per share data).\nFor Net sales: Value is 3440258, Value is 3236004, Year Ended October 31, is 3342226, Value is 2816057, Value is 2803480.\nFor Operating income: Value is 67994, Value is 29700, Year Ended October 31, is 425239, Value is 294111, Value is 335998.\nFor Net income: Value is 53294, Value is 61431, Year Ended October 31, is 279745, Value is 188961, Value is 216001.\nFor Basic earnings per share: Value is 2.41, Value is 2.7, Year Ended October 31, is 12.3, Value is 8.37, Value is 9.52.\nFor Diluted earnings per share: Value is 2.41, Value is 2.7, Year Ended October 31, is 12.3, Value is 8.37, Value is 9.52.\nFor Working capital: Value is 365430, Value is 367600, Year Ended October 31, is 650817, Value is 465135, Value is 396834.\nFor Total assets: Value is 1774134, Value is 1659440, Year Ended October 31, is 1733243, Value is 1422700, Value is 1246752.\nFor Long-term debt, less current maturities: Value is 55000, Value is —, Year Ended October 31, is —, Value is —, Value is —.\nFor Stockholders’ equity: Value is 1417675, Value is 1387893, Year Ended October 31, is 1432862, Value is 1190262, Value is 1029861.\nFor Cash dividends declared per share: Value is 1.28, Value is 1.28, Year Ended October 31, is 2.04, Value is 1.9, Value is 1.38.",
+    "answer": "Answer for document 14",
+    "doc_id": "eval_optimized_9226",
+    "relevant_doc_ids": [
+      "eval_optimized_9226"
+    ],
+    "answer_from": "table"
+  },
+  {
+    "query": "What information does this table contain?",
+    "context": "Table ID: 90f27fce7bbbda3fa39e96667c98b8f0\nTable columns: , Consolidated, .\nRow 1 data: Consolidated is 2019, Value is 2018.\nRow 2 data: Consolidated is US$000, Value is US$000.\nFor 0 to 1 month overdue: Consolidated is 5139, Value is 2935.\nFor 1 to 2 months overdue: Consolidated is 1424, Value is 1275.\nFor Over 2 months overdue: Consolidated is 2756, Value is 2680.\nRow 6 data: Consolidated is 9319, Value is 6890.",
+    "answer": "Answer for document 15",
+    "doc_id": "eval_optimized_9237",
+    "relevant_doc_ids": [
+      "eval_optimized_9237"
+    ],
+    "answer_from": "table"
+  }
+]

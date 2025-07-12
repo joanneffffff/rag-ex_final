@@ -6,6 +6,14 @@
 Prompt Template 内容从外部文件加载。
 """
 
+import sys
+import os
+from pathlib import Path
+
+# 添加项目根目录到Python路径
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import time
@@ -14,12 +22,17 @@ import gc
 import json 
 import argparse 
 from tqdm import tqdm 
-import os 
 import numpy as np 
 from typing import List, Optional, Dict, Any
 from collections import Counter
-from pathlib import Path
-import sys 
+
+# 导入配置文件
+try:
+    from config.parameters import config
+    print(f"✅ 使用配置文件中的缓存路径: {config.generator.cache_dir}")
+except ImportError:
+    print("⚠️ 无法导入配置文件，使用默认缓存路径")
+    config = None 
 
 # ====================================================================================
 # 后处理模块定义 (专门针对中文)
@@ -161,7 +174,7 @@ def clean_response(text: str) -> str:
 
 def _load_template_content_from_file(template_file_name: str) -> str:
     """从指定文件中加载Prompt模板的完整字符串内容"""
-    template_path = Path("data/prompt_templates") / "chinese" / template_file_name # 硬编码为中文模板路径
+    template_path = Path("data/prompt_templates") / template_file_name # 直接使用文件名，不添加chinese子目录
     try:
         with open(template_path, 'r', encoding='utf-8') as f:
             return f.read().strip()
@@ -169,7 +182,7 @@ def _load_template_content_from_file(template_file_name: str) -> str:
         print(f"❌ 模板文件未找到: {template_path}，请确保文件存在。")
         sys.exit(1)
 
-def get_messages_for_test(context: str, query: str, template_file_name: str = "chinese_test_template.txt") -> List[Dict[str, str]]:
+def get_messages_for_test(summary: str, context: str, query: str, template_file_name: str = "chinese_test_template.txt") -> List[Dict[str, str]]:
     """
     构建用于测试的 messages 列表，从指定模板文件加载内容。
     Args:
@@ -204,8 +217,8 @@ def get_messages_for_test(context: str, query: str, template_file_name: str = "c
                 if role == "user":
                     content = content.replace('{query}', query)
                     # 替换 {summary} 和 {context}
-                    # 假设模板中 {summary} 和 {context} 都用传入的 context 填充
-                    content = content.replace('{summary}', context).replace('{context}', context)
+                    # 直接使用传入的summary和context参数
+                    content = content.replace('{summary}', summary).replace('{context}', context)
                 
                 messages.append({"role": role, "content": content})
                 
@@ -249,11 +262,27 @@ class ModelLoader:
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.is_loaded = False
 
+        # 使用配置文件中的缓存路径
+        cache_dir = config.generator.cache_dir if config else "/users/sgjfei3/data/huggingface"
+        
         if "Fin-R1" in model_name: 
-            self.model_path = "/users/sgjfei3/data/huggingface/models--SUFE-AIFLM-Lab--Fin-R1/snapshots/026768c4a015b591b54b240743edeac1de0970fa" 
+            # 检查本地缓存路径
+            local_fin_r1_path = f"{cache_dir}/models--SUFE-AIFLM-Lab--Fin-R1/snapshots/026768c4a015b591b54b240743edeac1de0970fa"
+            if os.path.exists(local_fin_r1_path):
+                self.model_path = local_fin_r1_path
+                print(f"✅ 使用本地缓存的Fin-R1模型: {self.model_path}")
+            else:
+                self.model_path = "SUFE-AIFLM-Lab/Fin-R1"
+                print(f"⚠️ 本地缓存未找到，将从Hub下载: {self.model_path}")
         elif "Qwen3-8B" in model_name:
-            # 使用Qwen3-8B的实际路径，如果没有则使用Hub路径
-            self.model_path = "Qwen/Qwen2.5-7B-Instruct"  # 使用Hub路径，或者您本地的Qwen3-8B路径
+            # 检查本地缓存路径 - 使用正确的Qwen3-8B路径
+            local_qwen_path = f"{cache_dir}/models--Qwen--Qwen3-8B/snapshots/9c925d64d72725edaf899c6cb9c377fd0709d9c5"
+            if os.path.exists(local_qwen_path):
+                self.model_path = local_qwen_path
+                print(f"✅ 使用本地缓存的Qwen3-8B模型: {self.model_path}")
+            else:
+                self.model_path = "Qwen/Qwen3-8B"
+                print(f"⚠️ 本地缓存未找到，将从Hub下载: {self.model_path}")
         else:
             self.model_path = model_name 
             print(f"⚠️ 模型路径 '{model_name}' 未知，尝试从Hugging Face Hub加载。建议提前下载到本地。")
@@ -264,11 +293,13 @@ class ModelLoader:
             return
         
         print(f"🔄 加载模型: {self.model_name} 从 {self.model_path}")
-        is_local_path = isinstance(self.model_path, str) and "snapshots" in self.model_path # 判断是否为本地快照路径
+        is_local_path = isinstance(self.model_path, str) and ("snapshots" in self.model_path or "models--" in self.model_path) # 判断是否为本地缓存路径
 
-        tokenizer_args = {"trust_remote_code": True, "local_files_only": is_local_path}
+        # 使用配置文件中的缓存设置
+        cache_dir = config.generator.cache_dir if config else None
+        tokenizer_args = {"trust_remote_code": True, "local_files_only": is_local_path, "cache_dir": cache_dir}
         model_args = {"torch_dtype": torch.float16, "device_map": "auto", "trust_remote_code": True, 
-                      "load_in_8bit": True, "local_files_only": is_local_path} 
+                      "load_in_8bit": True, "local_files_only": is_local_path, "cache_dir": cache_dir} 
 
         try:
             print("🔧 加载tokenizer...")
@@ -296,7 +327,7 @@ class ModelLoader:
         print(f"🗑️ 卸载模型: {self.model_name} 并清理显存...")
         try:
             if self.model:
-                self.model.to('cpu') # 将模型移到CPU
+                # 对于8位量化模型，直接删除而不使用.to()方法
                 del self.model
             if self.tokenizer:
                 del self.tokenizer
@@ -348,7 +379,7 @@ def calculate_exact_match(prediction: str, ground_truth: str) -> float:
 # 主测试逻辑
 # ====================================================================================
 
-def run_chinese_comparison_test():
+def run_chinese_comparison_test(args):
     print("🚀 中文模型对比测试开始...")
     
     # --- 配置要测试的模型 ---
@@ -357,9 +388,9 @@ def run_chinese_comparison_test():
         "Qwen3-8B": ModelLoader("Qwen3-8B")
     }
 
-    # --- 测试配置 (硬编码为中文数据集) ---
-    data_path = "evaluate_mrr/alphafin_eval.jsonl" # 中文数据集路径
-    sample_size = 500 # 随机采样数量
+    # --- 测试配置 (使用命令行参数) ---
+    data_path = args.data_path # 使用命令行参数
+    sample_size = args.sample_size # 使用命令行参数
     # 模板文件名，需要与 data/prompt_templates/chinese/ 下的文件名一致
     template_file_name = "multi_stage_chinese_template.txt"  # 只使用文件名，路径在函数中拼接 
     
@@ -383,23 +414,35 @@ def run_chinese_comparison_test():
 
     # --- 逐个模型进行评估 ---
     for model_name, loader in model_loaders.items():
+        print(f"\n🔄 开始评估模型: {model_name}")
+        print(f"📊 当前GPU内存状态:")
+        if torch.cuda.is_available():
+            for i in range(torch.cuda.device_count()):
+                allocated = torch.cuda.memory_allocated(i) / 1024**3
+                cached = torch.cuda.memory_reserved(i) / 1024**3
+                print(f"   GPU {i}: 已分配 {allocated:.2f}GB, 缓存 {cached:.2f}GB")
+        
         current_model_results = []
         total_f1_model = 0.0
         total_em_model = 0.0
         total_generation_time_model = 0.0
         
         try:
+            print(f"🔄 正在加载模型: {model_name}")
             loader.load_model() # 加载当前模型
+            print(f"✅ 模型 {model_name} 加载完成，开始评估...")
             
             pbar = tqdm(dataset, desc=f"评估 {model_name}")
             for i, item in enumerate(pbar):
                 # 兼容多种查询字段名
                 query = item.get("query", "") or item.get("generated_question", "") or item.get("question", "")
-                context_data = item.get("context", "") # 假设 context 已经包含 summary
+                summary = item.get("summary", "") # 获取summary字段
+                context = item.get("context", "") # 获取context字段
                 expected_answer = item.get("answer", "") # 获取参考答案
 
                 # 构建 messages 列表，从外部模板文件加载
-                messages = get_messages_for_test(context_data, query, template_file_name)
+                # 传递summary和context，让模板函数正确处理
+                messages = get_messages_for_test(summary, context, query, template_file_name)
                 
                 # 转换为 ChatML 格式
                 prompt_string_for_model = _convert_messages_to_chatml(messages)
@@ -454,7 +497,15 @@ def run_chinese_comparison_test():
             import traceback
             traceback.print_exc()
         finally:
+            print(f"🗑️ 正在卸载模型: {model_name}")
             loader.unload_model() # 确保每次循环都卸载模型
+            print(f"✅ 模型 {model_name} 卸载完成")
+            print(f"📊 卸载后GPU内存状态:")
+            if torch.cuda.is_available():
+                for i in range(torch.cuda.device_count()):
+                    allocated = torch.cuda.memory_allocated(i) / 1024**3
+                    cached = torch.cuda.memory_reserved(i) / 1024**3
+                    print(f"   GPU {i}: 已分配 {allocated:.2f}GB, 缓存 {cached:.2f}GB")
 
     # --- 评估完成，保存所有结果 ---
     output_filename = f"comparison_results_chinese_{os.path.basename(data_path).replace('.jsonl', '')}_{time.strftime('%Y%m%d_%H%M%S')}.json"
@@ -474,4 +525,4 @@ if __name__ == "__main__":
     parser.add_argument("--repetition_penalty", type=float, default=1.1, help="重复惩罚系数")
     
     args = parser.parse_args()
-    run_chinese_comparison_test()  # 移除args参数
+    run_chinese_comparison_test(args)  # 传递args参数

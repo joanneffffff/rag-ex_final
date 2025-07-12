@@ -1,0 +1,14 @@
+{
+  "mode": "baseline",
+  "timestamp": "20250711_205257",
+  "total_samples": 100,
+  "mrr": 0.0,
+  "hit_at_1": 0.0,
+  "hit_at_3": 0.0,
+  "hit_at_5": 0.0,
+  "hit_at_10": 0.0,
+  "hit_at_1_count": 0,
+  "hit_at_3_count": 0,
+  "hit_at_5_count": 0,
+  "hit_at_10_count": 0
+}

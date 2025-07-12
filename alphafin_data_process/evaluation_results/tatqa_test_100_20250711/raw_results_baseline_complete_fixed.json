@@ -1,0 +1,1835 @@
+[
+  {
+    "query_text": "What is the value of the accounts receivable due from Customer A in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9359"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3228",
+      "eval_optimized_1423",
+      "eval_optimized_3055",
+      "eval_optimized_3252",
+      "eval_optimized_3219",
+      "eval_optimized_834",
+      "eval_optimized_3343",
+      "eval_optimized_1706",
+      "eval_optimized_2960",
+      "eval_optimized_3045"
+    ]
+  },
+  {
+    "query_text": "What does the table represent?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9192"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2529",
+      "eval_optimized_2068",
+      "eval_optimized_1903",
+      "eval_optimized_2059",
+      "eval_optimized_2850",
+      "eval_optimized_2741",
+      "eval_optimized_2013",
+      "eval_optimized_1870",
+      "eval_optimized_1800",
+      "eval_optimized_3278"
+    ]
+  },
+  {
+    "query_text": "Which assets had non-material adjusted carrying values?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9662"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2848",
+      "eval_optimized_3022",
+      "eval_optimized_1378",
+      "eval_optimized_409",
+      "eval_optimized_2846",
+      "eval_optimized_2935",
+      "eval_optimized_3303",
+      "eval_optimized_2684",
+      "eval_optimized_1670",
+      "eval_optimized_1032"
+    ]
+  },
+  {
+    "query_text": "What was purchased in fiscal 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9627"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2713",
+      "eval_optimized_2309",
+      "eval_optimized_1689",
+      "eval_optimized_2791",
+      "eval_optimized_3324",
+      "eval_optimized_1070",
+      "eval_optimized_1222",
+      "eval_optimized_1482",
+      "eval_optimized_2645",
+      "eval_optimized_1256"
+    ]
+  },
+  {
+    "query_text": "What are the Cost of sales and gross margin are subject to?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9627"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2051",
+      "eval_optimized_2677",
+      "eval_optimized_2456",
+      "eval_optimized_1841",
+      "eval_optimized_2069",
+      "eval_optimized_1886",
+      "eval_optimized_1842",
+      "eval_optimized_3084",
+      "eval_optimized_535",
+      "eval_optimized_1779"
+    ]
+  },
+  {
+    "query_text": "What is the total accounts receivable and long term receivable from Customer B as of September 30, 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9359"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3228",
+      "eval_optimized_834",
+      "eval_optimized_3087",
+      "eval_optimized_957",
+      "eval_optimized_3219",
+      "eval_optimized_1423",
+      "eval_optimized_3055",
+      "eval_optimized_3252",
+      "eval_optimized_3045",
+      "eval_optimized_2750"
+    ]
+  },
+  {
+    "query_text": "How much did net sales change between 2017 and 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9321"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2801",
+      "eval_optimized_2851",
+      "eval_optimized_1917",
+      "eval_optimized_2790",
+      "eval_optimized_3238",
+      "eval_optimized_2282",
+      "eval_optimized_2382",
+      "eval_optimized_3217",
+      "eval_optimized_2207",
+      "eval_optimized_2032"
+    ]
+  },
+  {
+    "query_text": "Which locations are responsible for driving the increase in sales in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9317"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2868",
+      "eval_optimized_2869",
+      "eval_optimized_1953",
+      "eval_optimized_2127",
+      "eval_optimized_2891",
+      "eval_optimized_1916",
+      "eval_optimized_2899",
+      "eval_optimized_2833",
+      "eval_optimized_1499",
+      "eval_optimized_257"
+    ]
+  },
+  {
+    "query_text": "What is the allocation of goodwill to the appropriate CGU based on?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9687"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3281",
+      "eval_optimized_3091",
+      "eval_optimized_2276",
+      "eval_optimized_2482",
+      "eval_optimized_2647",
+      "eval_optimized_2541",
+      "eval_optimized_997",
+      "eval_optimized_2846",
+      "eval_optimized_2832",
+      "eval_optimized_2349"
+    ]
+  },
+  {
+    "query_text": "What caused the increase in research and development expense?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9466"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3346",
+      "eval_optimized_3253",
+      "eval_optimized_2187",
+      "eval_optimized_3020",
+      "eval_optimized_2794",
+      "eval_optimized_2446",
+      "eval_optimized_3079",
+      "eval_optimized_535",
+      "eval_optimized_2456",
+      "eval_optimized_2961"
+    ]
+  },
+  {
+    "query_text": "What does NEO stand for?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10118"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2762",
+      "eval_optimized_2761",
+      "eval_optimized_825",
+      "eval_optimized_3363",
+      "eval_optimized_988",
+      "eval_optimized_2723",
+      "eval_optimized_3364",
+      "eval_optimized_1113",
+      "eval_optimized_266",
+      "eval_optimized_3180"
+    ]
+  },
+  {
+    "query_text": "What was the change in ownership interest held in Golar Partners?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9185"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2310",
+      "eval_optimized_2329",
+      "eval_optimized_2910",
+      "eval_optimized_2856",
+      "eval_optimized_3066",
+      "eval_optimized_17",
+      "eval_optimized_1749",
+      "eval_optimized_290",
+      "eval_optimized_2857",
+      "eval_optimized_3067"
+    ]
+  },
+  {
+    "query_text": "What was the amount of unrecognized stock-based compensation expense related to unvested employee stock options in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9219"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3346",
+      "eval_optimized_3253",
+      "eval_optimized_1683",
+      "eval_optimized_284",
+      "eval_optimized_2187",
+      "eval_optimized_2287",
+      "eval_optimized_2422",
+      "eval_optimized_2782",
+      "eval_optimized_2421",
+      "eval_optimized_535"
+    ]
+  },
+  {
+    "query_text": "What was the cost of internally-developed software in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10012"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2069",
+      "eval_optimized_385",
+      "eval_optimized_1795",
+      "eval_optimized_1963",
+      "eval_optimized_3346",
+      "eval_optimized_253",
+      "eval_optimized_3253",
+      "eval_optimized_3106",
+      "eval_optimized_535",
+      "eval_optimized_2446"
+    ]
+  },
+  {
+    "query_text": "What is the percentage increase in Mr Kapuria's salary from his promotion?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10119"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3364",
+      "eval_optimized_832",
+      "eval_optimized_3363",
+      "eval_optimized_1731",
+      "eval_optimized_635",
+      "eval_optimized_869",
+      "eval_optimized_500",
+      "eval_optimized_2186",
+      "eval_optimized_2185",
+      "eval_optimized_1639"
+    ]
+  },
+  {
+    "query_text": "What did the net income in the fourth quarter, 2019, represent?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9645"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1807",
+      "eval_optimized_3149",
+      "eval_optimized_1956",
+      "eval_optimized_3181",
+      "eval_optimized_2391",
+      "eval_optimized_2435",
+      "eval_optimized_3308",
+      "eval_optimized_23",
+      "eval_optimized_1754",
+      "eval_optimized_1755"
+    ]
+  },
+  {
+    "query_text": "The carrying value of the long term debt is held at which value?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9717"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2387",
+      "eval_optimized_2321",
+      "eval_optimized_2511",
+      "eval_optimized_1902",
+      "eval_optimized_1915",
+      "eval_optimized_676",
+      "eval_optimized_196",
+      "eval_optimized_852",
+      "eval_optimized_1801",
+      "eval_optimized_110"
+    ]
+  },
+  {
+    "query_text": "Where is the common stock traded under the symbol \"MEI.\"?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9928"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1105",
+      "eval_optimized_1300",
+      "eval_optimized_1170",
+      "eval_optimized_1783",
+      "eval_optimized_782",
+      "eval_optimized_424",
+      "eval_optimized_1517",
+      "eval_optimized_2044",
+      "eval_optimized_1244",
+      "eval_optimized_1198"
+    ]
+  },
+  {
+    "query_text": "What was the total comprehensive income from currency effects and measurement results from hedging transactions and hedging relationships?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10084"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3026",
+      "eval_optimized_1880",
+      "eval_optimized_2886",
+      "eval_optimized_2895",
+      "eval_optimized_2573",
+      "eval_optimized_3200",
+      "eval_optimized_2301",
+      "eval_optimized_2716",
+      "eval_optimized_2530",
+      "eval_optimized_2371"
+    ]
+  },
+  {
+    "query_text": "What is the cumulative amount of net derivative gains from economic hedges that had been recognized in general corporate expenses but not yet allocated to reporting segments?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9921"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3096",
+      "eval_optimized_663",
+      "eval_optimized_2775",
+      "eval_optimized_2478",
+      "eval_optimized_1506",
+      "eval_optimized_1282",
+      "eval_optimized_2697",
+      "eval_optimized_2369",
+      "eval_optimized_442",
+      "eval_optimized_820"
+    ]
+  },
+  {
+    "query_text": "The company's debt value increases by what amount if the interest rate decreases by 1% in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9717"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3350",
+      "eval_optimized_1372",
+      "eval_optimized_544",
+      "eval_optimized_700",
+      "eval_optimized_1714",
+      "eval_optimized_3104",
+      "eval_optimized_2978",
+      "eval_optimized_1311",
+      "eval_optimized_1826",
+      "eval_optimized_802"
+    ]
+  },
+  {
+    "query_text": "What was the  accumulated benefit obligation for the United States defined benefit pension plans in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9970"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3333",
+      "eval_optimized_1702",
+      "eval_optimized_2010",
+      "eval_optimized_312",
+      "eval_optimized_578",
+      "eval_optimized_3321",
+      "eval_optimized_1759",
+      "eval_optimized_2968",
+      "eval_optimized_2445",
+      "eval_optimized_3320"
+    ]
+  },
+  {
+    "query_text": "What was the reason for the change in other income from 2018 to 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9735"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2697",
+      "eval_optimized_2123",
+      "eval_optimized_885",
+      "eval_optimized_2369",
+      "eval_optimized_2381",
+      "eval_optimized_2064",
+      "eval_optimized_3004",
+      "eval_optimized_849",
+      "eval_optimized_2429",
+      "eval_optimized_3036"
+    ]
+  },
+  {
+    "query_text": "Which IFRS standard(s) did the Group adopt?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10069"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2581",
+      "eval_optimized_2719",
+      "eval_optimized_2582",
+      "eval_optimized_1076",
+      "eval_optimized_937",
+      "eval_optimized_719",
+      "eval_optimized_2359",
+      "eval_optimized_2770",
+      "eval_optimized_3177",
+      "eval_optimized_2562"
+    ]
+  },
+  {
+    "query_text": "What was the amount of  expenses for long-term remuneration components in FY2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9371"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1768",
+      "eval_optimized_3231",
+      "eval_optimized_1769",
+      "eval_optimized_37",
+      "eval_optimized_3241",
+      "eval_optimized_1767",
+      "eval_optimized_3223",
+      "eval_optimized_2056",
+      "eval_optimized_3242",
+      "eval_optimized_3222"
+    ]
+  },
+  {
+    "query_text": "What does the deferred income taxes reflect?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9241"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3197",
+      "eval_optimized_3225",
+      "eval_optimized_3224",
+      "eval_optimized_2903",
+      "eval_optimized_1596",
+      "eval_optimized_1578",
+      "eval_optimized_1314",
+      "eval_optimized_2579",
+      "eval_optimized_3114",
+      "eval_optimized_1500"
+    ]
+  },
+  {
+    "query_text": "What caused the increase in cash flows during the year ended December 31, 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9457"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2986",
+      "eval_optimized_416",
+      "eval_optimized_858",
+      "eval_optimized_2987",
+      "eval_optimized_1343",
+      "eval_optimized_3102",
+      "eval_optimized_1627",
+      "eval_optimized_2789",
+      "eval_optimized_2638",
+      "eval_optimized_2234"
+    ]
+  },
+  {
+    "query_text": "What was the U.S. Federal statutory rate in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9720"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2685",
+      "eval_optimized_2686",
+      "eval_optimized_2224",
+      "eval_optimized_620",
+      "eval_optimized_2354",
+      "eval_optimized_1266",
+      "eval_optimized_2489",
+      "eval_optimized_1802",
+      "eval_optimized_240",
+      "eval_optimized_2742"
+    ]
+  },
+  {
+    "query_text": "What are the expected operating fiscal gains in fiscal 2020 and 2021 and thereafter, respectively, based on the company’s forecasts of the timing of recognition of the underlying hedged items?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9921"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2529",
+      "eval_optimized_2685",
+      "eval_optimized_1802",
+      "eval_optimized_1883",
+      "eval_optimized_3039",
+      "eval_optimized_3125",
+      "eval_optimized_2306",
+      "eval_optimized_2067",
+      "eval_optimized_2489",
+      "eval_optimized_2013"
+    ]
+  },
+  {
+    "query_text": "In which years was the U.S. Federal statutory rate provided?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9720"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2005",
+      "eval_optimized_1478",
+      "eval_optimized_3101",
+      "eval_optimized_1363",
+      "eval_optimized_1136",
+      "eval_optimized_3227",
+      "eval_optimized_3229",
+      "eval_optimized_1599",
+      "eval_optimized_1962",
+      "eval_optimized_3006"
+    ]
+  },
+  {
+    "query_text": "What is the total number of exercisable shares excluded for 2019 and 2018 altogether?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9994"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2361",
+      "eval_optimized_1084",
+      "eval_optimized_295",
+      "eval_optimized_2634",
+      "eval_optimized_2610",
+      "eval_optimized_925",
+      "eval_optimized_1817",
+      "eval_optimized_1397",
+      "eval_optimized_3348",
+      "eval_optimized_1080"
+    ]
+  },
+  {
+    "query_text": "What is the amount of reimbursements for the cost of annual physical examinations and related travel for Mr. Post?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9989"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3364",
+      "eval_optimized_1639",
+      "eval_optimized_869",
+      "eval_optimized_635",
+      "eval_optimized_2736",
+      "eval_optimized_3363",
+      "eval_optimized_1731",
+      "eval_optimized_2186",
+      "eval_optimized_2185",
+      "eval_optimized_2569"
+    ]
+  },
+  {
+    "query_text": "What drove the income tax benefit?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9959"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2285",
+      "eval_optimized_1847",
+      "eval_optimized_354",
+      "eval_optimized_2678",
+      "eval_optimized_130",
+      "eval_optimized_630",
+      "eval_optimized_2222",
+      "eval_optimized_1784",
+      "eval_optimized_1779",
+      "eval_optimized_1956"
+    ]
+  },
+  {
+    "query_text": "What is the net income per basic share for pro forma year ended September 30, 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9528"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1630",
+      "eval_optimized_3358",
+      "eval_optimized_1727",
+      "eval_optimized_2480",
+      "eval_optimized_827",
+      "eval_optimized_3240",
+      "eval_optimized_2297",
+      "eval_optimized_2405",
+      "eval_optimized_782",
+      "eval_optimized_1526"
+    ]
+  },
+  {
+    "query_text": "What was the percentage change in the total accrued expenses between 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9767"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2253",
+      "eval_optimized_2622",
+      "eval_optimized_978",
+      "eval_optimized_3298",
+      "eval_optimized_3191",
+      "eval_optimized_2621",
+      "eval_optimized_974",
+      "eval_optimized_1786",
+      "eval_optimized_2962",
+      "eval_optimized_594"
+    ]
+  },
+  {
+    "query_text": "What was the increase in net cash provided by operating activities from 2018 to 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9350"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2955",
+      "eval_optimized_2945",
+      "eval_optimized_1316",
+      "eval_optimized_2718",
+      "eval_optimized_325",
+      "eval_optimized_778",
+      "eval_optimized_220",
+      "eval_optimized_1798",
+      "eval_optimized_858",
+      "eval_optimized_2705"
+    ]
+  },
+  {
+    "query_text": "Which year had the lowest percentage difference in basic and diluted net earnings per share?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9331"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_810",
+      "eval_optimized_2364",
+      "eval_optimized_159",
+      "eval_optimized_586",
+      "eval_optimized_2246",
+      "eval_optimized_475",
+      "eval_optimized_1103",
+      "eval_optimized_1740",
+      "eval_optimized_2462",
+      "eval_optimized_3141"
+    ]
+  },
+  {
+    "query_text": "What is the value of the company's 2023-2024 purchase obligations as a percentage of its total payment due in the 2023-2024 period?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9850"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1065",
+      "eval_optimized_525",
+      "eval_optimized_1825",
+      "eval_optimized_2711",
+      "eval_optimized_2202",
+      "eval_optimized_3315",
+      "eval_optimized_3156",
+      "eval_optimized_2710",
+      "eval_optimized_1682",
+      "eval_optimized_2194"
+    ]
+  },
+  {
+    "query_text": "What was the percentage change in Provisions for post-employment benefits plans (employer’s commitments) in FY2019 from FY2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9337"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1594",
+      "eval_optimized_3223",
+      "eval_optimized_3222",
+      "eval_optimized_1601",
+      "eval_optimized_1768",
+      "eval_optimized_3231",
+      "eval_optimized_37",
+      "eval_optimized_2776",
+      "eval_optimized_3232",
+      "eval_optimized_1128"
+    ]
+  },
+  {
+    "query_text": "What was the percentage change in the Restricted stock unit issuances between 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9818"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_738",
+      "eval_optimized_2374",
+      "eval_optimized_2136",
+      "eval_optimized_1666",
+      "eval_optimized_788",
+      "eval_optimized_970",
+      "eval_optimized_3258",
+      "eval_optimized_1349",
+      "eval_optimized_1662",
+      "eval_optimized_1517"
+    ]
+  },
+  {
+    "query_text": "What was the average income tax benefit for 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9796"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_12",
+      "eval_optimized_3225",
+      "eval_optimized_1596",
+      "eval_optimized_3197",
+      "eval_optimized_1500",
+      "eval_optimized_1505",
+      "eval_optimized_469",
+      "eval_optimized_2158",
+      "eval_optimized_967",
+      "eval_optimized_1578"
+    ]
+  },
+  {
+    "query_text": "What is the average value of raw materials and finished goods in 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9613"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1415",
+      "eval_optimized_18",
+      "eval_optimized_2347",
+      "eval_optimized_1762",
+      "eval_optimized_1069",
+      "eval_optimized_1750",
+      "eval_optimized_3344",
+      "eval_optimized_3234",
+      "eval_optimized_1643",
+      "eval_optimized_1707"
+    ]
+  },
+  {
+    "query_text": "What was the basic net loss per share in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9208"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_270",
+      "eval_optimized_2267",
+      "eval_optimized_612",
+      "eval_optimized_2771",
+      "eval_optimized_2182",
+      "eval_optimized_2183",
+      "eval_optimized_499",
+      "eval_optimized_2947",
+      "eval_optimized_1259",
+      "eval_optimized_1306"
+    ]
+  },
+  {
+    "query_text": "What are the 2 main items measured in this table?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10008"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_223",
+      "eval_optimized_1936",
+      "eval_optimized_2091",
+      "eval_optimized_2065",
+      "eval_optimized_2313",
+      "eval_optimized_1128",
+      "eval_optimized_890",
+      "eval_optimized_3002",
+      "eval_optimized_669",
+      "eval_optimized_2776"
+    ]
+  },
+  {
+    "query_text": "How many percent of the total inventory purchases did Supplier A account for in the year 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10126"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1733",
+      "eval_optimized_3070",
+      "eval_optimized_3071",
+      "eval_optimized_1739",
+      "eval_optimized_3069",
+      "eval_optimized_1972",
+      "eval_optimized_2340",
+      "eval_optimized_3074",
+      "eval_optimized_3271",
+      "eval_optimized_1603"
+    ]
+  },
+  {
+    "query_text": "What are the components factored in total inventories?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9381"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3370",
+      "eval_optimized_2659",
+      "eval_optimized_2658",
+      "eval_optimized_3233",
+      "eval_optimized_956",
+      "eval_optimized_1741",
+      "eval_optimized_3234",
+      "eval_optimized_18",
+      "eval_optimized_1750",
+      "eval_optimized_1603"
+    ]
+  },
+  {
+    "query_text": "What is the company's total operating lease obligations between 2020 to 2022?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9850"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_70",
+      "eval_optimized_2711",
+      "eval_optimized_1065",
+      "eval_optimized_2202",
+      "eval_optimized_2710",
+      "eval_optimized_3315",
+      "eval_optimized_525",
+      "eval_optimized_1413",
+      "eval_optimized_1682",
+      "eval_optimized_108"
+    ]
+  },
+  {
+    "query_text": "What were the RSAs granted in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9300"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1587",
+      "eval_optimized_1417",
+      "eval_optimized_1785",
+      "eval_optimized_1772",
+      "eval_optimized_3244",
+      "eval_optimized_2822",
+      "eval_optimized_444",
+      "eval_optimized_2904",
+      "eval_optimized_3349",
+      "eval_optimized_1159"
+    ]
+  },
+  {
+    "query_text": "What are the number of shares beneficially owned by Brian Kinion and Christopher Lien respectively?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10155"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1737",
+      "eval_optimized_2517",
+      "eval_optimized_860",
+      "eval_optimized_644",
+      "eval_optimized_2295",
+      "eval_optimized_2296",
+      "eval_optimized_1274",
+      "eval_optimized_2724",
+      "eval_optimized_353",
+      "eval_optimized_648"
+    ]
+  },
+  {
+    "query_text": "What was the change in Property and equipment, net in 2018 from 2017?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9662"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1652",
+      "eval_optimized_987",
+      "eval_optimized_871",
+      "eval_optimized_2140",
+      "eval_optimized_2382",
+      "eval_optimized_2032",
+      "eval_optimized_56",
+      "eval_optimized_1160",
+      "eval_optimized_2141",
+      "eval_optimized_446"
+    ]
+  },
+  {
+    "query_text": "What is the Customer Support Revenues of Americas expressed as a percentage of GAAP-based Customer Support Gross Profit for Fiscal year 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9824"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2525",
+      "eval_optimized_873",
+      "eval_optimized_2372",
+      "eval_optimized_736",
+      "eval_optimized_257",
+      "eval_optimized_2869",
+      "eval_optimized_182",
+      "eval_optimized_2009",
+      "eval_optimized_1724",
+      "eval_optimized_3354"
+    ]
+  },
+  {
+    "query_text": "What was the most significant expense in FY18?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9491"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3254",
+      "eval_optimized_1582",
+      "eval_optimized_562",
+      "eval_optimized_1768",
+      "eval_optimized_1278",
+      "eval_optimized_3201",
+      "eval_optimized_223",
+      "eval_optimized_37",
+      "eval_optimized_3255",
+      "eval_optimized_596"
+    ]
+  },
+  {
+    "query_text": "What is the percentage change in off-net APRU between 2017 and 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9275"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_557",
+      "eval_optimized_717",
+      "eval_optimized_1462",
+      "eval_optimized_435",
+      "eval_optimized_2355",
+      "eval_optimized_3081",
+      "eval_optimized_2120",
+      "eval_optimized_2654",
+      "eval_optimized_996",
+      "eval_optimized_2995"
+    ]
+  },
+  {
+    "query_text": "What was the change in the amount of stock options in 2019 from 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9219"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2136",
+      "eval_optimized_1666",
+      "eval_optimized_970",
+      "eval_optimized_788",
+      "eval_optimized_738",
+      "eval_optimized_1172",
+      "eval_optimized_2820",
+      "eval_optimized_2821",
+      "eval_optimized_1783",
+      "eval_optimized_1300"
+    ]
+  },
+  {
+    "query_text": "What is the year with Charges included in discontinued operations?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9549"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_354",
+      "eval_optimized_2421",
+      "eval_optimized_44",
+      "eval_optimized_1776",
+      "eval_optimized_3032",
+      "eval_optimized_284",
+      "eval_optimized_2287",
+      "eval_optimized_1779",
+      "eval_optimized_228",
+      "eval_optimized_231"
+    ]
+  },
+  {
+    "query_text": "What is the increase / (decrease) in the communication figures from 2018 to 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9659"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_501",
+      "eval_optimized_338",
+      "eval_optimized_1588",
+      "eval_optimized_234",
+      "eval_optimized_1948",
+      "eval_optimized_718",
+      "eval_optimized_2356",
+      "eval_optimized_1183",
+      "eval_optimized_441",
+      "eval_optimized_5"
+    ]
+  },
+  {
+    "query_text": "What was the increase / (decrease) in the RSAs granted from 2018 to 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9300"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1587",
+      "eval_optimized_1417",
+      "eval_optimized_1785",
+      "eval_optimized_3244",
+      "eval_optimized_1772",
+      "eval_optimized_444",
+      "eval_optimized_2822",
+      "eval_optimized_1173",
+      "eval_optimized_2904",
+      "eval_optimized_925"
+    ]
+  },
+  {
+    "query_text": "What is the impact of tax on the group share of associates' profits in 2018, in terms of % change?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9552"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3023",
+      "eval_optimized_2249",
+      "eval_optimized_3024",
+      "eval_optimized_1936",
+      "eval_optimized_223",
+      "eval_optimized_1610",
+      "eval_optimized_484",
+      "eval_optimized_1426",
+      "eval_optimized_1582",
+      "eval_optimized_406"
+    ]
+  },
+  {
+    "query_text": "What was the percentage change in Gross deferred income tax assets between 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9345"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2731",
+      "eval_optimized_2954",
+      "eval_optimized_2953",
+      "eval_optimized_1846",
+      "eval_optimized_2479",
+      "eval_optimized_3116",
+      "eval_optimized_2730",
+      "eval_optimized_823",
+      "eval_optimized_3115",
+      "eval_optimized_1089"
+    ]
+  },
+  {
+    "query_text": "What is the value of the 2017 restructuring charges as a percentage of the 2017 total goodwill impairment and restructuring charges?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9642"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1647",
+      "eval_optimized_1619",
+      "eval_optimized_2919",
+      "eval_optimized_2881",
+      "eval_optimized_2875",
+      "eval_optimized_439",
+      "eval_optimized_2571",
+      "eval_optimized_2416",
+      "eval_optimized_2715",
+      "eval_optimized_587"
+    ]
+  },
+  {
+    "query_text": "Which non-returning director has the lowest amount of total compensation?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9989"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1705",
+      "eval_optimized_3338",
+      "eval_optimized_2569",
+      "eval_optimized_2537",
+      "eval_optimized_2735",
+      "eval_optimized_87",
+      "eval_optimized_923",
+      "eval_optimized_869",
+      "eval_optimized_129",
+      "eval_optimized_758"
+    ]
+  },
+  {
+    "query_text": "What is the change in Shipping revenues from Years Ended December 31, 2018 to 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9827"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_319",
+      "eval_optimized_1440",
+      "eval_optimized_333",
+      "eval_optimized_1677",
+      "eval_optimized_279",
+      "eval_optimized_1456",
+      "eval_optimized_1462",
+      "eval_optimized_1698",
+      "eval_optimized_3080",
+      "eval_optimized_2910"
+    ]
+  },
+  {
+    "query_text": "What is the Gross accounts receivables for 2019 and 2018 respectively?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9463"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1616",
+      "eval_optimized_2344",
+      "eval_optimized_2165",
+      "eval_optimized_3219",
+      "eval_optimized_705",
+      "eval_optimized_476",
+      "eval_optimized_957",
+      "eval_optimized_2208",
+      "eval_optimized_3252",
+      "eval_optimized_1520"
+    ]
+  },
+  {
+    "query_text": "What is the average Long-term debt?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9837"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_73",
+      "eval_optimized_110",
+      "eval_optimized_580",
+      "eval_optimized_2243",
+      "eval_optimized_1801",
+      "eval_optimized_631",
+      "eval_optimized_1557",
+      "eval_optimized_204",
+      "eval_optimized_1922",
+      "eval_optimized_184"
+    ]
+  },
+  {
+    "query_text": "What is the percentage change in the total product sales from 2018 to 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9812"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1674",
+      "eval_optimized_1499",
+      "eval_optimized_726",
+      "eval_optimized_2367",
+      "eval_optimized_3199",
+      "eval_optimized_2891",
+      "eval_optimized_639",
+      "eval_optimized_1715",
+      "eval_optimized_257",
+      "eval_optimized_338"
+    ]
+  },
+  {
+    "query_text": "What is the increase / (decrease) in 28 nanometers from 2018 to 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9521"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_338",
+      "eval_optimized_234",
+      "eval_optimized_1948",
+      "eval_optimized_726",
+      "eval_optimized_2367",
+      "eval_optimized_501",
+      "eval_optimized_1588",
+      "eval_optimized_45",
+      "eval_optimized_1777",
+      "eval_optimized_718"
+    ]
+  },
+  {
+    "query_text": "What is the increase/ (decrease) in media revenue from 2017 to 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9617"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1644",
+      "eval_optimized_501",
+      "eval_optimized_1162",
+      "eval_optimized_46",
+      "eval_optimized_311",
+      "eval_optimized_1564",
+      "eval_optimized_1748",
+      "eval_optimized_3043",
+      "eval_optimized_1014",
+      "eval_optimized_100"
+    ]
+  },
+  {
+    "query_text": "How many years did Shares issued under the ESPP exceed $2 million?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9891",
+      "eval_optimized_9891"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_471",
+      "eval_optimized_1742",
+      "eval_optimized_4",
+      "eval_optimized_2554",
+      "eval_optimized_2839",
+      "eval_optimized_1720",
+      "eval_optimized_3309",
+      "eval_optimized_2841",
+      "eval_optimized_1273",
+      "eval_optimized_1587"
+    ]
+  },
+  {
+    "query_text": "What was the Projected benefit obligation in 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9870",
+      "eval_optimized_9870"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2445",
+      "eval_optimized_2444",
+      "eval_optimized_3321",
+      "eval_optimized_2010",
+      "eval_optimized_2196",
+      "eval_optimized_2968",
+      "eval_optimized_658",
+      "eval_optimized_312",
+      "eval_optimized_1759",
+      "eval_optimized_1684"
+    ]
+  },
+  {
+    "query_text": "What is the percentage change in total net sales from 2018 to 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9830",
+      "eval_optimized_9830"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_35",
+      "eval_optimized_1765",
+      "eval_optimized_140",
+      "eval_optimized_1764",
+      "eval_optimized_950",
+      "eval_optimized_2282",
+      "eval_optimized_2996",
+      "eval_optimized_527",
+      "eval_optimized_1006",
+      "eval_optimized_1892"
+    ]
+  },
+  {
+    "query_text": "What is the average revenue from Asia Pacific in 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9198",
+      "eval_optimized_9198"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1748",
+      "eval_optimized_1953",
+      "eval_optimized_873",
+      "eval_optimized_2699",
+      "eval_optimized_2525",
+      "eval_optimized_278",
+      "eval_optimized_1336",
+      "eval_optimized_2891",
+      "eval_optimized_211",
+      "eval_optimized_234"
+    ]
+  },
+  {
+    "query_text": "What was the difference in the gross carrying value between Trade Names and Non-compete agreements?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9784",
+      "eval_optimized_9784"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2684",
+      "eval_optimized_2935",
+      "eval_optimized_3303",
+      "eval_optimized_1032",
+      "eval_optimized_1670",
+      "eval_optimized_1101",
+      "eval_optimized_1439",
+      "eval_optimized_3064",
+      "eval_optimized_2195",
+      "eval_optimized_515"
+    ]
+  },
+  {
+    "query_text": "What was the Restricted stock unit issuances in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9818",
+      "eval_optimized_9818"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_738",
+      "eval_optimized_2374",
+      "eval_optimized_788",
+      "eval_optimized_2136",
+      "eval_optimized_1666",
+      "eval_optimized_970",
+      "eval_optimized_3258",
+      "eval_optimized_2044",
+      "eval_optimized_1349",
+      "eval_optimized_2926"
+    ]
+  },
+  {
+    "query_text": "What was the Change in foreign operations tax exposure reserves in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9296",
+      "eval_optimized_9296"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2731",
+      "eval_optimized_1089",
+      "eval_optimized_2730",
+      "eval_optimized_218",
+      "eval_optimized_2514",
+      "eval_optimized_3300",
+      "eval_optimized_3116",
+      "eval_optimized_854",
+      "eval_optimized_2043",
+      "eval_optimized_3068"
+    ]
+  },
+  {
+    "query_text": "What was the Unlevered free cash flow in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9724",
+      "eval_optimized_9724"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3321",
+      "eval_optimized_263",
+      "eval_optimized_2196",
+      "eval_optimized_1759",
+      "eval_optimized_3347",
+      "eval_optimized_2873",
+      "eval_optimized_3073",
+      "eval_optimized_517",
+      "eval_optimized_2088",
+      "eval_optimized_2010"
+    ]
+  },
+  {
+    "query_text": "How much were software in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9951",
+      "eval_optimized_9951"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_385",
+      "eval_optimized_2069",
+      "eval_optimized_1795",
+      "eval_optimized_3149",
+      "eval_optimized_3267",
+      "eval_optimized_2129",
+      "eval_optimized_1784",
+      "eval_optimized_3308",
+      "eval_optimized_2422",
+      "eval_optimized_2678"
+    ]
+  },
+  {
+    "query_text": "In which years was Inventories calculated?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9381",
+      "eval_optimized_9380"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2658",
+      "eval_optimized_2659",
+      "eval_optimized_3370",
+      "eval_optimized_3233",
+      "eval_optimized_3344",
+      "eval_optimized_3234",
+      "eval_optimized_1750",
+      "eval_optimized_1741",
+      "eval_optimized_1012",
+      "eval_optimized_1762"
+    ]
+  },
+  {
+    "query_text": "What is the percentage of capital expenditures for Bell Wireline out of the BCE capital expenditures in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9286",
+      "eval_optimized_9286"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3043",
+      "eval_optimized_3204",
+      "eval_optimized_3207",
+      "eval_optimized_3208",
+      "eval_optimized_3206",
+      "eval_optimized_3205",
+      "eval_optimized_1564",
+      "eval_optimized_1402",
+      "eval_optimized_1584",
+      "eval_optimized_724"
+    ]
+  },
+  {
+    "query_text": "What are the types of impairment losses under Americas in the Consolidated Statements of Operations?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9662",
+      "eval_optimized_9662"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_893",
+      "eval_optimized_278",
+      "eval_optimized_1823",
+      "eval_optimized_3199",
+      "eval_optimized_1777",
+      "eval_optimized_100",
+      "eval_optimized_2869",
+      "eval_optimized_45",
+      "eval_optimized_2547",
+      "eval_optimized_3139"
+    ]
+  },
+  {
+    "query_text": "What is the percentage change in the payroll and benefits in 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9556",
+      "eval_optimized_9556"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1441",
+      "eval_optimized_1314",
+      "eval_optimized_1500",
+      "eval_optimized_594",
+      "eval_optimized_607",
+      "eval_optimized_1188",
+      "eval_optimized_2262",
+      "eval_optimized_3261",
+      "eval_optimized_187",
+      "eval_optimized_12"
+    ]
+  },
+  {
+    "query_text": "What is the change in net carrying value between 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9408",
+      "eval_optimized_9408"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3022",
+      "eval_optimized_1378",
+      "eval_optimized_2684",
+      "eval_optimized_1101",
+      "eval_optimized_515",
+      "eval_optimized_1032",
+      "eval_optimized_3303",
+      "eval_optimized_3263",
+      "eval_optimized_2195",
+      "eval_optimized_1931"
+    ]
+  },
+  {
+    "query_text": "How many years did the Balance at end of period exceed 30,000,000 ?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9818",
+      "eval_optimized_9818"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2401",
+      "eval_optimized_2576",
+      "eval_optimized_931",
+      "eval_optimized_168",
+      "eval_optimized_1955",
+      "eval_optimized_1790",
+      "eval_optimized_2299",
+      "eval_optimized_60",
+      "eval_optimized_410",
+      "eval_optimized_650"
+    ]
+  },
+  {
+    "query_text": "What was the change in the Projected benefit obligation between 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9870",
+      "eval_optimized_9870"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2445",
+      "eval_optimized_3321",
+      "eval_optimized_2196",
+      "eval_optimized_2968",
+      "eval_optimized_2444",
+      "eval_optimized_2010",
+      "eval_optimized_517",
+      "eval_optimized_1684",
+      "eval_optimized_3320",
+      "eval_optimized_658"
+    ]
+  },
+  {
+    "query_text": "What was the percentage change in the net total between 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9742",
+      "eval_optimized_9742"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2088",
+      "eval_optimized_2465",
+      "eval_optimized_3073",
+      "eval_optimized_2466",
+      "eval_optimized_2010",
+      "eval_optimized_2090",
+      "eval_optimized_2591",
+      "eval_optimized_2830",
+      "eval_optimized_3321",
+      "eval_optimized_3320"
+    ]
+  },
+  {
+    "query_text": "How much did the company decrease its valuation allowance by in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9345",
+      "eval_optimized_9344"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3029",
+      "eval_optimized_2717",
+      "eval_optimized_3245",
+      "eval_optimized_823",
+      "eval_optimized_2479",
+      "eval_optimized_1385",
+      "eval_optimized_1846",
+      "eval_optimized_1048",
+      "eval_optimized_458",
+      "eval_optimized_2158"
+    ]
+  },
+  {
+    "query_text": "What was the Accumulated benefit obligation in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9870",
+      "eval_optimized_9870"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3321",
+      "eval_optimized_2010",
+      "eval_optimized_3333",
+      "eval_optimized_2968",
+      "eval_optimized_658",
+      "eval_optimized_1684",
+      "eval_optimized_312",
+      "eval_optimized_2444",
+      "eval_optimized_2445",
+      "eval_optimized_3320"
+    ]
+  },
+  {
+    "query_text": "What is the percentage change in the net cash from operation activities from 2017 to 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9457",
+      "eval_optimized_9457"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1524",
+      "eval_optimized_221",
+      "eval_optimized_2952",
+      "eval_optimized_1313",
+      "eval_optimized_1934",
+      "eval_optimized_1322",
+      "eval_optimized_1082",
+      "eval_optimized_3108",
+      "eval_optimized_564",
+      "eval_optimized_2725"
+    ]
+  },
+  {
+    "query_text": "What was the amount of  Net unrealized holding gains (losses)  in 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10088",
+      "eval_optimized_10088"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3230",
+      "eval_optimized_1600",
+      "eval_optimized_2223",
+      "eval_optimized_2774",
+      "eval_optimized_2183",
+      "eval_optimized_2182",
+      "eval_optimized_1997",
+      "eval_optimized_2947",
+      "eval_optimized_553",
+      "eval_optimized_3276"
+    ]
+  },
+  {
+    "query_text": "What was the revenue in North America in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9985",
+      "eval_optimized_9983"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3337",
+      "eval_optimized_2530",
+      "eval_optimized_3190",
+      "eval_optimized_2037",
+      "eval_optimized_2535",
+      "eval_optimized_126",
+      "eval_optimized_2531",
+      "eval_optimized_2810",
+      "eval_optimized_3296",
+      "eval_optimized_2907"
+    ]
+  },
+  {
+    "query_text": "What was the change in the revenue from South America between 2017 and 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9985",
+      "eval_optimized_9983"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3337",
+      "eval_optimized_2530",
+      "eval_optimized_3296",
+      "eval_optimized_2531",
+      "eval_optimized_2016",
+      "eval_optimized_3190",
+      "eval_optimized_2535",
+      "eval_optimized_320",
+      "eval_optimized_1214",
+      "eval_optimized_2327"
+    ]
+  },
+  {
+    "query_text": "Which years does the table provide information for the company's property and equipment?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9193",
+      "eval_optimized_9193"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1893",
+      "eval_optimized_1763",
+      "eval_optimized_1908",
+      "eval_optimized_2958",
+      "eval_optimized_2443",
+      "eval_optimized_2058",
+      "eval_optimized_2759",
+      "eval_optimized_2046",
+      "eval_optimized_1815",
+      "eval_optimized_1894"
+    ]
+  },
+  {
+    "query_text": "What was the Expected long-term return on plan assets assumption used in calculating net periodic benefit cost based on?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9354",
+      "eval_optimized_9353"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3226",
+      "eval_optimized_3227",
+      "eval_optimized_1277",
+      "eval_optimized_1797",
+      "eval_optimized_1962",
+      "eval_optimized_2005",
+      "eval_optimized_1598",
+      "eval_optimized_3101",
+      "eval_optimized_2663",
+      "eval_optimized_251"
+    ]
+  },
+  {
+    "query_text": "What was the cash and cash equivalents in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10050",
+      "eval_optimized_10050"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2004",
+      "eval_optimized_2925",
+      "eval_optimized_2662",
+      "eval_optimized_1959",
+      "eval_optimized_2050",
+      "eval_optimized_2455",
+      "eval_optimized_1961",
+      "eval_optimized_2019",
+      "eval_optimized_1871",
+      "eval_optimized_2468"
+    ]
+  },
+  {
+    "query_text": "What is the average deferral of revenues from 2017-2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9171",
+      "eval_optimized_9171"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1264",
+      "eval_optimized_2909",
+      "eval_optimized_987",
+      "eval_optimized_2786",
+      "eval_optimized_271",
+      "eval_optimized_922",
+      "eval_optimized_2568",
+      "eval_optimized_359",
+      "eval_optimized_2375",
+      "eval_optimized_2"
+    ]
+  },
+  {
+    "query_text": "What was the total credit facility in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10023",
+      "eval_optimized_10023"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2591",
+      "eval_optimized_3347",
+      "eval_optimized_944",
+      "eval_optimized_1711",
+      "eval_optimized_2465",
+      "eval_optimized_1759",
+      "eval_optimized_578",
+      "eval_optimized_3333",
+      "eval_optimized_263",
+      "eval_optimized_2466"
+    ]
+  },
+  {
+    "query_text": "What was the revenue from Traditional & Other Products for Network Solutions?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9452",
+      "eval_optimized_9452"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_2732",
+      "eval_optimized_3250",
+      "eval_optimized_2062",
+      "eval_optimized_2810",
+      "eval_optimized_2809",
+      "eval_optimized_2811",
+      "eval_optimized_380",
+      "eval_optimized_2874",
+      "eval_optimized_3007",
+      "eval_optimized_3162"
+    ]
+  },
+  {
+    "query_text": "What was the difference between total debt obligations and purchase obligations?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9581",
+      "eval_optimized_9581"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1825",
+      "eval_optimized_2314",
+      "eval_optimized_2711",
+      "eval_optimized_1065",
+      "eval_optimized_2194",
+      "eval_optimized_525",
+      "eval_optimized_3156",
+      "eval_optimized_2203",
+      "eval_optimized_2877",
+      "eval_optimized_550"
+    ]
+  },
+  {
+    "query_text": "What was the net carrying amount before unamortized debt issuance costs in 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9408",
+      "eval_optimized_9408"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_3239",
+      "eval_optimized_1608",
+      "eval_optimized_2321",
+      "eval_optimized_1915",
+      "eval_optimized_2511",
+      "eval_optimized_2270",
+      "eval_optimized_196",
+      "eval_optimized_676",
+      "eval_optimized_852",
+      "eval_optimized_616"
+    ]
+  },
+  {
+    "query_text": "What is the respective revenue from Asia Pacific in 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9198",
+      "eval_optimized_9198"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1748",
+      "eval_optimized_1953",
+      "eval_optimized_2525",
+      "eval_optimized_2699",
+      "eval_optimized_278",
+      "eval_optimized_873",
+      "eval_optimized_1336",
+      "eval_optimized_2891",
+      "eval_optimized_1848",
+      "eval_optimized_234"
+    ]
+  },
+  {
+    "query_text": "What was the change in the provision for doubtful receivables between 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9326",
+      "eval_optimized_9326"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "eval_optimized_1421",
+      "eval_optimized_2040",
+      "eval_optimized_3307",
+      "eval_optimized_3053",
+      "eval_optimized_1911",
+      "eval_optimized_3277",
+      "eval_optimized_2398",
+      "eval_optimized_2035",
+      "eval_optimized_2396",
+      "eval_optimized_2308"
+    ]
+  }
+]

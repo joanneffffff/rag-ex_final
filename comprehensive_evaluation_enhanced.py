@@ -637,8 +637,9 @@ class ComprehensiveEvaluator:
             elif role == "assistant":
                 formatted_prompt += f"<|im_start|>assistant\n{content.strip()}<|im_end|>\n"
         
-        # 提示模型开始生成
-        formatted_prompt += "<|im_start|>assistant\n" 
+        # <<< 关键修复：移除或注释掉这一行 >>>
+        # 因为Prompt模板的末尾是用户消息的一部分，模型会根据ChatML的规则自动在用户消息后生成助手回应，无需额外添加 <|im_start|>assistant。
+        # formatted_prompt += "<|im_start|>assistant\n" 
         
         return formatted_prompt
 

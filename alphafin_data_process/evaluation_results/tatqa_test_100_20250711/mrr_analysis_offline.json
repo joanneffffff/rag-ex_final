@@ -1,0 +1,22 @@
+{
+  "top_1": {
+    "MRR": 0.0,
+    "Hit@1": 0.0,
+    "total_samples": 100
+  },
+  "top_3": {
+    "MRR": 0.0,
+    "Hit@3": 0.0,
+    "total_samples": 100
+  },
+  "top_5": {
+    "MRR": 0.0,
+    "Hit@5": 0.0,
+    "total_samples": 100
+  },
+  "top_10": {
+    "MRR": 0.0,
+    "Hit@10": 0.0,
+    "total_samples": 100
+  }
+}

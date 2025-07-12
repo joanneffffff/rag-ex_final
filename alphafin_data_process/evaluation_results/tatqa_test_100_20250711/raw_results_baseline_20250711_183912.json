@@ -1,0 +1,1835 @@
+[
+  {
+    "query_text": "What is the value of the accounts receivable due from Customer A in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9359"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3228",
+      "tatqa_1423",
+      "tatqa_3055",
+      "tatqa_3252",
+      "tatqa_3219",
+      "tatqa_834",
+      "tatqa_3343",
+      "tatqa_1706",
+      "tatqa_2960",
+      "tatqa_3045"
+    ]
+  },
+  {
+    "query_text": "What does the table represent?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9192"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2529",
+      "tatqa_2068",
+      "tatqa_1903",
+      "tatqa_2059",
+      "tatqa_2850",
+      "tatqa_2741",
+      "tatqa_2013",
+      "tatqa_1870",
+      "tatqa_1800",
+      "tatqa_3278"
+    ]
+  },
+  {
+    "query_text": "Which assets had non-material adjusted carrying values?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9662"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2848",
+      "tatqa_3022",
+      "tatqa_1378",
+      "tatqa_409",
+      "tatqa_2846",
+      "tatqa_2935",
+      "tatqa_3303",
+      "tatqa_2684",
+      "tatqa_1670",
+      "tatqa_1032"
+    ]
+  },
+  {
+    "query_text": "What was purchased in fiscal 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9627"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2713",
+      "tatqa_2309",
+      "tatqa_1689",
+      "tatqa_2791",
+      "tatqa_3324",
+      "tatqa_1070",
+      "tatqa_1222",
+      "tatqa_1482",
+      "tatqa_2645",
+      "tatqa_1256"
+    ]
+  },
+  {
+    "query_text": "What are the Cost of sales and gross margin are subject to?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9627"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2051",
+      "tatqa_2677",
+      "tatqa_2456",
+      "tatqa_1841",
+      "tatqa_2069",
+      "tatqa_1886",
+      "tatqa_1842",
+      "tatqa_3084",
+      "tatqa_535",
+      "tatqa_1779"
+    ]
+  },
+  {
+    "query_text": "What is the total accounts receivable and long term receivable from Customer B as of September 30, 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9359"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3228",
+      "tatqa_834",
+      "tatqa_3087",
+      "tatqa_957",
+      "tatqa_3219",
+      "tatqa_1423",
+      "tatqa_3055",
+      "tatqa_3252",
+      "tatqa_3045",
+      "tatqa_2750"
+    ]
+  },
+  {
+    "query_text": "How much did net sales change between 2017 and 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9321"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2801",
+      "tatqa_2851",
+      "tatqa_1917",
+      "tatqa_2790",
+      "tatqa_3238",
+      "tatqa_2282",
+      "tatqa_2382",
+      "tatqa_3217",
+      "tatqa_2207",
+      "tatqa_2032"
+    ]
+  },
+  {
+    "query_text": "Which locations are responsible for driving the increase in sales in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9317"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2868",
+      "tatqa_2869",
+      "tatqa_1953",
+      "tatqa_2127",
+      "tatqa_2891",
+      "tatqa_1916",
+      "tatqa_2899",
+      "tatqa_2833",
+      "tatqa_1499",
+      "tatqa_257"
+    ]
+  },
+  {
+    "query_text": "What is the allocation of goodwill to the appropriate CGU based on?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9687"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3281",
+      "tatqa_3091",
+      "tatqa_2276",
+      "tatqa_2482",
+      "tatqa_2647",
+      "tatqa_2541",
+      "tatqa_997",
+      "tatqa_2846",
+      "tatqa_2832",
+      "tatqa_2349"
+    ]
+  },
+  {
+    "query_text": "What caused the increase in research and development expense?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9466"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3346",
+      "tatqa_3253",
+      "tatqa_2187",
+      "tatqa_3020",
+      "tatqa_2794",
+      "tatqa_2446",
+      "tatqa_3079",
+      "tatqa_535",
+      "tatqa_2456",
+      "tatqa_2961"
+    ]
+  },
+  {
+    "query_text": "What does NEO stand for?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10118"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2762",
+      "tatqa_2761",
+      "tatqa_825",
+      "tatqa_3363",
+      "tatqa_988",
+      "tatqa_2723",
+      "tatqa_3364",
+      "tatqa_1113",
+      "tatqa_266",
+      "tatqa_3180"
+    ]
+  },
+  {
+    "query_text": "What was the change in ownership interest held in Golar Partners?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9185"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2310",
+      "tatqa_2329",
+      "tatqa_2910",
+      "tatqa_2856",
+      "tatqa_3066",
+      "tatqa_17",
+      "tatqa_1749",
+      "tatqa_290",
+      "tatqa_2857",
+      "tatqa_3067"
+    ]
+  },
+  {
+    "query_text": "What was the amount of unrecognized stock-based compensation expense related to unvested employee stock options in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9219"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3346",
+      "tatqa_3253",
+      "tatqa_1683",
+      "tatqa_284",
+      "tatqa_2187",
+      "tatqa_2287",
+      "tatqa_2422",
+      "tatqa_2782",
+      "tatqa_2421",
+      "tatqa_535"
+    ]
+  },
+  {
+    "query_text": "What was the cost of internally-developed software in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10012"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2069",
+      "tatqa_385",
+      "tatqa_1795",
+      "tatqa_1963",
+      "tatqa_3346",
+      "tatqa_253",
+      "tatqa_3253",
+      "tatqa_3106",
+      "tatqa_535",
+      "tatqa_2446"
+    ]
+  },
+  {
+    "query_text": "What is the percentage increase in Mr Kapuria's salary from his promotion?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10119"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3364",
+      "tatqa_832",
+      "tatqa_3363",
+      "tatqa_1731",
+      "tatqa_635",
+      "tatqa_869",
+      "tatqa_500",
+      "tatqa_2186",
+      "tatqa_2185",
+      "tatqa_1639"
+    ]
+  },
+  {
+    "query_text": "What did the net income in the fourth quarter, 2019, represent?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9645"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1807",
+      "tatqa_3149",
+      "tatqa_1956",
+      "tatqa_3181",
+      "tatqa_2391",
+      "tatqa_2435",
+      "tatqa_3308",
+      "tatqa_23",
+      "tatqa_1754",
+      "tatqa_1755"
+    ]
+  },
+  {
+    "query_text": "The carrying value of the long term debt is held at which value?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9717"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2387",
+      "tatqa_2321",
+      "tatqa_2511",
+      "tatqa_1902",
+      "tatqa_1915",
+      "tatqa_676",
+      "tatqa_196",
+      "tatqa_852",
+      "tatqa_1801",
+      "tatqa_110"
+    ]
+  },
+  {
+    "query_text": "Where is the common stock traded under the symbol \"MEI.\"?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9928"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1105",
+      "tatqa_1300",
+      "tatqa_1170",
+      "tatqa_1783",
+      "tatqa_782",
+      "tatqa_424",
+      "tatqa_1517",
+      "tatqa_2044",
+      "tatqa_1244",
+      "tatqa_1198"
+    ]
+  },
+  {
+    "query_text": "What was the total comprehensive income from currency effects and measurement results from hedging transactions and hedging relationships?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10084"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3026",
+      "tatqa_1880",
+      "tatqa_2886",
+      "tatqa_2895",
+      "tatqa_2573",
+      "tatqa_3200",
+      "tatqa_2301",
+      "tatqa_2716",
+      "tatqa_2530",
+      "tatqa_2371"
+    ]
+  },
+  {
+    "query_text": "What is the cumulative amount of net derivative gains from economic hedges that had been recognized in general corporate expenses but not yet allocated to reporting segments?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9921"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3096",
+      "tatqa_663",
+      "tatqa_2775",
+      "tatqa_2478",
+      "tatqa_1506",
+      "tatqa_1282",
+      "tatqa_2697",
+      "tatqa_2369",
+      "tatqa_442",
+      "tatqa_820"
+    ]
+  },
+  {
+    "query_text": "The company's debt value increases by what amount if the interest rate decreases by 1% in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9717"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3350",
+      "tatqa_1372",
+      "tatqa_544",
+      "tatqa_700",
+      "tatqa_1714",
+      "tatqa_3104",
+      "tatqa_2978",
+      "tatqa_1311",
+      "tatqa_1826",
+      "tatqa_802"
+    ]
+  },
+  {
+    "query_text": "What was the  accumulated benefit obligation for the United States defined benefit pension plans in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9970"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3333",
+      "tatqa_1702",
+      "tatqa_2010",
+      "tatqa_312",
+      "tatqa_578",
+      "tatqa_3321",
+      "tatqa_1759",
+      "tatqa_2968",
+      "tatqa_2445",
+      "tatqa_3320"
+    ]
+  },
+  {
+    "query_text": "What was the reason for the change in other income from 2018 to 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9735"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2697",
+      "tatqa_2123",
+      "tatqa_885",
+      "tatqa_2369",
+      "tatqa_2381",
+      "tatqa_2064",
+      "tatqa_3004",
+      "tatqa_849",
+      "tatqa_2429",
+      "tatqa_3036"
+    ]
+  },
+  {
+    "query_text": "Which IFRS standard(s) did the Group adopt?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10069"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2581",
+      "tatqa_2719",
+      "tatqa_2582",
+      "tatqa_1076",
+      "tatqa_937",
+      "tatqa_719",
+      "tatqa_2359",
+      "tatqa_2770",
+      "tatqa_3177",
+      "tatqa_2562"
+    ]
+  },
+  {
+    "query_text": "What was the amount of  expenses for long-term remuneration components in FY2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9371"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1768",
+      "tatqa_3231",
+      "tatqa_1769",
+      "tatqa_37",
+      "tatqa_3241",
+      "tatqa_1767",
+      "tatqa_3223",
+      "tatqa_2056",
+      "tatqa_3242",
+      "tatqa_3222"
+    ]
+  },
+  {
+    "query_text": "What does the deferred income taxes reflect?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9241"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3197",
+      "tatqa_3225",
+      "tatqa_3224",
+      "tatqa_2903",
+      "tatqa_1596",
+      "tatqa_1578",
+      "tatqa_1314",
+      "tatqa_2579",
+      "tatqa_3114",
+      "tatqa_1500"
+    ]
+  },
+  {
+    "query_text": "What caused the increase in cash flows during the year ended December 31, 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9457"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2986",
+      "tatqa_416",
+      "tatqa_858",
+      "tatqa_2987",
+      "tatqa_1343",
+      "tatqa_3102",
+      "tatqa_1627",
+      "tatqa_2789",
+      "tatqa_2638",
+      "tatqa_2234"
+    ]
+  },
+  {
+    "query_text": "What was the U.S. Federal statutory rate in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9720"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2685",
+      "tatqa_2686",
+      "tatqa_2224",
+      "tatqa_620",
+      "tatqa_2354",
+      "tatqa_1266",
+      "tatqa_2489",
+      "tatqa_1802",
+      "tatqa_240",
+      "tatqa_2742"
+    ]
+  },
+  {
+    "query_text": "What are the expected operating fiscal gains in fiscal 2020 and 2021 and thereafter, respectively, based on the company’s forecasts of the timing of recognition of the underlying hedged items?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9921"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2529",
+      "tatqa_2685",
+      "tatqa_1802",
+      "tatqa_1883",
+      "tatqa_3039",
+      "tatqa_3125",
+      "tatqa_2306",
+      "tatqa_2067",
+      "tatqa_2489",
+      "tatqa_2013"
+    ]
+  },
+  {
+    "query_text": "In which years was the U.S. Federal statutory rate provided?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9720"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2005",
+      "tatqa_1478",
+      "tatqa_3101",
+      "tatqa_1363",
+      "tatqa_1136",
+      "tatqa_3227",
+      "tatqa_3229",
+      "tatqa_1599",
+      "tatqa_1962",
+      "tatqa_3006"
+    ]
+  },
+  {
+    "query_text": "What is the total number of exercisable shares excluded for 2019 and 2018 altogether?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9994"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2361",
+      "tatqa_1084",
+      "tatqa_295",
+      "tatqa_2634",
+      "tatqa_2610",
+      "tatqa_925",
+      "tatqa_1817",
+      "tatqa_1397",
+      "tatqa_3348",
+      "tatqa_1080"
+    ]
+  },
+  {
+    "query_text": "What is the amount of reimbursements for the cost of annual physical examinations and related travel for Mr. Post?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9989"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3364",
+      "tatqa_1639",
+      "tatqa_869",
+      "tatqa_635",
+      "tatqa_2736",
+      "tatqa_3363",
+      "tatqa_1731",
+      "tatqa_2186",
+      "tatqa_2185",
+      "tatqa_2569"
+    ]
+  },
+  {
+    "query_text": "What drove the income tax benefit?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9959"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2285",
+      "tatqa_1847",
+      "tatqa_354",
+      "tatqa_2678",
+      "tatqa_130",
+      "tatqa_630",
+      "tatqa_2222",
+      "tatqa_1784",
+      "tatqa_1779",
+      "tatqa_1956"
+    ]
+  },
+  {
+    "query_text": "What is the net income per basic share for pro forma year ended September 30, 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9528"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1630",
+      "tatqa_3358",
+      "tatqa_1727",
+      "tatqa_2480",
+      "tatqa_827",
+      "tatqa_3240",
+      "tatqa_2297",
+      "tatqa_2405",
+      "tatqa_782",
+      "tatqa_1526"
+    ]
+  },
+  {
+    "query_text": "What was the percentage change in the total accrued expenses between 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9767"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2253",
+      "tatqa_2622",
+      "tatqa_978",
+      "tatqa_3298",
+      "tatqa_3191",
+      "tatqa_2621",
+      "tatqa_974",
+      "tatqa_1786",
+      "tatqa_2962",
+      "tatqa_594"
+    ]
+  },
+  {
+    "query_text": "What was the increase in net cash provided by operating activities from 2018 to 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9350"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2955",
+      "tatqa_2945",
+      "tatqa_1316",
+      "tatqa_2718",
+      "tatqa_325",
+      "tatqa_778",
+      "tatqa_220",
+      "tatqa_1798",
+      "tatqa_858",
+      "tatqa_2705"
+    ]
+  },
+  {
+    "query_text": "Which year had the lowest percentage difference in basic and diluted net earnings per share?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9331"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_810",
+      "tatqa_2364",
+      "tatqa_159",
+      "tatqa_586",
+      "tatqa_2246",
+      "tatqa_475",
+      "tatqa_1103",
+      "tatqa_1740",
+      "tatqa_2462",
+      "tatqa_3141"
+    ]
+  },
+  {
+    "query_text": "What is the value of the company's 2023-2024 purchase obligations as a percentage of its total payment due in the 2023-2024 period?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9850"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1065",
+      "tatqa_525",
+      "tatqa_1825",
+      "tatqa_2711",
+      "tatqa_2202",
+      "tatqa_3315",
+      "tatqa_3156",
+      "tatqa_2710",
+      "tatqa_1682",
+      "tatqa_2194"
+    ]
+  },
+  {
+    "query_text": "What was the percentage change in Provisions for post-employment benefits plans (employer’s commitments) in FY2019 from FY2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9337"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1594",
+      "tatqa_3223",
+      "tatqa_3222",
+      "tatqa_1601",
+      "tatqa_1768",
+      "tatqa_3231",
+      "tatqa_37",
+      "tatqa_2776",
+      "tatqa_3232",
+      "tatqa_1128"
+    ]
+  },
+  {
+    "query_text": "What was the percentage change in the Restricted stock unit issuances between 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9818"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_738",
+      "tatqa_2374",
+      "tatqa_2136",
+      "tatqa_1666",
+      "tatqa_788",
+      "tatqa_970",
+      "tatqa_3258",
+      "tatqa_1349",
+      "tatqa_1662",
+      "tatqa_1517"
+    ]
+  },
+  {
+    "query_text": "What was the average income tax benefit for 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9796"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_12",
+      "tatqa_3225",
+      "tatqa_1596",
+      "tatqa_3197",
+      "tatqa_1500",
+      "tatqa_1505",
+      "tatqa_469",
+      "tatqa_2158",
+      "tatqa_967",
+      "tatqa_1578"
+    ]
+  },
+  {
+    "query_text": "What is the average value of raw materials and finished goods in 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9613"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1415",
+      "tatqa_18",
+      "tatqa_2347",
+      "tatqa_1762",
+      "tatqa_1069",
+      "tatqa_1750",
+      "tatqa_3344",
+      "tatqa_3234",
+      "tatqa_1643",
+      "tatqa_1707"
+    ]
+  },
+  {
+    "query_text": "What was the basic net loss per share in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9208"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_270",
+      "tatqa_2267",
+      "tatqa_612",
+      "tatqa_2771",
+      "tatqa_2182",
+      "tatqa_2183",
+      "tatqa_499",
+      "tatqa_2947",
+      "tatqa_1259",
+      "tatqa_1306"
+    ]
+  },
+  {
+    "query_text": "What are the 2 main items measured in this table?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10008"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_223",
+      "tatqa_1936",
+      "tatqa_2091",
+      "tatqa_2065",
+      "tatqa_2313",
+      "tatqa_1128",
+      "tatqa_890",
+      "tatqa_3002",
+      "tatqa_669",
+      "tatqa_2776"
+    ]
+  },
+  {
+    "query_text": "How many percent of the total inventory purchases did Supplier A account for in the year 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10126"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1733",
+      "tatqa_3070",
+      "tatqa_3071",
+      "tatqa_1739",
+      "tatqa_3069",
+      "tatqa_1972",
+      "tatqa_2340",
+      "tatqa_3074",
+      "tatqa_3271",
+      "tatqa_1603"
+    ]
+  },
+  {
+    "query_text": "What are the components factored in total inventories?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9381"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3370",
+      "tatqa_2659",
+      "tatqa_2658",
+      "tatqa_3233",
+      "tatqa_956",
+      "tatqa_1741",
+      "tatqa_3234",
+      "tatqa_18",
+      "tatqa_1750",
+      "tatqa_1603"
+    ]
+  },
+  {
+    "query_text": "What is the company's total operating lease obligations between 2020 to 2022?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9850"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_70",
+      "tatqa_2711",
+      "tatqa_1065",
+      "tatqa_2202",
+      "tatqa_2710",
+      "tatqa_3315",
+      "tatqa_525",
+      "tatqa_1413",
+      "tatqa_1682",
+      "tatqa_108"
+    ]
+  },
+  {
+    "query_text": "What were the RSAs granted in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9300"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1587",
+      "tatqa_1417",
+      "tatqa_1785",
+      "tatqa_1772",
+      "tatqa_3244",
+      "tatqa_2822",
+      "tatqa_444",
+      "tatqa_2904",
+      "tatqa_3349",
+      "tatqa_1159"
+    ]
+  },
+  {
+    "query_text": "What are the number of shares beneficially owned by Brian Kinion and Christopher Lien respectively?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10155"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1737",
+      "tatqa_2517",
+      "tatqa_860",
+      "tatqa_644",
+      "tatqa_2295",
+      "tatqa_2296",
+      "tatqa_1274",
+      "tatqa_2724",
+      "tatqa_353",
+      "tatqa_648"
+    ]
+  },
+  {
+    "query_text": "What was the change in Property and equipment, net in 2018 from 2017?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9662"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1652",
+      "tatqa_987",
+      "tatqa_871",
+      "tatqa_2140",
+      "tatqa_2382",
+      "tatqa_2032",
+      "tatqa_56",
+      "tatqa_1160",
+      "tatqa_2141",
+      "tatqa_446"
+    ]
+  },
+  {
+    "query_text": "What is the Customer Support Revenues of Americas expressed as a percentage of GAAP-based Customer Support Gross Profit for Fiscal year 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9824"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2525",
+      "tatqa_873",
+      "tatqa_2372",
+      "tatqa_736",
+      "tatqa_257",
+      "tatqa_2869",
+      "tatqa_182",
+      "tatqa_2009",
+      "tatqa_1724",
+      "tatqa_3354"
+    ]
+  },
+  {
+    "query_text": "What was the most significant expense in FY18?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9491"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3254",
+      "tatqa_1582",
+      "tatqa_562",
+      "tatqa_1768",
+      "tatqa_1278",
+      "tatqa_3201",
+      "tatqa_223",
+      "tatqa_37",
+      "tatqa_3255",
+      "tatqa_596"
+    ]
+  },
+  {
+    "query_text": "What is the percentage change in off-net APRU between 2017 and 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9275"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_557",
+      "tatqa_717",
+      "tatqa_1462",
+      "tatqa_435",
+      "tatqa_2355",
+      "tatqa_3081",
+      "tatqa_2120",
+      "tatqa_2654",
+      "tatqa_996",
+      "tatqa_2995"
+    ]
+  },
+  {
+    "query_text": "What was the change in the amount of stock options in 2019 from 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9219"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2136",
+      "tatqa_1666",
+      "tatqa_970",
+      "tatqa_788",
+      "tatqa_738",
+      "tatqa_1172",
+      "tatqa_2820",
+      "tatqa_2821",
+      "tatqa_1783",
+      "tatqa_1300"
+    ]
+  },
+  {
+    "query_text": "What is the year with Charges included in discontinued operations?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9549"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_354",
+      "tatqa_2421",
+      "tatqa_44",
+      "tatqa_1776",
+      "tatqa_3032",
+      "tatqa_284",
+      "tatqa_2287",
+      "tatqa_1779",
+      "tatqa_228",
+      "tatqa_231"
+    ]
+  },
+  {
+    "query_text": "What is the increase / (decrease) in the communication figures from 2018 to 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9659"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_501",
+      "tatqa_338",
+      "tatqa_1588",
+      "tatqa_234",
+      "tatqa_1948",
+      "tatqa_718",
+      "tatqa_2356",
+      "tatqa_1183",
+      "tatqa_441",
+      "tatqa_5"
+    ]
+  },
+  {
+    "query_text": "What was the increase / (decrease) in the RSAs granted from 2018 to 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9300"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1587",
+      "tatqa_1417",
+      "tatqa_1785",
+      "tatqa_3244",
+      "tatqa_1772",
+      "tatqa_444",
+      "tatqa_2822",
+      "tatqa_1173",
+      "tatqa_2904",
+      "tatqa_925"
+    ]
+  },
+  {
+    "query_text": "What is the impact of tax on the group share of associates' profits in 2018, in terms of % change?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9552"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3023",
+      "tatqa_2249",
+      "tatqa_3024",
+      "tatqa_1936",
+      "tatqa_223",
+      "tatqa_1610",
+      "tatqa_484",
+      "tatqa_1426",
+      "tatqa_1582",
+      "tatqa_406"
+    ]
+  },
+  {
+    "query_text": "What was the percentage change in Gross deferred income tax assets between 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9345"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2731",
+      "tatqa_2954",
+      "tatqa_2953",
+      "tatqa_1846",
+      "tatqa_2479",
+      "tatqa_3116",
+      "tatqa_2730",
+      "tatqa_823",
+      "tatqa_3115",
+      "tatqa_1089"
+    ]
+  },
+  {
+    "query_text": "What is the value of the 2017 restructuring charges as a percentage of the 2017 total goodwill impairment and restructuring charges?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9642"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1647",
+      "tatqa_1619",
+      "tatqa_2919",
+      "tatqa_2881",
+      "tatqa_2875",
+      "tatqa_439",
+      "tatqa_2571",
+      "tatqa_2416",
+      "tatqa_2715",
+      "tatqa_587"
+    ]
+  },
+  {
+    "query_text": "Which non-returning director has the lowest amount of total compensation?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9989"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1705",
+      "tatqa_3338",
+      "tatqa_2569",
+      "tatqa_2537",
+      "tatqa_2735",
+      "tatqa_87",
+      "tatqa_923",
+      "tatqa_869",
+      "tatqa_129",
+      "tatqa_758"
+    ]
+  },
+  {
+    "query_text": "What is the change in Shipping revenues from Years Ended December 31, 2018 to 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9827"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_319",
+      "tatqa_1440",
+      "tatqa_333",
+      "tatqa_1677",
+      "tatqa_279",
+      "tatqa_1456",
+      "tatqa_1462",
+      "tatqa_1698",
+      "tatqa_3080",
+      "tatqa_2910"
+    ]
+  },
+  {
+    "query_text": "What is the Gross accounts receivables for 2019 and 2018 respectively?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9463"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1616",
+      "tatqa_2344",
+      "tatqa_2165",
+      "tatqa_3219",
+      "tatqa_705",
+      "tatqa_476",
+      "tatqa_957",
+      "tatqa_2208",
+      "tatqa_3252",
+      "tatqa_1520"
+    ]
+  },
+  {
+    "query_text": "What is the average Long-term debt?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9837"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_73",
+      "tatqa_110",
+      "tatqa_580",
+      "tatqa_2243",
+      "tatqa_1801",
+      "tatqa_631",
+      "tatqa_1557",
+      "tatqa_204",
+      "tatqa_1922",
+      "tatqa_184"
+    ]
+  },
+  {
+    "query_text": "What is the percentage change in the total product sales from 2018 to 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9812"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1674",
+      "tatqa_1499",
+      "tatqa_726",
+      "tatqa_2367",
+      "tatqa_3199",
+      "tatqa_2891",
+      "tatqa_639",
+      "tatqa_1715",
+      "tatqa_257",
+      "tatqa_338"
+    ]
+  },
+  {
+    "query_text": "What is the increase / (decrease) in 28 nanometers from 2018 to 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9521"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_338",
+      "tatqa_234",
+      "tatqa_1948",
+      "tatqa_726",
+      "tatqa_2367",
+      "tatqa_501",
+      "tatqa_1588",
+      "tatqa_45",
+      "tatqa_1777",
+      "tatqa_718"
+    ]
+  },
+  {
+    "query_text": "What is the increase/ (decrease) in media revenue from 2017 to 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9617"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1644",
+      "tatqa_501",
+      "tatqa_1162",
+      "tatqa_46",
+      "tatqa_311",
+      "tatqa_1564",
+      "tatqa_1748",
+      "tatqa_3043",
+      "tatqa_1014",
+      "tatqa_100"
+    ]
+  },
+  {
+    "query_text": "How many years did Shares issued under the ESPP exceed $2 million?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9891",
+      "eval_optimized_9891"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_471",
+      "tatqa_1742",
+      "tatqa_4",
+      "tatqa_2554",
+      "tatqa_2839",
+      "tatqa_1720",
+      "tatqa_3309",
+      "tatqa_2841",
+      "tatqa_1273",
+      "tatqa_1587"
+    ]
+  },
+  {
+    "query_text": "What was the Projected benefit obligation in 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9870",
+      "eval_optimized_9870"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2445",
+      "tatqa_2444",
+      "tatqa_3321",
+      "tatqa_2010",
+      "tatqa_2196",
+      "tatqa_2968",
+      "tatqa_658",
+      "tatqa_312",
+      "tatqa_1759",
+      "tatqa_1684"
+    ]
+  },
+  {
+    "query_text": "What is the percentage change in total net sales from 2018 to 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9830",
+      "eval_optimized_9830"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_35",
+      "tatqa_1765",
+      "tatqa_140",
+      "tatqa_1764",
+      "tatqa_950",
+      "tatqa_2282",
+      "tatqa_2996",
+      "tatqa_527",
+      "tatqa_1006",
+      "tatqa_1892"
+    ]
+  },
+  {
+    "query_text": "What is the average revenue from Asia Pacific in 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9198",
+      "eval_optimized_9198"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1748",
+      "tatqa_1953",
+      "tatqa_873",
+      "tatqa_2699",
+      "tatqa_2525",
+      "tatqa_278",
+      "tatqa_1336",
+      "tatqa_2891",
+      "tatqa_211",
+      "tatqa_234"
+    ]
+  },
+  {
+    "query_text": "What was the difference in the gross carrying value between Trade Names and Non-compete agreements?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9784",
+      "eval_optimized_9784"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2684",
+      "tatqa_2935",
+      "tatqa_3303",
+      "tatqa_1032",
+      "tatqa_1670",
+      "tatqa_1101",
+      "tatqa_1439",
+      "tatqa_3064",
+      "tatqa_2195",
+      "tatqa_515"
+    ]
+  },
+  {
+    "query_text": "What was the Restricted stock unit issuances in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9818",
+      "eval_optimized_9818"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_738",
+      "tatqa_2374",
+      "tatqa_788",
+      "tatqa_2136",
+      "tatqa_1666",
+      "tatqa_970",
+      "tatqa_3258",
+      "tatqa_2044",
+      "tatqa_1349",
+      "tatqa_2926"
+    ]
+  },
+  {
+    "query_text": "What was the Change in foreign operations tax exposure reserves in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9296",
+      "eval_optimized_9296"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2731",
+      "tatqa_1089",
+      "tatqa_2730",
+      "tatqa_218",
+      "tatqa_2514",
+      "tatqa_3300",
+      "tatqa_3116",
+      "tatqa_854",
+      "tatqa_2043",
+      "tatqa_3068"
+    ]
+  },
+  {
+    "query_text": "What was the Unlevered free cash flow in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9724",
+      "eval_optimized_9724"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3321",
+      "tatqa_263",
+      "tatqa_2196",
+      "tatqa_1759",
+      "tatqa_3347",
+      "tatqa_2873",
+      "tatqa_3073",
+      "tatqa_517",
+      "tatqa_2088",
+      "tatqa_2010"
+    ]
+  },
+  {
+    "query_text": "How much were software in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9951",
+      "eval_optimized_9951"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_385",
+      "tatqa_2069",
+      "tatqa_1795",
+      "tatqa_3149",
+      "tatqa_3267",
+      "tatqa_2129",
+      "tatqa_1784",
+      "tatqa_3308",
+      "tatqa_2422",
+      "tatqa_2678"
+    ]
+  },
+  {
+    "query_text": "In which years was Inventories calculated?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9381",
+      "eval_optimized_9380"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2658",
+      "tatqa_2659",
+      "tatqa_3370",
+      "tatqa_3233",
+      "tatqa_3344",
+      "tatqa_3234",
+      "tatqa_1750",
+      "tatqa_1741",
+      "tatqa_1012",
+      "tatqa_1762"
+    ]
+  },
+  {
+    "query_text": "What is the percentage of capital expenditures for Bell Wireline out of the BCE capital expenditures in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9286",
+      "eval_optimized_9286"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3043",
+      "tatqa_3204",
+      "tatqa_3207",
+      "tatqa_3208",
+      "tatqa_3206",
+      "tatqa_3205",
+      "tatqa_1564",
+      "tatqa_1402",
+      "tatqa_1584",
+      "tatqa_724"
+    ]
+  },
+  {
+    "query_text": "What are the types of impairment losses under Americas in the Consolidated Statements of Operations?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9662",
+      "eval_optimized_9662"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_893",
+      "tatqa_278",
+      "tatqa_1823",
+      "tatqa_3199",
+      "tatqa_1777",
+      "tatqa_100",
+      "tatqa_2869",
+      "tatqa_45",
+      "tatqa_2547",
+      "tatqa_3139"
+    ]
+  },
+  {
+    "query_text": "What is the percentage change in the payroll and benefits in 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9556",
+      "eval_optimized_9556"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1441",
+      "tatqa_1314",
+      "tatqa_1500",
+      "tatqa_594",
+      "tatqa_607",
+      "tatqa_1188",
+      "tatqa_2262",
+      "tatqa_3261",
+      "tatqa_187",
+      "tatqa_12"
+    ]
+  },
+  {
+    "query_text": "What is the change in net carrying value between 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9408",
+      "eval_optimized_9408"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3022",
+      "tatqa_1378",
+      "tatqa_2684",
+      "tatqa_1101",
+      "tatqa_515",
+      "tatqa_1032",
+      "tatqa_3303",
+      "tatqa_3263",
+      "tatqa_2195",
+      "tatqa_1931"
+    ]
+  },
+  {
+    "query_text": "How many years did the Balance at end of period exceed 30,000,000 ?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9818",
+      "eval_optimized_9818"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2401",
+      "tatqa_2576",
+      "tatqa_931",
+      "tatqa_168",
+      "tatqa_1955",
+      "tatqa_1790",
+      "tatqa_2299",
+      "tatqa_60",
+      "tatqa_410",
+      "tatqa_650"
+    ]
+  },
+  {
+    "query_text": "What was the change in the Projected benefit obligation between 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9870",
+      "eval_optimized_9870"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2445",
+      "tatqa_3321",
+      "tatqa_2196",
+      "tatqa_2968",
+      "tatqa_2444",
+      "tatqa_2010",
+      "tatqa_517",
+      "tatqa_1684",
+      "tatqa_3320",
+      "tatqa_658"
+    ]
+  },
+  {
+    "query_text": "What was the percentage change in the net total between 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9742",
+      "eval_optimized_9742"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2088",
+      "tatqa_2465",
+      "tatqa_3073",
+      "tatqa_2466",
+      "tatqa_2010",
+      "tatqa_2090",
+      "tatqa_2591",
+      "tatqa_2830",
+      "tatqa_3321",
+      "tatqa_3320"
+    ]
+  },
+  {
+    "query_text": "How much did the company decrease its valuation allowance by in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9345",
+      "eval_optimized_9344"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3029",
+      "tatqa_2717",
+      "tatqa_3245",
+      "tatqa_823",
+      "tatqa_2479",
+      "tatqa_1385",
+      "tatqa_1846",
+      "tatqa_1048",
+      "tatqa_458",
+      "tatqa_2158"
+    ]
+  },
+  {
+    "query_text": "What was the Accumulated benefit obligation in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9870",
+      "eval_optimized_9870"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3321",
+      "tatqa_2010",
+      "tatqa_3333",
+      "tatqa_2968",
+      "tatqa_658",
+      "tatqa_1684",
+      "tatqa_312",
+      "tatqa_2444",
+      "tatqa_2445",
+      "tatqa_3320"
+    ]
+  },
+  {
+    "query_text": "What is the percentage change in the net cash from operation activities from 2017 to 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9457",
+      "eval_optimized_9457"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1524",
+      "tatqa_221",
+      "tatqa_2952",
+      "tatqa_1313",
+      "tatqa_1934",
+      "tatqa_1322",
+      "tatqa_1082",
+      "tatqa_3108",
+      "tatqa_564",
+      "tatqa_2725"
+    ]
+  },
+  {
+    "query_text": "What was the amount of  Net unrealized holding gains (losses)  in 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10088",
+      "eval_optimized_10088"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3230",
+      "tatqa_1600",
+      "tatqa_2223",
+      "tatqa_2774",
+      "tatqa_2183",
+      "tatqa_2182",
+      "tatqa_1997",
+      "tatqa_2947",
+      "tatqa_553",
+      "tatqa_3276"
+    ]
+  },
+  {
+    "query_text": "What was the revenue in North America in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9985",
+      "eval_optimized_9983"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3337",
+      "tatqa_2530",
+      "tatqa_3190",
+      "tatqa_2037",
+      "tatqa_2535",
+      "tatqa_126",
+      "tatqa_2531",
+      "tatqa_2810",
+      "tatqa_3296",
+      "tatqa_2907"
+    ]
+  },
+  {
+    "query_text": "What was the change in the revenue from South America between 2017 and 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9985",
+      "eval_optimized_9983"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3337",
+      "tatqa_2530",
+      "tatqa_3296",
+      "tatqa_2531",
+      "tatqa_2016",
+      "tatqa_3190",
+      "tatqa_2535",
+      "tatqa_320",
+      "tatqa_1214",
+      "tatqa_2327"
+    ]
+  },
+  {
+    "query_text": "Which years does the table provide information for the company's property and equipment?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9193",
+      "eval_optimized_9193"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1893",
+      "tatqa_1763",
+      "tatqa_1908",
+      "tatqa_2958",
+      "tatqa_2443",
+      "tatqa_2058",
+      "tatqa_2759",
+      "tatqa_2046",
+      "tatqa_1815",
+      "tatqa_1894"
+    ]
+  },
+  {
+    "query_text": "What was the Expected long-term return on plan assets assumption used in calculating net periodic benefit cost based on?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9354",
+      "eval_optimized_9353"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3226",
+      "tatqa_3227",
+      "tatqa_1277",
+      "tatqa_1797",
+      "tatqa_1962",
+      "tatqa_2005",
+      "tatqa_1598",
+      "tatqa_3101",
+      "tatqa_2663",
+      "tatqa_251"
+    ]
+  },
+  {
+    "query_text": "What was the cash and cash equivalents in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10050",
+      "eval_optimized_10050"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2004",
+      "tatqa_2925",
+      "tatqa_2662",
+      "tatqa_1959",
+      "tatqa_2050",
+      "tatqa_2455",
+      "tatqa_1961",
+      "tatqa_2019",
+      "tatqa_1871",
+      "tatqa_2468"
+    ]
+  },
+  {
+    "query_text": "What is the average deferral of revenues from 2017-2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9171",
+      "eval_optimized_9171"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1264",
+      "tatqa_2909",
+      "tatqa_987",
+      "tatqa_2786",
+      "tatqa_271",
+      "tatqa_922",
+      "tatqa_2568",
+      "tatqa_359",
+      "tatqa_2375",
+      "tatqa_2"
+    ]
+  },
+  {
+    "query_text": "What was the total credit facility in 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_10023",
+      "eval_optimized_10023"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2591",
+      "tatqa_3347",
+      "tatqa_944",
+      "tatqa_1711",
+      "tatqa_2465",
+      "tatqa_1759",
+      "tatqa_578",
+      "tatqa_3333",
+      "tatqa_263",
+      "tatqa_2466"
+    ]
+  },
+  {
+    "query_text": "What was the revenue from Traditional & Other Products for Network Solutions?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9452",
+      "eval_optimized_9452"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_2732",
+      "tatqa_3250",
+      "tatqa_2062",
+      "tatqa_2810",
+      "tatqa_2809",
+      "tatqa_2811",
+      "tatqa_380",
+      "tatqa_2874",
+      "tatqa_3007",
+      "tatqa_3162"
+    ]
+  },
+  {
+    "query_text": "What was the difference between total debt obligations and purchase obligations?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9581",
+      "eval_optimized_9581"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1825",
+      "tatqa_2314",
+      "tatqa_2711",
+      "tatqa_1065",
+      "tatqa_2194",
+      "tatqa_525",
+      "tatqa_3156",
+      "tatqa_2203",
+      "tatqa_2877",
+      "tatqa_550"
+    ]
+  },
+  {
+    "query_text": "What was the net carrying amount before unamortized debt issuance costs in 2018?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9408",
+      "eval_optimized_9408"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_3239",
+      "tatqa_1608",
+      "tatqa_2321",
+      "tatqa_1915",
+      "tatqa_2511",
+      "tatqa_2270",
+      "tatqa_196",
+      "tatqa_676",
+      "tatqa_852",
+      "tatqa_616"
+    ]
+  },
+  {
+    "query_text": "What is the respective revenue from Asia Pacific in 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9198",
+      "eval_optimized_9198"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1748",
+      "tatqa_1953",
+      "tatqa_2525",
+      "tatqa_2699",
+      "tatqa_278",
+      "tatqa_873",
+      "tatqa_1336",
+      "tatqa_2891",
+      "tatqa_1848",
+      "tatqa_234"
+    ]
+  },
+  {
+    "query_text": "What was the change in the provision for doubtful receivables between 2018 and 2019?",
+    "ground_truth_doc_ids": [
+      "eval_optimized_9326",
+      "eval_optimized_9326"
+    ],
+    "retrieved_doc_ids_ranked": [
+      "tatqa_1421",
+      "tatqa_2040",
+      "tatqa_3307",
+      "tatqa_3053",
+      "tatqa_1911",
+      "tatqa_3277",
+      "tatqa_2398",
+      "tatqa_2035",
+      "tatqa_2396",
+      "tatqa_2308"
+    ]
+  }
+]
