@@ -682,30 +682,13 @@ def run_chinese_comparison_test(args):
         from utils.data_loader import load_json_or_jsonl, sample_data
         dataset_full = load_json_or_jsonl(data_path)
 
-        # --- 数据筛选逻辑 ---
-        filtered_dataset = []
-        # 定义你关心的预测类答案模式
-        # 注意：这里我们放宽了对标点的匹配，以增加鲁棒性，但仍确保核心格式
-        target_prediction_pattern = re.compile(r"这个股票的下月最终收益结果是:['‘’](涨|跌)['’],?(上涨|下跌)概率:(极大|较大|中上|一般)[。.]?")
-
-        for item in dataset_full:
-            instruction_content = item.get("instruction", "").strip()
-            answer_content = item.get("answer", "").strip()
-            
-            # 条件1: instruction 为空 (通用问答，如数值抽取、摘要等)
-            # 条件2: instruction 不为空，并且 answer 匹配特定预测模式 (预测类问答)
-            # 这种筛选方式旨在保留所有有意义的评估样本
-            if not instruction_content or target_prediction_pattern.fullmatch(answer_content):
-                filtered_dataset.append(item)
-            else:
-                logger.debug(f"跳过样本 (instruction存在但answer不匹配预测模式): Query='{item.get('query', '')[:50]}...', Answer='{answer_content[:50]}...'")
-        
+        # --- 使用所有数据，不进行筛选 ---
         if sample_size > 0:
-            dataset_to_evaluate = sample_data(filtered_dataset, sample_size, 42)
-            logger.info(f"✅ 筛选并随机采样 {len(dataset_to_evaluate)} 个样本进行评估。")
+            dataset_to_evaluate = sample_data(dataset_full, sample_size, 42)
+            logger.info(f"✅ 随机采样 {len(dataset_to_evaluate)} 个样本进行评估。")
         else:
-            dataset_to_evaluate = filtered_dataset
-            logger.info(f"✅ 筛选后，加载了全部 {len(dataset_to_evaluate)} 个样本进行评估。")
+            dataset_to_evaluate = dataset_full
+            logger.info(f"✅ 加载了全部 {len(dataset_to_evaluate)} 个样本进行评估（无筛选）。")
 
         if not dataset_to_evaluate:
             logger.error("❌ 没有符合条件的样本进行评估，请检查数据集和筛选条件。")
@@ -774,9 +757,10 @@ def run_chinese_comparison_test(args):
         
         # 准备所有任务
         tasks = []
+        positions = {name: idx for idx, name in enumerate(loaded_models.keys())}
         for model_name, loader in loaded_models.items():
             logger.info(f"✅ 准备 {model_name} 评估任务...")
-            tasks.append((model_name, loader, dataset_to_evaluate, template_file_name, args.max_new_tokens, args.do_sample, args.repetition_penalty, args.save_frequency))
+            tasks.append((model_name, loader, dataset_to_evaluate, template_file_name, args.max_new_tokens, args.do_sample, args.repetition_penalty, args.save_frequency, positions[model_name]))
         
         # 使用线程池同时执行所有任务
         with ThreadPoolExecutor(max_workers=len(tasks)) as executor:
@@ -864,7 +848,7 @@ def run_chinese_comparison_test(args):
     logger.info("----------------------------")
 
 
-def evaluate_model_on_dataset(model_name: str, loader: ModelLoader, dataset: List[Dict[str, Any]], template_file_name: str, max_new_tokens: int, do_sample: bool, repetition_penalty: float, save_frequency: int = 10) -> List[Dict[str, Any]]:
+def evaluate_model_on_dataset(model_name: str, loader: ModelLoader, dataset: List[Dict[str, Any]], template_file_name: str, max_new_tokens: int, do_sample: bool, repetition_penalty: float, save_frequency: int = 10, tqdm_position: int = 0) -> List[Dict[str, Any]]:
     """
     在特定数据集上评估单个模型。此函数将在独立的线程中运行。
     """
@@ -872,7 +856,7 @@ def evaluate_model_on_dataset(model_name: str, loader: ModelLoader, dataset: Lis
 
     logger.info(f"\n[线程] 开始评估 {model_name} 在 {loader.device} 上...")
 
-    pbar = tqdm(dataset, desc=f"评估 {model_name} ({loader.device})")
+    pbar = tqdm(dataset, desc=f"评估 {model_name} ({loader.device})", position=tqdm_position)
     for i, item in enumerate(pbar):
         # 基础查询
         query = item.get("generated_question", "") or item.get("query", "") or item.get("question", "")
