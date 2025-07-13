@@ -320,11 +320,11 @@ def is_stock_prediction_query(test_item: Dict[str, Any]) -> bool:
     # 检查instruction字段
     instruction = test_item.get("instruction", "")
     
-    # 只有当instruction等于特定字符串时，才认为是股票预测查询
-    stock_prediction_instruction = "请根据下方提供的该股票相关研报与数据，对该股票的下个月的涨跌，进行预测，请给出明确的答案，\"涨\" 或者 \"跌\"。同时给出这个股票下月的涨跌概率，分别是:极大，较大，中上，一般。"
-    
-    if instruction.strip() == stock_prediction_instruction:
+    # 检测是否为股票预测查询（通过关键词匹配）
+    if "涨跌" in instruction and "预测" in instruction and "涨跌概率" in instruction:
         return True
+    
+    return False
     
     return False
 
