@@ -71,6 +71,10 @@ class DataConfig:
     chinese_data_path: str = "data/alphafin/alphafin_final_clean.json"  # 中文数据路径
     english_data_path: str = "data/unified/tatqa_knowledge_base_combined.jsonl"     # 英文数据路径
     prompt_template_dir: str = "data/prompt_templates"  # prompt模板目录
+    
+    # 语言特定配置
+    chinese_prompt_template: str = "multi_stage_chinese_template_with_fewshot.txt"  # 中文提示模板
+    english_prompt_template: str = "unified_english_template_no_think.txt"  # 英文提示模板
 
 @dataclass
 class ModalityConfig:

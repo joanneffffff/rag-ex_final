@@ -41,8 +41,8 @@ except ImportError:
     print("警告: 多阶段检索系统不可用，将使用传统检索")
     MULTI_STAGE_AVAILABLE = False
 
-def try_load_qwen_reranker(model_name, cache_dir=None):
-    """尝试加载Qwen重排序器，支持GPU 0和CPU回退"""
+def try_load_qwen_reranker(model_name, cache_dir=None, device=None):
+    """尝试加载Qwen重排序器，支持指定设备和回退策略"""
     try:
         import torch
         from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -54,30 +54,36 @@ def try_load_qwen_reranker(model_name, cache_dir=None):
         print(f"尝试使用8bit量化加载QwenReranker...")
         print(f"加载重排序器模型: {model_name}")
         
-        # 首先尝试GPU 0
-        if torch.cuda.is_available() and torch.cuda.device_count() > 0:
-            device = "cuda:0"  # 明确指定GPU 0
-            print(f"- 设备: {device}")
-            print(f"- 缓存目录: {cache_dir}")
-            print(f"- 量化: True (8bit)")
-            print(f"- Flash Attention: False")
-            
+        # 使用指定的设备，如果没有指定则使用GPU 0
+        if device is None:
+            device = "cuda:0"  # 默认使用GPU 0
+        
+        print(f"- 设备: {device}")
+        print(f"- 缓存目录: {cache_dir}")
+        print(f"- 量化: True (8bit)")
+        print(f"- Flash Attention: False")
+        
+        # 检查设备类型
+        if device.startswith("cuda"):
             try:
-                # 检查GPU 0的可用内存
-                gpu_memory = torch.cuda.get_device_properties(0).total_memory
-                allocated_memory = torch.cuda.memory_allocated(0)
+                # 解析GPU ID
+                gpu_id = int(device.split(":")[1]) if ":" in device else 0
+                
+                # 检查GPU内存
+                gpu_memory = torch.cuda.get_device_properties(gpu_id).total_memory
+                allocated_memory = torch.cuda.memory_allocated(gpu_id)
                 free_memory = gpu_memory - allocated_memory
                 
-                print(f"- GPU 0 总内存: {gpu_memory / 1024**3:.1f}GB")
-                print(f"- GPU 0 已用内存: {allocated_memory / 1024**3:.1f}GB")
-                print(f"- GPU 0 可用内存: {free_memory / 1024**3:.1f}GB")
+                print(f"- GPU {gpu_id} 总内存: {gpu_memory / 1024**3:.1f}GB")
+                print(f"- GPU {gpu_id} 已用内存: {allocated_memory / 1024**3:.1f}GB")
+                print(f"- GPU {gpu_id} 可用内存: {free_memory / 1024**3:.1f}GB")
                 
                 # 如果可用内存少于2GB，回退到CPU
                 if free_memory < 2 * 1024**3:  # 2GB
-                    print("- GPU 0 内存不足，回退到CPU")
+                    print(f"- GPU {gpu_id} 内存不足，回退到CPU")
                     device = "cpu"
                 else:
-                    # 尝试在GPU 0上加载
+                    # 尝试在指定GPU上加载
                     tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
                     model = AutoModelForSequenceClassification.from_pretrained(
                         model_name,
@@ -92,13 +98,13 @@ def try_load_qwen_reranker(model_name, cache_dir=None):
                     return QwenReranker(model_name, device=device, cache_dir=cache_dir)
                     
             except Exception as e:
-                print(f"- GPU 0 加载失败: {e}")
+                print(f"- GPU {gpu_id} 加载失败: {e}")
                 print("- 回退到CPU")
                 device = "cpu"
         
         # CPU回退
+        device = "cpu"  # 确保device变量总是有定义
         if device == "cpu" or not torch.cuda.is_available():
-            device = "cpu"
             print(f"- 设备: {device}")
             print(f"- 缓存目录: {cache_dir}")
             print(f"- 量化: False (CPU模式)")
@@ -309,7 +315,8 @@ class OptimizedRagUI:
         if self.enable_reranker:
             self.reranker = try_load_qwen_reranker(
                 model_name=config.reranker.model_name,
-                cache_dir=config.reranker.cache_dir
+                cache_dir=config.reranker.cache_dir,
+                device=config.reranker.device  # 使用配置文件中的设备设置
             )
             if self.reranker is None:
                 print("⚠️ 重排序器加载失败，将禁用重排序功能")
@@ -690,24 +697,29 @@ class OptimizedRagUI:
                     doc_texts.append(doc.content if hasattr(doc, 'content') else str(doc))
                     doc_id_to_original_map[doc_id] = doc  # 使用doc_id映射
             
-            # 使用QwenReranker的rerank方法
-            reranked_items = self.reranker.rerank(
+            # 使用QwenReranker的rerank_with_doc_ids方法
+            doc_ids = []
+            for doc in retrieved_documents:
+                doc_id = getattr(doc.metadata, 'doc_id', None)
+                if doc_id is None:
+                    doc_id = hashlib.md5(doc.content.encode('utf-8')).hexdigest()[:16]
+                doc_ids.append(doc_id)
+            
+            reranked_items = self.reranker.rerank_with_doc_ids(
                 query=question,
                 documents=doc_texts,
-                batch_size=1  # 减小到1以避免GPU内存不足
+                doc_ids=doc_ids,
+                batch_size=self.config.reranker.batch_size  # 使用配置文件中的批处理大小
             )
             
-            # 将重排序结果映射回文档（使用索引位置映射）
-            for i, (doc_text, rerank_score) in enumerate(reranked_items):
-                if i < len(retrieved_documents):
-                    # 使用索引位置获取对应的doc_id
-                    doc_id = getattr(retrieved_documents[i].metadata, 'doc_id', None)
-                    if doc_id is None:
-                        doc_id = hashlib.md5(retrieved_documents[i].content.encode('utf-8')).hexdigest()[:16]
-                    
-                    if doc_id in doc_id_to_original_map:
-                        reranked_docs.append(doc_id_to_original_map[doc_id])
-                        reranked_scores.append(rerank_score)
+            # 将重排序结果映射回文档（reranker直接返回doc_id，无需复杂映射）
+            for doc_text, rerank_score, doc_id in reranked_items:
+                if doc_id in doc_id_to_original_map:
+                    reranked_docs.append(doc_id_to_original_map[doc_id])
+                    reranked_scores.append(rerank_score)
+                    print(f"DEBUG: ✅ 成功映射文档 (doc_id: {doc_id})，重排序分数: {rerank_score:.4f}")
+                else:
+                    print(f"DEBUG: ❌ doc_id不在映射中: {doc_id}")
             
             # 按重排序分数排序
             sorted_pairs = sorted(zip(reranked_docs, reranked_scores), key=lambda x: x[1], reverse=True)
@@ -821,44 +833,44 @@ class OptimizedRagUI:
                 else:
                     prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question}\n\n回答："
         else:
-            # 英文查询：只使用context
+            # 英文查询：使用与comprehensive_evaluation_enhanced_new_1.py相同的逻辑
+            # 移除混合决策，只使用unified_english_template_no_think.txt模板
             try:
-                from xlm.components.prompt_templates.template_loader import template_loader
-                prompt = template_loader.format_template(
-                    "rag_english_template",
-                    context=context_str,
-                    question=question
-                )
-                if prompt is None:
-                    # 回退到简单英文prompt
-                    prompt = f"Context: {context_str}\nQuestion: {question}\nAnswer:"
+                # 导入RAG系统的英文prompt处理函数
+                from xlm.components.rag_system.rag_system import get_final_prompt_messages_english, _convert_messages_to_chatml
+                messages = get_final_prompt_messages_english(context_str, question)
+                prompt = _convert_messages_to_chatml(messages)
+                print(f"使用统一英文模板: unified_english_template_no_think.txt")
             except Exception as e:
                 print(f"英文模板加载失败: {e}，使用简单英文prompt")
                 prompt = f"Context: {context_str}\nQuestion: {question}\nAnswer:"
         
         try:
-            # 根据语言检测结果决定hybrid_decision参数
+            # 直接使用生成器，不进行混合决策
             if is_chinese_query:
-                hybrid_decision = "multi_stage_chinese"
+                # 中文查询使用原有逻辑
+                answer = self.generator.generate_hybrid_answer(
+                    question=question,
+                    table_context="",  # UI中没有分离的上下文
+                    text_context=context_str,
+                    hybrid_decision="multi_stage_chinese"
+                )
             else:
-                # 英文查询：使用混合决策算法
+                # 英文查询：直接使用prompt生成
+                generated_responses = self.generator.generate(texts=[prompt])
+                answer = generated_responses[0] if generated_responses else "Unable to generate answer"
+                
+                # 对英文查询进行答案提取处理
                 try:
-                    # 导入混合决策函数
-                    from comprehensive_evaluation_enhanced import hybrid_decision_enhanced
-                    decision_result = hybrid_decision_enhanced(context_str, question)
-                    hybrid_decision = decision_result['primary_decision']
-                    print(f"🤖 英文混合决策: {hybrid_decision} (置信度: {decision_result['confidence']:.3f})")
+                    from xlm.components.rag_system.rag_system import extract_final_answer_from_tag
+                    extracted_answer = extract_final_answer_from_tag(answer)
+                    if extracted_answer and extracted_answer.strip():
+                        answer = extracted_answer
+                        print(f"答案提取成功: {extracted_answer[:100]}...")
+                    else:
+                        print("答案提取失败，使用原始响应")
                 except Exception as e:
-                    print(f"混合决策失败: {e}，使用默认hybrid")
-                    hybrid_decision = "hybrid"
-            
-            # 使用generate_hybrid_answer方法，传递混合决策参数
-            answer = self.generator.generate_hybrid_answer(
-                question=question,
-                table_context="",  # UI中没有分离的上下文
-                text_context=context_str,
-                hybrid_decision=hybrid_decision
-            )
+                    print(f"答案提取过程出错: {e}，使用原始响应")
         except Exception as e:
             print(f"生成器调用失败: {e}")
             answer = "生成器调用失败"
