@@ -12,7 +12,12 @@ from typing import Dict, Optional
 class PromptTemplateLoader:
     """Prompt模板加载器"""
     
-    def __init__(self, template_dir: str = "data/prompt_templates"):
+    def __init__(self, template_dir: Optional[str] = None):
+        # 如果没有指定模板目录，使用配置中的默认值
+        if template_dir is None:
+            from config.parameters import config
+            template_dir = config.data.prompt_template_dir
+        
         self.template_dir = Path(template_dir)
         self._templates: Dict[str, str] = {}
         self._load_templates()

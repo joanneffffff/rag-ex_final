@@ -47,6 +47,7 @@ def main():
                 ["用友网络2019年的每股经营活动产生的现金流量净额是多少？"],
                 ["首钢股份的业绩表现如何？"],
                 ["钢铁行业发展趋势"],
+                ["富春环保（002479）的最新研究报告显示，国资入主对公司有何影响？"],
                 ["How was internally developed software capitalised?"], # text query
                 ["Which years does the table provide information for net sales by region?"], # table+text query
                 ["What was the total cost for 2019?"] # table query

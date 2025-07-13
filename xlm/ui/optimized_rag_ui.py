@@ -7,13 +7,15 @@ import os
 import sys
 import re
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict, Any
 import gradio as gr
 import numpy as np
 import torch
 import faiss
 from langdetect import detect, LangDetectException
 import hashlib
+import json
+import logging
 
 # Add parent directory to path
 sys.path.append(str(Path(__file__).parent.parent.parent))
@@ -40,6 +42,38 @@ try:
 except ImportError:
     print("警告: 多阶段检索系统不可用，将使用传统检索")
     MULTI_STAGE_AVAILABLE = False
+
+# 设置环境变量
+ENHANCED_ENGLISH_AVAILABLE = True
+
+# 配置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def build_smart_context(summary: str, context: str, query: str) -> str:
+    """
+    智能构建context，使用与chinese_llm_evaluation.py相同的逻辑
+    这个函数负责将原始的 `context` 字符串进行处理，避免过度截断
+    """
+    processed_context = context
+    try:
+        # 尝试将 context 解析为字典，如果是则格式化为可读的JSON
+        # 注意：这里使用 json.loads() 代替 eval() 更安全，但需要先替换单引号为双引号
+        context_data = json.loads(context.replace("'", '"')) 
+        if isinstance(context_data, dict):
+            processed_context = json.dumps(context_data, ensure_ascii=False, indent=2)
+            logger.debug("✅ Context识别为字典字符串并已格式化为JSON。")
+    except (json.JSONDecodeError, TypeError):
+        logger.debug("⚠️ Context非JSON字符串格式，直接使用原始context。")
+        pass
+
+    # 使用与chinese_llm_evaluation.py相同的长度限制：3500字符
+    max_processed_context_length = 3500 # 字符长度，作为粗略限制
+    if len(processed_context) > max_processed_context_length:
+        logger.warning(f"⚠️ 处理后的Context长度过长 ({len(processed_context)}字符)，进行截断。")
+        processed_context = processed_context[:max_processed_context_length] + "..."
+
+    return processed_context
 
 def try_load_qwen_reranker(model_name, cache_dir=None, device=None):
     """尝试加载Qwen重排序器，支持指定设备和回退策略"""
@@ -137,8 +171,8 @@ class OptimizedRagUI:
         enable_reranker: bool = True,
         use_existing_embedding_index: Optional[bool] = None,  # 从config读取，None表示使用默认值
         max_alphafin_chunks: Optional[int] = None,  # 从config读取，None表示使用默认值
-        window_title: str = "RAG System with FAISS",
-        title: str = "RAG System with FAISS",
+        window_title: str = "Financial Explainable RAG System",
+        title: str = "Financial Explainable RAG System",
         examples: Optional[List[List[str]]] = None,
     ):
         # 使用config中的平台感知配置
@@ -174,6 +208,13 @@ class OptimizedRagUI:
         # Create Gradio interface
         self.interface = self._create_interface()
         self.docid2context = self._load_docid2context(self.config.data.chinese_data_path)
+
+    def _build_stock_prediction_instruction(self, question: str) -> str:
+        """
+        构建股票预测的instruction
+        """
+        # 使用与chinese_llm_evaluation.py相同的instruction格式，明确要求输出格式
+        return f"请根据下方提供的该股票相关研报与数据，对该股票的下个月的涨跌，进行预测，请给出明确的答案，\"涨\" 或者 \"跌\"。同时给出这个股票下月的涨跌概率，分别是:极大，较大，中上，一般。\n\n请严格按照以下格式输出：\n这个股票的下月最终收益结果是:'涨/跌',上涨/下跌概率:极大/较大/中上/一般\n\n问题：{question}"
 
     def _load_docid2context(self, data_path):
         import json
@@ -411,6 +452,12 @@ class OptimizedRagUI:
                         interactive=True
                     )
                 with gr.Column(scale=1):
+                    stock_prediction_checkbox = gr.Checkbox(
+                        label="stock prediction (only for chinese query)",
+                        value=False,
+                        interactive=True
+                    )
+                with gr.Column(scale=1):
                     submit_btn = gr.Button("Submit")
             
             # 使用标签页分离显示
@@ -451,7 +498,7 @@ class OptimizedRagUI:
             # 绑定事件
             submit_btn.click(
                 self._process_question,
-                inputs=[question_input, datasource, reranker_checkbox],
+                inputs=[question_input, datasource, reranker_checkbox, stock_prediction_checkbox],
                 outputs=[answer_output, context_html_output]
             )
             
@@ -461,7 +508,8 @@ class OptimizedRagUI:
         self,
         question: str,
         datasource: str,
-        reranker_checkbox: bool
+        reranker_checkbox: bool,
+        stock_prediction_checkbox: bool
     ) -> tuple[str, str]:
         if not question.strip():
             return "请输入问题", ""
@@ -483,24 +531,39 @@ class OptimizedRagUI:
             chinese_chars = sum(1 for char in question if '\u4e00' <= char <= '\u9fff')
             language = 'zh' if chinese_chars > 0 else 'en'
         
-        # 统一使用相同的RAG系统处理
-        return self._unified_rag_processing(question, language, reranker_checkbox)
-    
-    def _unified_rag_processing(self, question: str, language: str, reranker_checkbox: bool) -> tuple[str, str]:
+        # 根据语言和股票预测复选框选择处理方式
+        if language == 'zh':
+            # 所有中文查询都走内置的多阶段检索系统
+            print("🔍 检测到中文查询，使用内置多阶段检索系统...")
+            return self._unified_rag_processing_with_prompt(question, language, reranker_checkbox, stock_prediction_checkbox)
+        else:
+            # 英文查询：使用传统RAG处理
+            return self._unified_rag_processing(question, language, reranker_checkbox, stock_prediction_checkbox)
+
+    def _unified_rag_processing_with_prompt(self, question: str, language: str, reranker_checkbox: bool, stock_prediction_checkbox: bool) -> tuple[str, str]:
         """
-        统一的RAG处理流程 - 中文和英文使用相同的FAISS、重排序器和生成器
+        统一的RAG处理流程 - 支持股票预测prompt切换
         """
         print(f"开始统一RAG检索...")
         print(f"查询: {question}")
         print(f"语言: {language}")
         print(f"使用FAISS: {self.use_faiss}")
         print(f"启用重排序器: {reranker_checkbox}")
+        print(f"股票预测模式: {stock_prediction_checkbox}")
         
-                # 1. 中文查询：关键词提取 -> 元数据过滤 -> FAISS检索 -> chunk重排序
+        # 确定生成用的prompt
+        if stock_prediction_checkbox:
+            generation_prompt = "请根据下方提供的该股票相关研报与数据，对该股票的下个月的涨跌，进行预测，请给出明确的答案，\"涨\" 或者 \"跌\"。同时给出这个股票下月的涨跌概率，分别是:极大，较大，中上，一般。\n\n请严格按照以下格式输出：\n这个股票的下月最终收益结果是:'涨/跌',上涨/下跌概率:极大/较大/中上/一般"
+            print(f"🔮 股票预测模式激活，生成prompt: {generation_prompt[:100]}...")
+        else:
+            generation_prompt = question
+            print(f"📝 使用原始query作为生成prompt")
+        
+        # 1. 中文查询：关键词提取 -> 元数据过滤 -> FAISS检索 -> chunk重排序
         if language == 'zh' and self.chinese_retrieval_system:
             print("检测到中文查询，尝试使用元数据过滤...")
             try:
-                # 1.1 提取关键词
+                # 1.1 提取关键词（使用原始query）
                 company_name, stock_code = extract_stock_info_with_mapping(question)
                 report_date = extract_report_date(question)
                 if company_name:
@@ -521,11 +584,11 @@ class OptimizedRagUI:
                 if candidate_indices:
                     print(f"元数据过滤成功，找到 {len(candidate_indices)} 个候选文档")
                     
-                    # 1.3 使用已有的FAISS索引在过滤后的文档中进行检索
+                    # 1.3 使用已有的FAISS索引在过滤后的文档中进行检索（使用原始query）
                     faiss_results = self.chinese_retrieval_system.faiss_search(
                         query=question,
                         candidate_indices=candidate_indices,
-                        top_k=self.config.retriever.retrieval_top_k  # 使用配置的检索数量
+                        top_k=self.config.retriever.retrieval_top_k
                     )
                     
                     if faiss_results:
@@ -548,59 +611,51 @@ class OptimizedRagUI:
                                         author="",
                                         language="chinese",
                                         doc_id=str(original_doc_id),
-                                        origin_doc_id=str(original_doc_id)  # 确保origin_doc_id也使用原始doc_id
+                                        origin_doc_id=str(original_doc_id)
                                     )
                                 )
                                 unique_docs.append((doc, faiss_score))
                         
-                        # 1.5 对chunk应用重排序器
+                        # 1.5 对chunk应用重排序器（使用原始query）
                         if reranker_checkbox and self.reranker:
                             print("对chunk应用重排序器...")
                             reranked_docs = []
                             reranked_scores = []
                             
-                            # 提取文档内容（中文数据：summary + context，英文数据：context）
+                            # 提取文档内容
                             doc_texts = []
-                            doc_id_to_original_map = {}  # 使用doc_id进行映射
+                            doc_id_to_original_map = {}
                             for doc, _ in unique_docs:
-                                # 获取doc_id
                                 doc_id = getattr(doc.metadata, 'doc_id', None)
                                 if doc_id is None:
-                                    # 如果没有doc_id，使用content的hash作为唯一标识
                                     doc_id = hashlib.md5(doc.content.encode('utf-8')).hexdigest()[:16]
                                 
                                 if hasattr(doc, 'metadata') and hasattr(doc.metadata, 'language') and doc.metadata.language == 'chinese':
-                                    # 中文数据：尝试组合summary和context
                                     summary = ""
                                     if hasattr(doc.metadata, 'summary') and doc.metadata.summary:
                                         summary = doc.metadata.summary
                                     else:
-                                        # 如果没有summary，使用context的前200字符作为summary
                                         summary = doc.content[:200] + "..." if len(doc.content) > 200 else doc.content
                                     
-                                    # 组合summary和context，避免过长
                                     combined_text = f"摘要：{summary}\n\n详细内容：{doc.content}"
-                                    # 限制总长度，避免超出重排序器的token限制
-                                    if len(combined_text) > 4000:  # 假设重排序器限制为4000字符
+                                    if len(combined_text) > 4000:
                                         combined_text = f"摘要：{summary}\n\n详细内容：{doc.content[:3500]}..."
                                     doc_texts.append(combined_text)
-                                    doc_id_to_original_map[doc_id] = doc  # 使用doc_id映射
+                                    doc_id_to_original_map[doc_id] = doc
                                 else:
-                                    # 英文数据：只使用context
                                     doc_texts.append(doc.content)
-                                    doc_id_to_original_map[doc_id] = doc  # 使用doc_id映射
+                                    doc_id_to_original_map[doc_id] = doc
                             
-                            # 使用QwenReranker的rerank方法
+                            # 使用原始query进行重排序
                             reranked_items = self.reranker.rerank(
                                 query=question,
                                 documents=doc_texts,
                                 batch_size=4
                             )
                             
-                            # 将重排序结果映射回文档（使用索引位置映射）
+                            # 将重排序结果映射回文档
                             for i, (doc_text, rerank_score) in enumerate(reranked_items):
                                 if i < len(unique_docs):
-                                    # 使用索引位置获取对应的doc_id
                                     doc_id = getattr(unique_docs[i][0].metadata, 'doc_id', None)
                                     if doc_id is None:
                                         doc_id = hashlib.md5(unique_docs[i][0].content.encode('utf-8')).hexdigest()[:16]
@@ -620,8 +675,8 @@ class OptimizedRagUI:
                             print("跳过重排序器...")
                             unique_docs = unique_docs[:10]
                         
-                        # 1.6 使用chunk生成答案
-                        answer = self._generate_answer_with_context(question, unique_docs)
+                        # 1.6 使用generation_prompt生成答案
+                        answer = self._generate_answer_with_context(generation_prompt, unique_docs, stock_prediction_checkbox)
                         return self._format_and_return_result(answer, unique_docs, reranker_checkbox, "中文完整流程")
                     else:
                         print("FAISS检索未找到相关文档，回退到统一FAISS检索...")
@@ -630,6 +685,128 @@ class OptimizedRagUI:
                     
             except Exception as e:
                 print(f"中文处理流程失败: {e}，回退到统一RAG处理")
+        
+        # 2. 使用统一的检索器进行FAISS检索
+        retrieval_result = self.retriever.retrieve(
+            text=question, 
+            top_k=self.config.retriever.retrieval_top_k,
+            return_scores=True,
+            language=language
+        )
+        
+        # 处理返回结果
+        if isinstance(retrieval_result, tuple):
+            retrieved_documents, retriever_scores = retrieval_result
+        else:
+            retrieved_documents = retrieval_result
+            retriever_scores = [1.0] * len(retrieved_documents)
+        
+        print(f"FAISS召回数量: {len(retrieved_documents)}")
+        if not retrieved_documents:
+            return "未找到相关文档", ""
+        
+        # 3. 可选的重排序（如果启用）
+        if reranker_checkbox and self.reranker:
+            print(f"应用重排序器... 输入数量: {len(retrieved_documents)}")
+            reranked_docs = []
+            reranked_scores = []
+            
+            # 检测查询语言
+            try:
+                from langdetect import detect
+                query_language = detect(question)
+                is_chinese_query = query_language.startswith('zh')
+            except:
+                is_chinese_query = any('\u4e00' <= char <= '\u9fff' for char in question)
+            
+            # 提取文档内容
+            doc_texts = []
+            doc_id_to_original_map = {}
+            for doc in retrieved_documents:
+                doc_id = getattr(doc.metadata, 'doc_id', None)
+                if doc_id is None:
+                    doc_id = hashlib.md5(doc.content.encode('utf-8')).hexdigest()[:16]
+                
+                if is_chinese_query and hasattr(doc, 'metadata') and hasattr(doc.metadata, 'language') and doc.metadata.language == 'chinese':
+                    summary = ""
+                    if hasattr(doc.metadata, 'summary') and doc.metadata.summary:
+                        summary = doc.metadata.summary
+                    else:
+                        summary = doc.content[:200] + "..." if len(doc.content) > 200 else doc.content
+                    
+                    combined_text = f"摘要：{summary}\n\n详细内容：{doc.content}"
+                    if len(combined_text) > 4000:
+                        combined_text = f"摘要：{summary}\n\n详细内容：{doc.content[:3500]}..."
+                    doc_texts.append(combined_text)
+                    doc_id_to_original_map[doc_id] = doc
+                else:
+                    doc_texts.append(doc.content)
+                    doc_id_to_original_map[doc_id] = doc
+            
+            # 使用原始query进行重排序
+            reranked_items = self.reranker.rerank(
+                query=question,
+                documents=doc_texts,
+                batch_size=4
+            )
+            
+            # 将重排序结果映射回文档
+            for i, (doc_text, rerank_score) in enumerate(reranked_items):
+                if i < len(retrieved_documents):
+                    doc_id = getattr(retrieved_documents[i].metadata, 'doc_id', None)
+                    if doc_id is None:
+                        doc_id = hashlib.md5(retrieved_documents[i].content.encode('utf-8')).hexdigest()[:16]
+                    
+                    if doc_id in doc_id_to_original_map:
+                        reranked_docs.append(doc_id_to_original_map[doc_id])
+                        reranked_scores.append(rerank_score)
+            
+            try:
+                sorted_pairs = sorted(zip(reranked_docs, reranked_scores), key=lambda x: x[1], reverse=True)
+                retrieved_documents = [doc for doc, _ in sorted_pairs[:self.config.retriever.rerank_top_k]]
+                retriever_scores = [score for _, score in sorted_pairs[:self.config.retriever.rerank_top_k]]
+                print(f"重排序完成，保留前 {len(retrieved_documents)} 个文档")
+            except Exception as e:
+                print(f"重排序异常: {e}")
+        
+        # 4. 去重处理
+        unique_docs = []
+        seen_hashes = set()
+        
+        for doc, score in zip(retrieved_documents, retriever_scores):
+            if hasattr(doc, 'content'):
+                content = doc.content
+            else:
+                content = str(doc)
+            h = hashlib.md5(content.encode('utf-8')).hexdigest()
+            if h not in seen_hashes:
+                unique_docs.append((doc, score))
+                seen_hashes.add(h)
+            if len(unique_docs) >= self.config.retriever.rerank_top_k:
+                break
+        
+        # 5. 使用generation_prompt生成答案
+        answer = self._generate_answer_with_context(generation_prompt, unique_docs, stock_prediction_checkbox)
+        
+        # 6. 打印结果并返回
+        return self._format_and_return_result(answer, unique_docs, reranker_checkbox, "统一RAG")
+    
+    def _unified_rag_processing(self, question: str, language: str, reranker_checkbox: bool, stock_prediction_checkbox: bool = False) -> tuple[str, str]:
+        """
+        统一的RAG处理流程 - 中文和英文使用相同的FAISS、重排序器和生成器
+        """
+        print(f"开始统一RAG检索...")
+        print(f"查询: {question}")
+        print(f"语言: {language}")
+        print(f"使用FAISS: {self.use_faiss}")
+        print(f"启用重排序器: {reranker_checkbox}")
+
+        
+        # 英文查询专用处理流程
+        if language == 'zh':
+            print("检测到中文查询，但此系统仅支持英文查询，回退到统一RAG处理")
+        
+        # 2. 使用统一的检索器进行FAISS检索
         
         # 2. 使用统一的检索器进行FAISS检索
         # 中文使用summary，英文使用chunk
@@ -657,14 +834,7 @@ class OptimizedRagUI:
             reranked_docs = []
             reranked_scores = []
             
-            # 检测查询语言
-            try:
-                from langdetect import detect
-                query_language = detect(question)
-                is_chinese_query = query_language.startswith('zh')
-            except:
-                # 如果语言检测失败，根据查询内容判断
-                is_chinese_query = any('\u4e00' <= char <= '\u9fff' for char in question)
+
             
             # 提取文档内容（只有中文查询使用智能内容选择）
             doc_texts = []
@@ -676,26 +846,9 @@ class OptimizedRagUI:
                     # 如果没有doc_id，使用content的hash作为唯一标识
                     doc_id = hashlib.md5(doc.content.encode('utf-8')).hexdigest()[:16]
                 
-                if is_chinese_query and hasattr(doc, 'metadata') and hasattr(doc.metadata, 'language') and doc.metadata.language == 'chinese':
-                    # 中文数据：尝试组合summary和context
-                    summary = ""
-                    if hasattr(doc.metadata, 'summary') and doc.metadata.summary:
-                        summary = doc.metadata.summary
-                    else:
-                        # 如果没有summary，使用context的前200字符作为summary
-                        summary = doc.content[:200] + "..." if len(doc.content) > 200 else doc.content
-                    
-                    # 组合summary和context，避免过长
-                    combined_text = f"摘要：{summary}\n\n详细内容：{doc.content}"
-                    # 限制总长度，避免超出重排序器的token限制
-                    if len(combined_text) > 4000:  # 假设重排序器限制为4000字符
-                        combined_text = f"摘要：{summary}\n\n详细内容：{doc.content[:3500]}..."
-                    doc_texts.append(combined_text)
-                    doc_id_to_original_map[doc_id] = doc  # 使用doc_id映射
-                else:
-                    # 英文数据或非中文数据：只使用context
-                    doc_texts.append(doc.content if hasattr(doc, 'content') else str(doc))
-                    doc_id_to_original_map[doc_id] = doc  # 使用doc_id映射
+                # 英文数据：只使用context
+                doc_texts.append(doc.content if hasattr(doc, 'content') else str(doc))
+                doc_id_to_original_map[doc_id] = doc  # 使用doc_id映射
             
             # 使用QwenReranker的rerank_with_doc_ids方法
             doc_ids = []
@@ -746,12 +899,12 @@ class OptimizedRagUI:
                 break
         
         # 5. 使用统一的生成器生成答案
-        answer = self._generate_answer_with_context(question, unique_docs)
+        answer = self._generate_answer_with_context(question, unique_docs, stock_prediction_checkbox)
         
         # 6. 打印结果并返回
         return self._format_and_return_result(answer, unique_docs, reranker_checkbox, "统一RAG")
     
-    def _generate_answer_with_context(self, question: str, unique_docs: List[Tuple[DocumentWithMetadata, float]]) -> str:
+    def _generate_answer_with_context(self, question: str, unique_docs: List[Tuple[DocumentWithMetadata, float]], stock_prediction_checkbox: bool = False) -> str:
         """使用上下文生成答案"""
         # 构建上下文和提取摘要
         context_parts = []
@@ -787,28 +940,36 @@ class OptimizedRagUI:
                         summary = doc.metadata.summary
                     else:
                         # 如果没有summary，使用context的前200字符作为summary
-                        summary = content[:200] + "..." if len(content) > 200 else content
+                        summary = doc.content[:200] + "..." if len(doc.content) > 200 else doc.content
                     
-                    # 组合summary和context，避免过长
+                    # 使用build_smart_context处理上下文，避免过度截断
                     combined_text = f"摘要：{summary}\n\n详细内容：{content}"
-                    # 限制总长度，避免超出prompt的token限制
-                    if len(combined_text) > 4000:  # 假设prompt限制为4000字符
-                        combined_text = f"摘要：{summary}\n\n详细内容：{content[:3500]}..."
+                    processed_context = build_smart_context(summary, combined_text, question)
                     
-                    context_parts.append(combined_text)
+                    context_parts.append(processed_context)
                     summary_parts.append(summary)
                 else:
                     # 非中文数据：只使用context
-                    context_parts.append(content)
+                    processed_context = build_smart_context("", content, question)
+                    context_parts.append(processed_context)
             else:
                 # 英文查询：只使用context
-                context_parts.append(content)
+                processed_context = build_smart_context("", content, question)
+                context_parts.append(processed_context)
         
         context_str = "\n\n".join(context_parts)
         summary_str = "\n\n".join(summary_parts) if summary_parts else None
         
         # 使用生成器生成答案
         print("使用生成器生成答案...")
+        
+        # 确定生成用的prompt
+        if stock_prediction_checkbox and is_chinese_query:
+            question_for_prompt = "请根据下方提供的该股票相关研报与数据，对该股票的下个月的涨跌，进行预测，请给出明确的答案，\"涨\" 或者 \"跌\"。同时给出这个股票下月的涨跌概率，分别是:极大，较大，中上，一般。\n\n请严格按照以下格式输出：\n这个股票的下月最终收益结果是:'涨/跌',上涨/下跌概率:极大/较大/中上/一般"
+            print(f"🔮 股票预测模式激活，生成prompt使用instruction: {question_for_prompt[:100]}...")
+        else:
+            question_for_prompt = question
+            print(f"📝 使用原始query作为生成prompt")
         
         if is_chinese_query:
             # 中文查询：使用中文prompt模板，同时提供summary和context
@@ -818,43 +979,45 @@ class OptimizedRagUI:
                     "multi_stage_chinese_template",
                     summary=summary_str if summary_str else "无摘要信息",
                     context=context_str,
-                    query=question
+                    query=question_for_prompt
                 )
                 if prompt is None:
                     # 回退到简单中文prompt
                     if summary_str:
-                        prompt = f"摘要：{summary_str}\n\n完整上下文：{context_str}\n\n问题：{question}\n\n回答："
+                        prompt = f"摘要：{summary_str}\n\n完整上下文：{context_str}\n\n问题：{question_for_prompt}\n\n回答："
                     else:
-                        prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question}\n\n回答："
+                        prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question_for_prompt}\n\n回答："
             except Exception as e:
                 print(f"中文模板加载失败: {e}，使用简单中文prompt")
                 if summary_str:
-                    prompt = f"摘要：{summary_str}\n\n完整上下文：{context_str}\n\n问题：{question}\n\n回答："
+                    prompt = f"摘要：{summary_str}\n\n完整上下文：{context_str}\n\n问题：{question_for_prompt}\n\n回答："
                 else:
-                    prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question}\n\n回答："
+                    prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question_for_prompt}\n\n回答："
         else:
-            # 英文查询：使用与comprehensive_evaluation_enhanced_new_1.py相同的逻辑
-            # 移除混合决策，只使用unified_english_template_no_think.txt模板
+            # 英文查询：使用配置的英文模板
             try:
                 # 导入RAG系统的英文prompt处理函数
                 from xlm.components.rag_system.rag_system import get_final_prompt_messages_english, _convert_messages_to_chatml
-                messages = get_final_prompt_messages_english(context_str, question)
+                
+                # 使用配置的英文模板
+                english_template = getattr(self.config.data, 'english_prompt_template', 'unified_english_template_no_think.txt')
+                messages = get_final_prompt_messages_english(context_str, question_for_prompt, english_template)
                 prompt = _convert_messages_to_chatml(messages)
-                print(f"使用统一英文模板: unified_english_template_no_think.txt")
+                print(f"使用配置的英文模板: {english_template}")
             except Exception as e:
                 print(f"英文模板加载失败: {e}，使用简单英文prompt")
-                prompt = f"Context: {context_str}\nQuestion: {question}\nAnswer:"
+                prompt = f"Context: {context_str}\nQuestion: {question_for_prompt}\nAnswer:"
         
         try:
             # 直接使用生成器，不进行混合决策
             if is_chinese_query:
-                # 中文查询使用原有逻辑
-                answer = self.generator.generate_hybrid_answer(
-                    question=question,
-                    table_context="",  # UI中没有分离的上下文
-                    text_context=context_str,
-                    hybrid_decision="multi_stage_chinese"
-                )
+                # 中文查询使用配置的中文模板
+                chinese_template = getattr(self.config.data, 'chinese_prompt_template', 'multi_stage_chinese_template_with_fewshot.txt')
+                print(f"使用配置的中文模板: {chinese_template}")
+                
+                # 中文查询：直接使用prompt生成
+                generated_responses = self.generator.generate(texts=[prompt])
+                answer = generated_responses[0] if generated_responses else "Unable to generate answer"
             else:
                 # 英文查询：直接使用prompt生成
                 generated_responses = self.generator.generate(texts=[prompt])
@@ -1103,7 +1266,7 @@ class OptimizedRagUI:
             html_parts.append(f"""
             <div class='content-section'>
                 <div class='header'>
-                    <strong style='color: #333;'>文档 {i+1}</strong>
+                    <strong style='color: #333;'>Document {i+1}</strong>
                     <span class='score'>score: {score:.4f}</span>
                 </div>
                 <div class='short-content' id='short_{i}'>

@@ -7,17 +7,19 @@ import os
 import sys
 import re
 import hashlib
+import json
+import logging
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict, Any
 import gradio as gr
 import numpy as np
 import torch
 import faiss
 from langdetect import detect, LangDetectException
 
-# 添加项目根目录到路径
+# 添加项目根目录到Python路径
 project_root = Path(__file__).parent.parent.parent
-sys.path.append(str(project_root))
+sys.path.insert(0, str(project_root))
 
 from xlm.dto.dto import DocumentWithMetadata, DocumentMetadata, RagOutput
 from xlm.components.rag_system.rag_system import RagSystem
@@ -27,7 +29,7 @@ from xlm.components.retriever.reranker import QwenReranker
 from xlm.utils.visualizer import Visualizer
 from xlm.registry.retriever import load_enhanced_retriever
 from xlm.registry.generator import load_generator
-from config.parameters import Config, EncoderConfig, RetrieverConfig, ModalityConfig, EMBEDDING_CACHE_DIR, RERANKER_CACHE_DIR
+from config.parameters import Config, EncoderConfig, RetrieverConfig, ModalityConfig, EMBEDDING_CACHE_DIR, RERANKER_CACHE_DIR, config
 from xlm.components.prompt_templates.template_loader import template_loader
 from xlm.utils.stock_info_extractor import extract_stock_info, extract_stock_info_with_mapping, extract_report_date
 
@@ -38,6 +40,127 @@ try:
 except ImportError:
     print("警告: 多阶段检索系统不可用，将使用传统检索")
     MULTI_STAGE_AVAILABLE = False
+
+# 配置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def build_smart_context(summary: str, context: str, query: str) -> str:
+    """
+    智能构建context，使用与chinese_llm_evaluation.py相同的逻辑
+    这个函数负责将原始的 `context` 字符串进行处理，避免过度截断
+    """
+    processed_context = context
+    try:
+        # 尝试将 context 解析为字典，如果是则格式化为可读的JSON
+        # 注意：这里使用 json.loads() 代替 eval() 更安全，但需要先替换单引号为双引号
+        context_data = json.loads(context.replace("'", '"')) 
+        if isinstance(context_data, dict):
+            processed_context = json.dumps(context_data, ensure_ascii=False, indent=2)
+            logger.debug("✅ Context识别为字典字符串并已格式化为JSON。")
+    except (json.JSONDecodeError, TypeError):
+        logger.debug("⚠️ Context非JSON字符串格式，直接使用原始context。")
+        pass
+
+    # 使用与chinese_llm_evaluation.py相同的长度限制：3500字符
+    max_processed_context_length = 3500 # 字符长度，作为粗略限制
+    if len(processed_context) > max_processed_context_length:
+        logger.warning(f"⚠️ 处理后的Context长度过长 ({len(processed_context)}字符)，进行截断。")
+        processed_context = processed_context[:max_processed_context_length] + "..."
+
+    return processed_context
+
+def _load_template_content_from_file(template_file_name: str) -> str:
+    """
+    从文件加载模板内容
+    """
+    template_path = Path("data/prompt_templates") / template_file_name
+    if not template_path.exists():
+        logger.error(f"❌ 模板文件不存在: {template_path}")
+        return ""
+    
+    try:
+        with open(template_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    except Exception as e:
+        logger.error(f"❌ 读取模板文件失败: {e}")
+        return ""
+
+def get_messages_for_test(summary: str, context: str, query: str, 
+                          template_file_name: str = "multi_stage_chinese_template_with_fewshot.txt") -> List[Dict[str, str]]:
+    """
+    构建用于测试的 messages 列表，从指定模板文件加载内容，并将 item_instruction 融入 Prompt。
+    Args:
+        summary (str): LLM Qwen2-7B 生成的摘要。
+        context (str): 完整上下文（已包含摘要）。
+        query (str): 用户问题。
+        template_file_name (str): 要加载的模板文件名。
+    Returns:
+        List[Dict[str, str]]: 构建好的 messages 列表。
+    """
+    template_full_string = _load_template_content_from_file(template_file_name)
+
+    messages = []
+    # 使用正则表达式分割所有部分，并保留分隔符内容
+    parts = re.split(r'(===SYSTEM===|===USER===|===ASSISTANT===)', template_full_string, flags=re.DOTALL)
+
+    # 移除第一个空字符串（如果存在）和多余的空白
+    parts = [p.strip() for p in parts if p.strip()]
+
+    current_role = None
+    current_content = []
+
+    for part in parts:
+        if part in ["===SYSTEM===", "===USER===", "===ASSISTANT==="]:
+            if current_role is not None:
+                messages.append({"role": current_role.lower().replace("===", ""), "content": "\n".join(current_content).strip()})
+            current_role = part
+            current_content = []
+        else:
+            current_content.append(part)
+
+    # 添加最后一个部分的 message
+    if current_role is not None:
+        messages.append({"role": current_role.lower().replace("===", ""), "content": "\n".join(current_content).strip()})
+
+    # 替换占位符
+    for message in messages:
+        if message["role"] == "user":
+            modified_content = message["content"]
+            modified_content = modified_content.replace('{query}', query)
+            modified_content = modified_content.replace('{summary}', summary)
+            modified_content = modified_content.replace('{context}', context)
+            message["content"] = modified_content
+
+    logger.debug(f"构建的 messages: {messages}")
+    return messages
+
+def _convert_messages_to_chatml(messages: List[Dict[str, str]]) -> str:
+    """
+    将 messages 列表转换为 Fin-R1 (Qwen2.5 based) 期望的ChatML格式字符串。
+    Qwen系列标准应该是 `im_end`
+    """
+    if not messages:
+        return ""
+
+    formatted_prompt = ""
+    for message in messages:
+        role = message.get("role", "")
+        content = message.get("content", "")
+
+        if role == "system":
+            formatted_prompt += f"<|im_start|>system\n{content.strip()}<|im_end|>\n"
+        elif role == "user":
+            formatted_prompt += f"<|im_start|>user\n{content.strip()}<|im_end|>\n"
+        elif role == "assistant":
+            # 这里的 assistant 角色通常是 Few-shot 示例的一部分
+            formatted_prompt += f"<|im_start|>assistant\n{content.strip()}<|im_end|>\n"
+
+    # 在最后追加一个 <|im_start|>assistant\n，表示希望模型开始生成新的 assistant 回复
+    formatted_prompt += "<|im_start|>assistant\n"
+
+    logger.debug(f"转换后的 ChatML Prompt (前500字符):\n{formatted_prompt[:500]}...")
+    return formatted_prompt
 
 def try_load_qwen_reranker(model_name, cache_dir=None):
     """尝试加载Qwen重排序器，支持GPU 0和CPU回退"""
@@ -270,6 +393,12 @@ class OptimizedRagUIWithMultiStage:
                         interactive=True
                     )
                 with gr.Column(scale=1):
+                    stock_prediction_checkbox = gr.Checkbox(
+                        label="stock prediction (only for chinese query)",
+                        value=False,
+                        interactive=True
+                    )
+                with gr.Column(scale=1):
                     submit_btn = gr.Button("Submit")
             
             # 使用标签页分离显示
@@ -302,7 +431,7 @@ class OptimizedRagUIWithMultiStage:
             # 绑定事件
             submit_btn.click(
                 self._process_question,
-                inputs=[question_input, datasource, reranker_checkbox],
+                inputs=[question_input, datasource, reranker_checkbox, stock_prediction_checkbox],
                 outputs=[answer_output, context_output]
             )
             
@@ -312,10 +441,11 @@ class OptimizedRagUIWithMultiStage:
         self,
         question: str,
         datasource: str,
-        reranker_checkbox: bool
+        reranker_checkbox: bool,
+        stock_prediction_checkbox: bool
     ) -> tuple[str, List[List[str]]]:
         if not question.strip():
-            return "请输入问题", []
+            return "please input your question", []
         
         # 检测语言
         try:
@@ -324,6 +454,10 @@ class OptimizedRagUIWithMultiStage:
         except:
             language = 'en'
         
+        # 股票预测模式处理
+        if stock_prediction_checkbox and language == 'zh':
+            return self._process_stock_prediction(question, reranker_checkbox)
+        
         # 根据语言选择检索系统
         if language == 'zh' and self.chinese_retrieval_system:
             return self._process_chinese_with_multi_stage(question, reranker_checkbox)
@@ -331,6 +465,152 @@ class OptimizedRagUIWithMultiStage:
             return self._process_english_with_multi_stage(question, reranker_checkbox)
         else:
             return self._fallback_retrieval(question, language)
+    
+    def _process_stock_prediction(self, question: str, reranker_checkbox: bool) -> tuple[str, List[List[str]]]:
+        """
+        处理股票预测模式 - 仅适用于中文查询
+        检索使用原始query，生成使用instruction
+        """
+        print(f"🔍 [股票预测模式] 开始处理...")
+        print(f"📝 [股票预测模式] 原始查询: '{question}'")
+        
+        # 构建股票预测的instruction
+        instruction = self._build_stock_prediction_instruction(question)
+        print(f"📋 [股票预测模式] 生成的instruction:")
+        print(f"   {instruction}")
+        print(f"🔄 [股票预测模式] 查询转换完成:")
+        print(f"   - 检索使用: '{question}'")
+        print(f"   - 生成使用: '{instruction[:100]}{'...' if len(instruction) > 100 else ''}'")
+        
+        # 使用原始query进行检索，instruction用于生成
+        return self._process_chinese_with_multi_stage_with_instruction(question, instruction, reranker_checkbox)
+    
+    def _process_chinese_with_multi_stage_with_instruction(self, query: str, instruction: str, reranker_checkbox: bool) -> tuple[str, List[List[str]]]:
+        """
+        使用多阶段检索系统处理中文查询（分离模式）
+        使用query进行检索，instruction进行生成
+        """
+        print(f"🚀 [多阶段分离模式] 开始处理...")
+        print(f"🔍 [多阶段分离模式] 检索查询: '{query}'")
+        print(f"📝 [多阶段分离模式] 生成instruction: '{instruction[:100]}{'...' if len(instruction) > 100 else ''}'")
+        print(f"📊 [多阶段分离模式] 处理策略:")
+        print(f"   - 检索阶段: 使用原始query '{query}' 进行文档检索")
+        print(f"   - 生成阶段: 使用instruction进行答案生成")
+        
+        if not self.chinese_retrieval_system:
+            return self._fallback_retrieval(query, 'zh')
+        
+        try:
+            print(f"🔍 [多阶段分离模式] 开始中文多阶段检索...")
+            company_name, stock_code = extract_stock_info_with_mapping(query)
+            report_date = extract_report_date(query)
+            print(f"🏢 [多阶段分离模式] 公司名称: {company_name}")
+            print(f"📈 [多阶段分离模式] 股票代码: {stock_code}")
+            print(f"📅 [多阶段分离模式] 报告日期: {report_date}")
+            
+            # 使用query进行检索
+            results = self.chinese_retrieval_system.search(
+                query=query,
+                company_name=company_name,
+                stock_code=stock_code,
+                report_date=report_date,
+                top_k=self.config.retriever.rerank_top_k
+            )
+            
+            # 转换为DocumentWithMetadata格式
+            retrieved_documents = []
+            retriever_scores = []
+            
+            # 检查results的格式
+            print(f"📊 [多阶段分离模式] 检索结果类型: {type(results)}")
+            if isinstance(results, dict) and 'retrieved_documents' in results:
+                documents = results['retrieved_documents']
+                print(f"📄 [多阶段分离模式] 检索到 {len(documents)} 个文档")
+                for result in documents:
+                    doc = DocumentWithMetadata(
+                        content=result.get('original_context', result.get('summary', '')),
+                        metadata=DocumentMetadata(
+                            source=result.get('company_name', 'Unknown'),
+                            created_at="",
+                            author="",
+                            language="chinese"
+                        )
+                    )
+                    retrieved_documents.append(doc)
+                    retriever_scores.append(result.get('combined_score', 0.0))
+            else:
+                for result in results:
+                    doc = DocumentWithMetadata(
+                        content=result.get('original_context', result.get('summary', '')),
+                        metadata=DocumentMetadata(
+                            source=result.get('company_name', 'Unknown'),
+                            created_at="",
+                            author="",
+                            language="chinese"
+                        )
+                    )
+                    retrieved_documents.append(doc)
+                    retriever_scores.append(result.get('combined_score', 0.0))
+            
+            if retrieved_documents:
+                # 使用build_smart_context处理上下文，避免过度截断
+                context_parts = []
+                summary_parts = []
+                
+                for doc in retrieved_documents[:10]:
+                    content = doc.content
+                    if not isinstance(content, str):
+                        if isinstance(content, dict):
+                            content = content.get('context', content.get('content', str(content)))
+                        else:
+                            content = str(content)
+                    
+                    # 使用build_smart_context处理上下文
+                    processed_context = build_smart_context("", content, instruction)
+                    context_parts.append(processed_context)
+                
+                context_str = "\n\n".join(context_parts)
+                summary = context_str[:200] + "..." if len(context_str) > 200 else context_str
+                
+                # 使用与chinese_llm_evaluation.py相同的prompt生成逻辑
+                chinese_template = getattr(self.config.data, 'chinese_prompt_template', 'multi_stage_chinese_template_with_fewshot.txt')
+                print(f"使用配置的中文模板: {chinese_template}")
+                
+                # 使用get_messages_for_test和_convert_messages_to_chatml
+                messages = get_messages_for_test(summary, context_str, instruction, chinese_template)
+                prompt = _convert_messages_to_chatml(messages)
+                
+                print(f"🤖 [多阶段分离模式] 使用instruction生成答案...")
+                
+                # 生成答案
+                try:
+                    generated_responses = self.generator.generate(texts=[prompt])
+                    answer = generated_responses[0] if generated_responses else "Unable to generate answer"
+                    print(f"✅ [多阶段分离模式] 答案生成完成")
+                except Exception as e:
+                    print(f"❌ [多阶段分离模式] 答案生成失败: {e}")
+                    answer = f"[多阶段分离模式] 答案生成失败: {e}"
+                
+                # 准备上下文数据
+                context_data = []
+                for doc, score in zip(retrieved_documents[:self.config.retriever.rerank_top_k], retriever_scores[:self.config.retriever.rerank_top_k]):
+                    context_data.append([f"{score:.4f}", doc.content[:500] + "..." if len(doc.content) > 500 else doc.content])
+                
+                return answer, context_data
+            else:
+                print(f"❌ [多阶段分离模式] 未找到相关文档")
+                return "未找到相关文档", []
+                
+        except Exception as e:
+            print(f"❌ [多阶段分离模式] 处理失败: {e}")
+            return self._fallback_retrieval(query, 'zh')
+    
+    def _build_stock_prediction_instruction(self, question: str) -> str:
+        """
+        构建股票预测的instruction
+        """
+        # 使用与chinese_llm_evaluation.py相同的instruction格式
+        return f"请根据下方提供的该股票相关研报与数据，对该股票的下个月的涨跌，进行预测，请给出明确的答案，\"涨\" 或者 \"跌\"。同时给出这个股票下月的涨跌概率，分别是:极大，较大，中上，一般。\n\n问题：{question}"
     
     def _process_chinese_with_multi_stage(self, question: str, reranker_checkbox: bool) -> tuple[str, List[List[str]]]:
         """使用多阶段检索系统处理中文查询"""
@@ -401,7 +681,23 @@ class OptimizedRagUIWithMultiStage:
                     retriever_scores.append(result.get('combined_score', 0.0))
             
             if retrieved_documents:
-                context_str = "\n\n".join([doc.content for doc in retrieved_documents[:10]])
+                # 使用build_smart_context处理上下文，避免过度截断
+                context_parts = []
+                summary_parts = []
+                
+                for doc in retrieved_documents[:10]:
+                    content = doc.content
+                    if not isinstance(content, str):
+                        if isinstance(content, dict):
+                            content = content.get('context', content.get('content', str(content)))
+                        else:
+                            content = str(content)
+                    
+                    # 使用build_smart_context处理上下文
+                    processed_context = build_smart_context("", content, question)
+                    context_parts.append(processed_context)
+                
+                context_str = "\n\n".join(context_parts)
                 
                 # 根据查询语言动态选择prompt模板
                 try:
@@ -413,26 +709,25 @@ class OptimizedRagUIWithMultiStage:
                     is_chinese_query = any('\u4e00' <= char <= '\u9fff' for char in question)
                 
                 if is_chinese_query:
-                    # 中文查询使用中文prompt模板
+                    # 中文查询使用与chinese_llm_evaluation.py相同的prompt生成逻辑
                     summary = context_str[:200] + "..." if len(context_str) > 200 else context_str
-                    prompt = template_loader.format_template(
-                        "multi_stage_chinese_template",
-                        summary=summary,
-                        context=context_str,
-                        query=question
-                    )
-                    if prompt is None:
-                        # 回退到简单中文prompt
-                        prompt = f"基于以下上下文回答问题：\n\n{context_str}\n\n问题：{question}\n\n回答："
+                    chinese_template = getattr(self.config.data, 'chinese_prompt_template', 'multi_stage_chinese_template_with_fewshot.txt')
+                    print(f"使用配置的中文模板: {chinese_template}")
+                    
+                    # 使用get_messages_for_test和_convert_messages_to_chatml
+                    messages = get_messages_for_test(summary, context_str, question, chinese_template)
+                    prompt = _convert_messages_to_chatml(messages)
                 else:
-                    # 英文查询：使用与comprehensive_evaluation_enhanced_new_1.py相同的逻辑
-                    # 移除混合决策，只使用unified_english_template_no_think.txt模板
+                    # 英文查询：使用配置的英文模板
                     try:
                         # 导入RAG系统的英文prompt处理函数
                         from xlm.components.rag_system.rag_system import get_final_prompt_messages_english, _convert_messages_to_chatml
-                        messages = get_final_prompt_messages_english(context_str, question)
+                        
+                        # 使用配置的英文模板
+                        english_template = getattr(self.config.data, 'english_prompt_template', 'unified_english_template_no_think.txt')
+                        messages = get_final_prompt_messages_english(context_str, question, english_template)
                         prompt = _convert_messages_to_chatml(messages)
-                        print(f"使用统一英文模板: unified_english_template_no_think.txt")
+                        print(f"使用配置的英文模板: {english_template}")
                     except Exception as e:
                         print(f"英文模板加载失败: {e}，使用简单英文prompt")
                         prompt = f"Context: {context_str}\nQuestion: {question}\nAnswer:"

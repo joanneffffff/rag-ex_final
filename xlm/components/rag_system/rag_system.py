@@ -79,12 +79,16 @@ def _convert_messages_to_chatml(messages: List[Dict[str, str]]) -> str:
 
     return formatted_prompt
 
-def get_final_prompt_messages_english(context: str, query: str) -> List[Dict[str, str]]:
+def get_final_prompt_messages_english(context: str, query: str, template_file_name: Optional[str] = None) -> List[Dict[str, str]]:
     """
     Constructs the messages list for English evaluation, using the specified template file.
     This function is adapted from comprehensive_evaluation_enhanced_new_1.py
     """
-    template_file_name = "unified_english_template_no_think.txt"
+    # 如果没有指定模板文件名，使用配置中的默认值
+    if template_file_name is None:
+        from config.parameters import config
+        template_file_name = config.data.english_prompt_template
+    
     template_full_string = _load_template_content_from_file_english(template_file_name)
     
     if template_full_string is None:
@@ -329,11 +333,12 @@ class RagSystem:
                 template_type = "ZH-MULTI-STAGE"
             else:
                 # 英文查询使用与comprehensive_evaluation_enhanced_new_1.py相同的逻辑
-                # 移除混合决策，只使用unified_english_template_no_think.txt模板
+                # 使用配置中的英文模板
                 messages = get_final_prompt_messages_english(context_str, user_input)
                 prompt = _convert_messages_to_chatml(messages)
                 template_type = "EN-UNIFIED-TEMPLATE"
-                print(f"使用统一英文模板: unified_english_template_no_think.txt")
+                from config.parameters import config
+                print(f"使用统一英文模板: {config.data.english_prompt_template}")
         except Exception as e:
             # 回退到简单prompt
             if is_chinese_q:
