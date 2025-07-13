@@ -1038,6 +1038,29 @@ class OptimizedRagUI:
             print(f"生成器调用失败: {e}")
             answer = "生成器调用失败"
         
+        # 如果启用了股票预测模式，移除"注意："及其后面的文字
+        if stock_prediction_checkbox and is_chinese_query:
+            answer = self._clean_stock_prediction_answer(answer)
+        
+        return answer
+    
+    def _clean_stock_prediction_answer(self, answer: str) -> str:
+        """
+        清理股票预测答案，移除"注意："及其后面的文字
+        """
+        if not answer:
+            return answer
+        
+        # 查找"注意："的位置
+        notice_index = answer.find("注意：")
+        if notice_index != -1:
+            # 移除"注意："及其后面的所有文字
+            cleaned_answer = answer[:notice_index].strip()
+            print(f"🔧 清理股票预测答案:")
+            print(f"   原始答案: {answer}")
+            print(f"   清理后答案: {cleaned_answer}")
+            return cleaned_answer
+        
         return answer
     
     def _format_and_return_result(self, answer: str, unique_docs: List[Tuple[DocumentWithMetadata, float]], 

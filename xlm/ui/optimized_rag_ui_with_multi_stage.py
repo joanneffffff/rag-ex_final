@@ -591,6 +591,9 @@ class OptimizedRagUIWithMultiStage:
                     print(f"❌ [多阶段分离模式] 答案生成失败: {e}")
                     answer = f"[多阶段分离模式] 答案生成失败: {e}"
                 
+                # 清理股票预测答案，移除"注意："及其后面的文字
+                answer = self._clean_stock_prediction_answer(answer)
+                
                 # 准备上下文数据
                 context_data = []
                 for doc, score in zip(retrieved_documents[:self.config.retriever.rerank_top_k], retriever_scores[:self.config.retriever.rerank_top_k]):
@@ -611,6 +614,25 @@ class OptimizedRagUIWithMultiStage:
         """
         # 使用与chinese_llm_evaluation.py相同的instruction格式
         return f"请根据下方提供的该股票相关研报与数据，对该股票的下个月的涨跌，进行预测，请给出明确的答案，\"涨\" 或者 \"跌\"。同时给出这个股票下月的涨跌概率，分别是:极大，较大，中上，一般。\n\n问题：{question}"
+    
+    def _clean_stock_prediction_answer(self, answer: str) -> str:
+        """
+        清理股票预测答案，移除"注意："及其后面的文字
+        """
+        if not answer:
+            return answer
+        
+        # 查找"注意："的位置
+        notice_index = answer.find("注意：")
+        if notice_index != -1:
+            # 移除"注意："及其后面的所有文字
+            cleaned_answer = answer[:notice_index].strip()
+            print(f"🔧 清理股票预测答案:")
+            print(f"   原始答案: {answer}")
+            print(f"   清理后答案: {cleaned_answer}")
+            return cleaned_answer
+        
+        return answer
     
     def _process_chinese_with_multi_stage(self, question: str, reranker_checkbox: bool) -> tuple[str, List[List[str]]]:
         """使用多阶段检索系统处理中文查询"""
