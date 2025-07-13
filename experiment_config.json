@@ -1,0 +1,126 @@
+{
+  "experiment_scenarios": {
+    "quick_test": {
+      "description": "快速测试 - 少量样本，所有扰动器",
+      "max_samples": 3,
+      "perturbers": ["leave_one_out", "trend", "year"],
+      "output_file": "quick_test_results.json"
+    },
+    "comprehensive_test": {
+      "description": "全面测试 - 中等样本，所有扰动器",
+      "max_samples": 10,
+      "perturbers": ["leave_one_out", "reorder", "trend", "year", "term"],
+      "output_file": "comprehensive_test_results.json"
+    },
+    "trend_analysis": {
+      "description": "趋势分析 - 专注趋势扰动器",
+      "max_samples": 5,
+      "perturbers": ["trend"],
+      "output_file": "trend_analysis_results.json"
+    },
+    "year_analysis": {
+      "description": "年份分析 - 专注年份扰动器",
+      "max_samples": 5,
+      "perturbers": ["year"],
+      "output_file": "year_analysis_results.json"
+    },
+    "term_analysis": {
+      "description": "术语分析 - 专注术语扰动器",
+      "max_samples": 5,
+      "perturbers": ["term"],
+      "output_file": "term_analysis_results.json"
+    }
+  },
+  "test_samples": [
+    {
+      "id": "sample_1",
+      "query": "首钢股份在2023年上半年的业绩表现如何？",
+      "answer": "首钢股份在2023年上半年业绩表现良好，营收增长15%，净利润增长20%"
+    },
+    {
+      "id": "sample_2",
+      "query": "中国平安的财务状况怎么样？",
+      "answer": "中国平安财务状况稳健，总资产超过10万亿元，净利润持续增长"
+    },
+    {
+      "id": "sample_3",
+      "query": "腾讯控股的营收增长情况如何？",
+      "answer": "腾讯控股营收保持稳定增长，游戏业务和广告业务表现良好"
+    },
+    {
+      "id": "sample_4",
+      "query": "阿里巴巴2023年的净利润是多少？",
+      "answer": "阿里巴巴2023年净利润达到1000亿元，同比增长10%"
+    },
+    {
+      "id": "sample_5",
+      "query": "比亚迪的市值在2023年有什么变化？",
+      "answer": "比亚迪市值在2023年大幅增长，从年初的5000亿元增长到年末的8000亿元"
+    },
+    {
+      "id": "sample_6",
+      "query": "华为的研发投入在2022年是多少？",
+      "answer": "华为2022年研发投入达到1500亿元，占营收比例超过20%"
+    },
+    {
+      "id": "sample_7",
+      "query": "小米集团的毛利率表现如何？",
+      "answer": "小米集团毛利率保持在15%左右，硬件业务毛利率较低，互联网服务毛利率较高"
+    },
+    {
+      "id": "sample_8",
+      "query": "京东的物流业务在2023年发展怎么样？",
+      "answer": "京东物流业务在2023年持续扩张，覆盖范围进一步扩大，配送效率显著提升"
+    },
+    {
+      "id": "sample_9",
+      "query": "美团的外卖业务收入增长情况？",
+      "answer": "美团外卖业务收入在2023年保持稳定增长，用户订单量持续增加"
+    },
+    {
+      "id": "sample_10",
+      "query": "拼多多的用户增长趋势如何？",
+      "answer": "拼多多用户数量在2023年快速增长，活跃用户数突破8亿"
+    }
+  ],
+  "perturber_configs": {
+    "trend": {
+      "description": "趋势扰动器配置",
+      "config": {
+        "trend_map": {
+          "zh": {
+            "上升": "下降", "上涨": "下跌", "增长": "减少", "提升": "降低", "增加": "减少",
+            "下降": "上升", "下跌": "上涨", "减少": "增长", "降低": "提升"
+          },
+          "en": {
+            "increase": "decrease", "rise": "fall", "growth": "decline", "up": "down", "gain": "loss",
+            "decrease": "increase", "fall": "rise", "decline": "growth", "down": "up", "loss": "gain"
+          }
+        }
+      }
+    },
+    "term": {
+      "description": "术语扰动器配置",
+      "config": {
+        "term_map": {
+          "市盈率": "净利润",
+          "净利润": "市盈率",
+          "市净率": "市销率",
+          "营收": "收入",
+          "营业收入": "营业利润",
+          "营业利润": "营业收入",
+          "总资产": "净资产",
+          "净资产": "总资产",
+          "负债": "资产",
+          "资产": "负债"
+        }
+      }
+    },
+    "year": {
+      "description": "年份扰动器配置",
+      "config": {
+        "year_offset": 1
+      }
+    }
+  }
+} 
