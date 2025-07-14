@@ -6,72 +6,96 @@
 import json
 import os
 import re
-import jieba
 from pathlib import Path
 from typing import Dict, List, Any
+from collections import Counter
 
-def normalize_answer_chinese(s: str) -> str:
-    """标准化中文答案"""
-    if not s:
-        return ""
+NOT_FOUND_REPLY_ENGLISH = "I cannot find the answer in the provided context."
+
+def _shared_text_standardizer_english(text: str) -> str:
+    """
+    Helper function to standardize English text for both answer extraction and F1 score calculation.
+    Strictly follows the rules from the English Prompt Template.
+    """
+    text = text.strip()
     
-    # 移除"解析"及其后面的内容
-    # 查找"解析"的位置，移除它及其后面的所有内容
-    parse_index = s.find("解析")
-    if parse_index != -1:
-        s = s[:parse_index]
+    # Lowercase all text
+    text = text.lower()
+
+    # 递归替换所有 \text{...} 为 ...（保留内容）
+    while True:
+        new_text = re.sub(r'\\text\{([^}]*)\}', r'\1', text, flags=re.DOTALL)
+        if new_text == text:
+            break
+        text = new_text
+    # 其余 LaTeX 格式直接去掉
+    text = re.sub(r'\\[a-zA-Z]+\{[^}]*\}', '', text)
+    text = re.sub(r'\\[a-zA-Z]+', '', text)
     
-    s = ' '.join(s.split())
-    s = re.sub(r'[^\u4e00-\u9fff\w\s]', '', s)
-    return s.strip()
+    # Remove currency symbols and common unit words based on prompt rule
+    text = re.sub(r'\b(million|billion|thousand|trillion|usd|eur|gbp|m|b)\b', '', text, flags=re.IGNORECASE).strip()
+    text = re.sub(r'[\$£€]', '', text).strip()
 
-def normalize_answer_english(s: str) -> str:
-    """标准化英文答案"""
-    if not s:
-        return ""
-    s = ' '.join(s.split())
-    s = re.sub(r'[^\w\s]', '', s)
-    return s.strip().lower()
+    # Remove commas from numbers
+    text = text.replace(',', '')
 
-def get_tokens_chinese(s: str) -> List[str]:
-    """使用jieba分词获取中文token列表"""
-    return list(jieba.cut(s))
-
-def get_tokens_english(s: str) -> List[str]:
-    """获取英文token列表"""
-    return s.split()
-
-def calculate_f1_score(prediction: str, ground_truth: str, language: str = "chinese") -> float:
-    """计算F1-score，支持中文和英文"""
-    if language == "chinese":
-        pred_tokens = set(get_tokens_chinese(normalize_answer_chinese(prediction)))
-        gt_tokens = set(get_tokens_chinese(normalize_answer_chinese(ground_truth)))
+    # Handle negative numbers in parentheses (e.g., "(33)" -> "-33")
+    if text.startswith('(') and text.endswith(')'):
+        text = '-' + text[1:-1]
+    
+    # Normalize percentages
+    text = text.replace(' percent', '%').replace('pct', '%')
+    text = re.sub(r'(\d+\.?\d*)\s*%', r'\1%', text)
+    
+    # Remove common introductory phrases
+    text = re.sub(r'^(the\s*answer\s*is|it\s*was|the\s*value\s*is|resulting\s*in|this\s*represents|the\s*effect\s*is|therefore|so|thus|in\s*conclusion|final\s*answer\s*is|final\s*number\s*is)\s*', '', text, flags=re.IGNORECASE).strip()
+    
+    # Remove trailing punctuation
+    if text.endswith('%'):
+        text = re.sub(r'[\.,;]$', '', text).strip()
     else:
-        pred_tokens = set(get_tokens_english(normalize_answer_english(prediction)))
-        gt_tokens = set(get_tokens_english(normalize_answer_english(ground_truth)))
+        text = re.sub(r'[\.,;%]$', '', text).strip() 
     
-    if not gt_tokens:
-        return 1.0 if not pred_tokens else 0.0
+    # Final cleanup of whitespace
+    text = ' '.join(text.split()).strip()
+
+    return text
+
+def calculate_f1_score(prediction: str, ground_truth: str, language: str = "english") -> float:
+    """Calculates F1-score based on token overlap for English."""
     
-    intersection = pred_tokens & gt_tokens
-    precision = len(intersection) / len(pred_tokens) if pred_tokens else 0.0
-    recall = len(intersection) / len(gt_tokens)
+    normalized_prediction = _shared_text_standardizer_english(prediction).lower()
+    normalized_ground_truth = _shared_text_standardizer_english(ground_truth).lower()
+
+    # Handle cases where the model explicitly states "I cannot find the answer..."
+    if normalized_prediction == NOT_FOUND_REPLY_ENGLISH.lower():
+        return 1.0 if normalized_ground_truth == NOT_FOUND_REPLY_ENGLISH.lower() else 0.0
     
-    if precision + recall == 0:
+    # Handle cases where the ground truth is "I cannot find the answer...", but the model gave a factual answer (which is an error)
+    if normalized_ground_truth == NOT_FOUND_REPLY_ENGLISH.lower():
         return 0.0
-    
-    return 2 * precision * recall / (precision + recall)
 
-def calculate_exact_match(prediction: str, ground_truth: str, language: str = "chinese") -> float:
-    """计算Exact Match，支持中文和英文"""
-    if language == "chinese":
-        pred_normalized = normalize_answer_chinese(prediction)
-        gt_normalized = normalize_answer_chinese(ground_truth)
-    else:
-        pred_normalized = normalize_answer_english(prediction)
-        gt_normalized = normalize_answer_english(ground_truth)
-    
-    return 1.0 if pred_normalized == gt_normalized else 0.0
+    prediction_tokens = normalized_prediction.split()
+    ground_truth_tokens = normalized_ground_truth.split()
+
+    if not ground_truth_tokens: 
+        return 1.0 if not prediction_tokens else 0.0
+    if not prediction_tokens: 
+        return 0.0
+
+    common = Counter(prediction_tokens) & Counter(ground_truth_tokens)
+    num_same = sum(common.values())
+    if num_same == 0: 
+        return 0.0
+
+    precision = 1.0 * num_same / len(prediction_tokens)
+    recall = 1.0 * num_same / len(ground_truth_tokens)
+    f1 = (2 * precision * recall) / (precision + recall)
+    return f1
+
+def calculate_exact_match(prediction: str, ground_truth: str, language: str = "english") -> float:
+    """Calculates Exact Match score for English."""
+    return 1.0 if _shared_text_standardizer_english(prediction).lower() == _shared_text_standardizer_english(ground_truth).lower() else 0.0
 
 def process_answer(answer: str) -> str:
     """
@@ -99,14 +123,14 @@ def load_and_process_batch(file_path: str) -> List[Dict[str, Any]]:
     for sample in data["data"]:
         original_answer = sample.get("answer", "")
         expected_answer = sample.get("expected_answer", "")
-        language = sample.get("language", "chinese")
+        language = sample.get("language", "english")  # 强制使用英文处理
         
         # 移除[Reranker: Enabled]文本
         cleaned_answer = process_answer(original_answer)
         
-        # 重新计算F1和EM分数
-        f1_score = calculate_f1_score(cleaned_answer, expected_answer, language)
-        exact_match = calculate_exact_match(cleaned_answer, expected_answer, language)
+        # 重新计算F1和EM分数 - 使用英文处理
+        f1_score = calculate_f1_score(cleaned_answer, expected_answer, "english")
+        exact_match = calculate_exact_match(cleaned_answer, expected_answer, "english")
         
         # 创建处理后的样本
         processed_sample = {
@@ -121,7 +145,7 @@ def load_and_process_batch(file_path: str) -> List[Dict[str, Any]]:
             "generation_time": sample.get("generation_time", 0.0),
             "token_count": sample.get("token_count", 0),
             "success": sample.get("success", True),
-            "language": language,
+            "language": "english",  # 强制设置为英文
             "auto_stock_prediction": sample.get("auto_stock_prediction", False)
         }
         
@@ -191,7 +215,7 @@ def combine_all_batches(data_dir: str) -> Dict[str, Any]:
     # 构建合并结果
     combined_result = {
         "timestamp": "2025-07-14 00:00:00",
-        "data_path": "data/alphafin/alphafin_eval_samples_updated.jsonl",
+        "data_path": "evaluate_mrr/tatqa_eval_balanced_100.jsonl",
         "total_samples": total_samples,
         "successful_samples": successful_samples,
         "failed_samples": failed_samples,
@@ -204,7 +228,7 @@ def combine_all_batches(data_dir: str) -> Dict[str, Any]:
         "avg_token_count": avg_token_count,
         "total_token_count": total_token_count,
         "stock_prediction_samples": stock_prediction_samples,
-        "reranker_enabled": True,
+        "reranker_enabled": False,  # 已移除[Reranker: Enabled]前缀
         "stock_prediction_enabled": stock_prediction_samples > 0,
         "auto_detected_stock_prediction": stock_prediction_samples,
         "data": all_samples
@@ -229,7 +253,7 @@ def print_summary(result: Dict[str, Any]):
     print("📊 数据集测试结果汇总")
     print("=" * 80)
     print(f"📁 数据路径: {result['data_path']}")
-    print(f"🌍 语言: chinese")
+    print(f"🌍 语言: english")
     print(f"📈 总样本数: {result['total_samples']}")
     print(f"✅ 成功样本数: {result['successful_samples']}")
     print(f"❌ 失败样本数: {result['failed_samples']}")
@@ -250,8 +274,8 @@ def main():
     """
     主函数
     """
-    data_dir = "raw_data_alphafin_eval_samples_updated"
-    output_file = "combined_alphafin_results.json"
+    data_dir = "raw_data_tatqa_eval_balanced_100"
+    output_file = "combined_tatqa_results_reranker_removed.json"
     
     print("🔧 开始合并所有批次文件...")
     print("📝 任务: 移除[Reranker: Enabled]文本并计算整体F1和EM分数")
