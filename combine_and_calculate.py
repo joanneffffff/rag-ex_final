@@ -1,16 +1,42 @@
 #!/usr/bin/env python3
 """
 合并所有批次文件并计算整体的F1和EM分数
+使用中文LLM评估文件中的计算逻辑
 """
 
 import json
 import os
 import re
+import jieba
 from pathlib import Path
 from typing import Dict, List, Any
 from collections import Counter
 
 NOT_FOUND_REPLY_ENGLISH = "I cannot find the answer in the provided context."
+
+def normalize_answer_chinese(s: str) -> str:
+    """
+    针对中文进行答案归一化：移除标点、转换全角字符为半角、去除多余空格、分词并小写。
+    与llm_comparison/chinese_llm_evaluation.py保持完全一致。
+    """
+    if not s:
+        return ""
+
+    s = s.strip().lower()
+    s = s.replace('，', ',').replace('。', '.').replace('！', '!').replace('？', '?').replace('；', ';')
+    s = s.replace('（', '(').replace('）', ')')
+
+    punctuation_pattern = r'[!"#$%&\'()*+,-./:;<=>?@[\]^_`{|}~“”‘’【】『』《》—…·～「」～￥%#@！&（）《》]'
+    s = re.sub(punctuation_pattern, '', s)
+
+    import jieba
+    tokens = list(jieba.cut(s))
+    normalized_tokens = [token for token in tokens if token.strip()]
+    return " ".join(normalized_tokens)
+
+def get_tokens_chinese(s: str) -> List[str]:
+    """使用jieba分词获取中文token列表"""
+    return list(jieba.cut(s))
 
 def _shared_text_standardizer_english(text: str) -> str:
     """
@@ -61,7 +87,31 @@ def _shared_text_standardizer_english(text: str) -> str:
 
     return text
 
-def calculate_f1_score(prediction: str, ground_truth: str, language: str = "english") -> float:
+def calculate_f1_score_chinese(prediction: str, ground_truth: str) -> float:
+    """计算F1-score，支持中文和英文"""
+    pred_tokens = set(get_tokens_chinese(normalize_answer_chinese(prediction)))
+    gt_tokens = set(get_tokens_chinese(normalize_answer_chinese(ground_truth)))
+    
+    if not gt_tokens:
+        return 1.0 if not pred_tokens else 0.0
+    
+    intersection = pred_tokens & gt_tokens
+    precision = len(intersection) / len(pred_tokens) if pred_tokens else 0.0
+    recall = len(intersection) / len(gt_tokens)
+    
+    if precision + recall == 0:
+        return 0.0
+    
+    return 2 * precision * recall / (precision + recall)
+
+def calculate_exact_match_chinese(prediction: str, ground_truth: str) -> float:
+    """计算Exact Match，支持中文和英文"""
+    pred_normalized = normalize_answer_chinese(prediction)
+    gt_normalized = normalize_answer_chinese(ground_truth)
+    
+    return 1.0 if pred_normalized == gt_normalized else 0.0
+
+def calculate_f1_score_english(prediction: str, ground_truth: str) -> float:
     """Calculates F1-score based on token overlap for English."""
     
     normalized_prediction = _shared_text_standardizer_english(prediction).lower()
@@ -93,13 +143,27 @@ def calculate_f1_score(prediction: str, ground_truth: str, language: str = "engl
     f1 = (2 * precision * recall) / (precision + recall)
     return f1
 
-def calculate_exact_match(prediction: str, ground_truth: str, language: str = "english") -> float:
+def calculate_exact_match_english(prediction: str, ground_truth: str) -> float:
     """Calculates Exact Match score for English."""
     return 1.0 if _shared_text_standardizer_english(prediction).lower() == _shared_text_standardizer_english(ground_truth).lower() else 0.0
 
+def calculate_f1_score(prediction: str, ground_truth: str, language: str = "chinese") -> float:
+    """统一的F1分数计算函数，根据语言选择不同的计算方法"""
+    if language == "chinese":
+        return calculate_f1_score_chinese(prediction, ground_truth)
+    else:
+        return calculate_f1_score_english(prediction, ground_truth)
+
+def calculate_exact_match(prediction: str, ground_truth: str, language: str = "chinese") -> float:
+    """统一的精确匹配计算函数，根据语言选择不同的计算方法"""
+    if language == "chinese":
+        return calculate_exact_match_chinese(prediction, ground_truth)
+    else:
+        return calculate_exact_match_english(prediction, ground_truth)
+
 def process_answer(answer: str) -> str:
     """
-    移除答案中的[Reranker: Enabled]文本
+    移除答案中的[Reranker: Enabled]前缀、"解析"及其后面的内容，以及"【解释】"及其后面的内容
     """
     if not answer:
         return answer
@@ -107,7 +171,30 @@ def process_answer(answer: str) -> str:
     # 移除[Reranker: Enabled]前缀
     answer = re.sub(r'^\[Reranker: Enabled\]\s*', '', answer)
     
+    # 移除"解析"及其后面的所有内容
+    parse_index = answer.find("解析")
+    if parse_index != -1:
+        answer = answer[:parse_index]
+    
+    # 移除"【解释】"及其后面的所有内容
+    explanation_index = answer.find("【解释】")
+    if explanation_index != -1:
+        answer = answer[:explanation_index]
+    
     return answer.strip()
+
+def detect_language(text: str) -> str:
+    """
+    检测文本语言，简单的中英文检测
+    """
+    # 检查是否包含中文字符
+    chinese_chars = sum(1 for char in text if '\u4e00' <= char <= '\u9fff')
+    total_chars = len([char for char in text if char.isalpha() or '\u4e00' <= char <= '\u9fff'])
+    
+    if total_chars > 0 and chinese_chars / total_chars > 0.3:  # 如果超过30%是中文字符，认为是中文
+        return "chinese"
+    else:
+        return "english"
 
 def load_and_process_batch(file_path: str) -> List[Dict[str, Any]]:
     """
@@ -123,14 +210,20 @@ def load_and_process_batch(file_path: str) -> List[Dict[str, Any]]:
     for sample in data["data"]:
         original_answer = sample.get("answer", "")
         expected_answer = sample.get("expected_answer", "")
-        language = sample.get("language", "english")  # 强制使用英文处理
+        
+        # 检测语言
+        language = sample.get("language", "chinese")  # 默认使用中文
+        if language == "auto":
+            # 如果语言是auto，则自动检测
+            query = sample.get("query", "")
+            language = detect_language(query)
         
         # 移除[Reranker: Enabled]文本
         cleaned_answer = process_answer(original_answer)
         
-        # 重新计算F1和EM分数 - 使用英文处理
-        f1_score = calculate_f1_score(cleaned_answer, expected_answer, "english")
-        exact_match = calculate_exact_match(cleaned_answer, expected_answer, "english")
+        # 重新计算F1和EM分数 - 根据语言选择计算方法
+        f1_score = calculate_f1_score(cleaned_answer, expected_answer, language)
+        exact_match = calculate_exact_match(cleaned_answer, expected_answer, language)
         
         # 创建处理后的样本
         processed_sample = {
@@ -145,7 +238,7 @@ def load_and_process_batch(file_path: str) -> List[Dict[str, Any]]:
             "generation_time": sample.get("generation_time", 0.0),
             "token_count": sample.get("token_count", 0),
             "success": sample.get("success", True),
-            "language": "english",  # 强制设置为英文
+            "language": language,
             "auto_stock_prediction": sample.get("auto_stock_prediction", False)
         }
         
@@ -201,99 +294,159 @@ def combine_all_batches(data_dir: str) -> Dict[str, Any]:
             if sample.get("auto_stock_prediction", False):
                 stock_prediction_samples += 1
     
-    # 计算总体指标
-    total_samples = len(all_samples)
-    total_f1 = sum(sample["f1"] for sample in all_samples)
-    total_em = sum(sample["em"] for sample in all_samples)
+    # 计算整体指标
+    if all_samples:
+        # 按语言分组计算
+        chinese_samples = [s for s in all_samples if s.get("language") == "chinese"]
+        english_samples = [s for s in all_samples if s.get("language") == "english"]
+        
+        # 总体指标
+        overall_f1 = sum(s.get("f1", 0.0) for s in all_samples) / len(all_samples)
+        overall_em = sum(s.get("em", 0.0) for s in all_samples) / len(all_samples)
+        
+        # 中文样本指标
+        chinese_f1 = 0.0
+        chinese_em = 0.0
+        if chinese_samples:
+            chinese_f1 = sum(s.get("f1", 0.0) for s in chinese_samples) / len(chinese_samples)
+            chinese_em = sum(s.get("em", 0.0) for s in chinese_samples) / len(chinese_samples)
+        
+        # 英文样本指标
+        english_f1 = 0.0
+        english_em = 0.0
+        if english_samples:
+            english_f1 = sum(s.get("f1", 0.0) for s in english_samples) / len(english_samples)
+            english_em = sum(s.get("em", 0.0) for s in english_samples) / len(english_samples)
+        
+        result = {
+            "timestamp": "2025-07-14 00:00:00",  # 使用当前时间戳
+            "total_samples": len(all_samples),
+            "successful_samples": successful_samples,
+            "failed_samples": failed_samples,
+            "stock_prediction_samples": stock_prediction_samples,
+            "overall_metrics": {
+                "f1_score": overall_f1,
+                "exact_match": overall_em
+            },
+            "chinese_metrics": {
+                "sample_count": len(chinese_samples),
+                "f1_score": chinese_f1,
+                "exact_match": chinese_em
+            },
+            "english_metrics": {
+                "sample_count": len(english_samples),
+                "f1_score": english_f1,
+                "exact_match": english_em
+            },
+            "performance_metrics": {
+                "total_processing_time": total_processing_time,
+                "total_generation_time": total_generation_time,
+                "total_token_count": total_token_count,
+                "avg_processing_time": total_processing_time / len(all_samples) if all_samples else 0.0,
+                "avg_generation_time": total_generation_time / len(all_samples) if all_samples else 0.0,
+                "avg_token_count": total_token_count / len(all_samples) if all_samples else 0.0
+            },
+            "data": all_samples
+        }
+    else:
+        result = {
+            "timestamp": "",
+            "total_samples": 0,
+            "successful_samples": 0,
+            "failed_samples": 0,
+            "stock_prediction_samples": 0,
+            "overall_metrics": {
+                "f1_score": 0.0,
+                "exact_match": 0.0
+            },
+            "chinese_metrics": {
+                "sample_count": 0,
+                "f1_score": 0.0,
+                "exact_match": 0.0
+            },
+            "english_metrics": {
+                "sample_count": 0,
+                "f1_score": 0.0,
+                "exact_match": 0.0
+            },
+            "performance_metrics": {
+                "total_processing_time": 0.0,
+                "total_generation_time": 0.0,
+                "total_token_count": 0,
+                "avg_processing_time": 0.0,
+                "avg_generation_time": 0.0,
+                "avg_token_count": 0.0
+            },
+            "data": []
+        }
     
-    avg_f1 = total_f1 / total_samples if total_samples > 0 else 0.0
-    avg_em = total_em / total_samples if total_samples > 0 else 0.0
-    avg_processing_time = total_processing_time / total_samples if total_samples > 0 else 0.0
-    avg_generation_time = total_generation_time / total_samples if total_samples > 0 else 0.0
-    avg_token_count = total_token_count / total_samples if total_samples > 0 else 0.0
-    
-    # 构建合并结果
-    combined_result = {
-        "timestamp": "2025-07-14 00:00:00",
-        "data_path": "evaluate_mrr/tatqa_eval_balanced_100.jsonl",
-        "total_samples": total_samples,
-        "successful_samples": successful_samples,
-        "failed_samples": failed_samples,
-        "success_rate": (successful_samples / total_samples * 100) if total_samples > 0 else 0.0,
-        "avg_f1_score": avg_f1,
-        "avg_exact_match": avg_em,
-        "avg_processing_time": avg_processing_time,
-        "total_processing_time": total_processing_time,
-        "avg_generation_time": avg_generation_time,
-        "avg_token_count": avg_token_count,
-        "total_token_count": total_token_count,
-        "stock_prediction_samples": stock_prediction_samples,
-        "reranker_enabled": False,  # 已移除[Reranker: Enabled]前缀
-        "stock_prediction_enabled": stock_prediction_samples > 0,
-        "auto_detected_stock_prediction": stock_prediction_samples,
-        "data": all_samples
-    }
-    
-    return combined_result
+    return result
 
 def save_combined_result(result: Dict[str, Any], output_file: str):
-    """
-    保存合并结果
-    """
+    """保存合并结果到文件"""
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
-    
-    print(f"💾 合并结果保存到: {output_file}")
+    print(f"💾 结果已保存到: {output_file}")
 
 def print_summary(result: Dict[str, Any]):
-    """
-    打印结果摘要
-    """
-    print("\n" + "=" * 80)
-    print("📊 数据集测试结果汇总")
-    print("=" * 80)
-    print(f"📁 数据路径: {result['data_path']}")
-    print(f"🌍 语言: english")
-    print(f"📈 总样本数: {result['total_samples']}")
-    print(f"✅ 成功样本数: {result['successful_samples']}")
-    print(f"❌ 失败样本数: {result['failed_samples']}")
-    print(f"📊 成功率: {result['success_rate']:.2f}%")
-    print(f"🎯 平均F1-score: {result['avg_f1_score']:.4f}")
-    print(f"🎯 平均Exact Match: {result['avg_exact_match']:.4f}")
-    print(f"⏱️ 平均处理时间: {result['avg_processing_time']:.2f}秒")
-    print(f"⏱️ 总处理时间: {result['total_processing_time']:.2f}秒")
-    print(f"⏱️ 平均生成时间: {result['avg_generation_time']:.2f}秒")
-    print(f"🔢 平均Token数: {result['avg_token_count']:.1f}")
-    print(f"🔢 总Token数: {result['total_token_count']}")
-    print(f"🔮 重排序器: {'启用' if result['reranker_enabled'] else '禁用'}")
-    print(f"🔮 股票预测: {'启用' if result['stock_prediction_enabled'] else '禁用'}")
-    print(f"🔮 自动检测股票预测: {result['auto_detected_stock_prediction']} 个")
-    print("=" * 80)
+    """打印结果摘要"""
+    print("\n" + "="*60)
+    print("📊 评估结果摘要")
+    print("="*60)
+    
+    print(f"📈 总体指标:")
+    print(f"   总样本数: {result['total_samples']}")
+    print(f"   成功样本: {result['successful_samples']}")
+    print(f"   失败样本: {result['failed_samples']}")
+    print(f"   股票预测样本: {result['stock_prediction_samples']}")
+    
+    print(f"\n🎯 整体性能:")
+    print(f"   F1分数: {result['overall_metrics']['f1_score']:.4f}")
+    print(f"   精确匹配: {result['overall_metrics']['exact_match']:.4f}")
+    
+    print(f"\n🇨🇳 中文样本 ({result['chinese_metrics']['sample_count']} 个):")
+    print(f"   F1分数: {result['chinese_metrics']['f1_score']:.4f}")
+    print(f"   精确匹配: {result['chinese_metrics']['exact_match']:.4f}")
+    
+    print(f"\n🇺🇸 英文样本 ({result['english_metrics']['sample_count']} 个):")
+    print(f"   F1分数: {result['english_metrics']['f1_score']:.4f}")
+    print(f"   精确匹配: {result['english_metrics']['exact_match']:.4f}")
+    
+    print(f"\n⏱️ 性能指标:")
+    print(f"   总处理时间: {result['performance_metrics']['total_processing_time']:.2f}秒")
+    print(f"   总生成时间: {result['performance_metrics']['total_generation_time']:.2f}秒")
+    print(f"   总Token数: {result['performance_metrics']['total_token_count']}")
+    print(f"   平均处理时间: {result['performance_metrics']['avg_processing_time']:.2f}秒")
+    print(f"   平均生成时间: {result['performance_metrics']['avg_generation_time']:.2f}秒")
+    print(f"   平均Token数: {result['performance_metrics']['avg_token_count']:.1f}")
+    
+    print("="*60)
 
 def main():
-    """
-    主函数
-    """
-    data_dir = "raw_data_tatqa_eval_balanced_100"
-    output_file = "combined_tatqa_results_reranker_removed.json"
+    """主函数"""
+    # 设置数据目录
+    data_dir = "comprehensive_evaluation_results/raw_data_alphafin_eval_samples_updated"
     
-    print("🔧 开始合并所有批次文件...")
-    print("📝 任务: 移除[Reranker: Enabled]文本并计算整体F1和EM分数")
-    print("=" * 60)
+    print("🚀 开始重新计算F1和EM指标...")
+    print(f"📁 数据目录: {data_dir}")
     
     # 合并所有批次
     result = combine_all_batches(data_dir)
     
     if result:
-        # 保存合并结果
+        # 生成输出文件名
+        timestamp = result.get("timestamp", "").replace(" ", "_").replace(":", "-")
+        output_file = f"comprehensive_evaluation_results/combined_results_recalculated_{timestamp}.json"
+        
+        # 保存结果
         save_combined_result(result, output_file)
         
         # 打印摘要
         print_summary(result)
         
-        print("\n🎉 合并完成！")
+        print(f"\n✅ 重新计算完成！结果已保存到: {output_file}")
     else:
-        print("❌ 合并失败！")
+        print("❌ 处理失败，没有生成结果")
 
 if __name__ == "__main__":
     main() 
