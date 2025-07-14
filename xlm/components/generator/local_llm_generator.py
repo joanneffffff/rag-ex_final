@@ -78,13 +78,18 @@ class LocalLLMGenerator(Generator):
         print(f"LocalLLMGenerator '{model_name}' loaded on {self.device} with quantization: {self.use_quantization} ({self.quantization_type}).")
     
     def _init_template_loader(self):
-        """初始化模板加载器"""
-        self.template_dir = Path("data/prompt_templates")
-        self.templates = {}
-        self._load_templates()
+        """初始化模板加载器 - 使用共享资源管理器"""
+        try:
+            from xlm.utils.shared_resource_manager import shared_resource_manager
+            self.templates = shared_resource_manager.get_templates()
+        except ImportError:
+            # 回退到原始方式
+            self.template_dir = Path("data/prompt_templates")
+            self.templates = {}
+            self._load_templates()
     
     def _load_templates(self):
-        """加载所有模板文件"""
+        """加载所有模板文件 - 仅在回退时使用"""
         if not self.template_dir.exists():
             print(f"Warning: Template directory {self.template_dir} does not exist")
             return

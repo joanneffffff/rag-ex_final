@@ -370,32 +370,78 @@ class OptimizedRagUI:
             torch.cuda.empty_cache()
         
         print("\nStep 5. Loading generator...")
-        # 现在GPU内存充足，使用GPU 1加载生成器
+        # 尝试使用共享资源管理器
         try:
-            print("GPU内存充足，使用GPU 1加载生成器...")
-            self.generator = load_generator(
-                generator_model_name=config.generator.model_name,
-                use_local_llm=True,
-                use_gpu=True,  # 使用GPU
-                gpu_device="cuda:1",  # 使用GPU 1
-                cache_dir=config.generator.cache_dir
-            )
-            print("✅ 生成器GPU模式加载成功")
+            from xlm.utils.shared_resource_manager import shared_resource_manager
             
-        except Exception as e:
-            print(f"❌ 生成器GPU模式加载失败: {e}")
-            print("回退到CPU模式...")
+            # 尝试从共享资源管理器获取LLM生成器
+            self.generator = shared_resource_manager.get_llm_generator(
+                model_name=config.generator.model_name,
+                cache_dir=config.generator.cache_dir,
+                device=config.generator.device,
+                use_quantization=config.generator.use_quantization,
+                quantization_type=config.generator.quantization_type
+            )
+            
+            if self.generator:
+                print("✅ 使用共享生成器")
+            else:
+                print("⚠️ 共享生成器获取失败，回退到独立加载")
+                # 回退到独立加载
+                try:
+                    print("GPU内存充足，使用GPU 1加载生成器...")
+                    self.generator = load_generator(
+                        generator_model_name=config.generator.model_name,
+                        use_local_llm=True,
+                        use_gpu=True,  # 使用GPU
+                        gpu_device="cuda:1",  # 使用GPU 1
+                        cache_dir=config.generator.cache_dir
+                    )
+                    print("✅ 生成器GPU模式加载成功")
+                    
+                except Exception as e:
+                    print(f"❌ 生成器GPU模式加载失败: {e}")
+                    print("回退到CPU模式...")
+                    try:
+                        self.generator = load_generator(
+                            generator_model_name=config.generator.model_name,
+                            use_local_llm=True,
+                            use_gpu=False,  # 回退到CPU
+                            cache_dir=config.generator.cache_dir
+                        )
+                        print("✅ 生成器CPU模式加载成功")
+                    except Exception as e2:
+                        print(f"❌ 生成器CPU模式也失败: {e2}")
+                        raise e2
+                        
+        except ImportError:
+            print("⚠️ 共享资源管理器不可用，使用独立加载")
+            # 回退到独立加载
             try:
+                print("GPU内存充足，使用GPU 1加载生成器...")
                 self.generator = load_generator(
                     generator_model_name=config.generator.model_name,
                     use_local_llm=True,
-                    use_gpu=False,  # 回退到CPU
+                    use_gpu=True,  # 使用GPU
+                    gpu_device="cuda:1",  # 使用GPU 1
                     cache_dir=config.generator.cache_dir
                 )
-                print("✅ 生成器CPU模式加载成功")
-            except Exception as e2:
-                print(f"❌ 生成器CPU模式也失败: {e2}")
-                raise e2
+                print("✅ 生成器GPU模式加载成功")
+                
+            except Exception as e:
+                print(f"❌ 生成器GPU模式加载失败: {e}")
+                print("回退到CPU模式...")
+                try:
+                    self.generator = load_generator(
+                        generator_model_name=config.generator.model_name,
+                        use_local_llm=True,
+                        use_gpu=False,  # 回退到CPU
+                        cache_dir=config.generator.cache_dir
+                    )
+                    print("✅ 生成器CPU模式加载成功")
+                except Exception as e2:
+                    print(f"❌ 生成器CPU模式也失败: {e2}")
+                    raise e2
         
         # 清理内存
         if torch.cuda.is_available():

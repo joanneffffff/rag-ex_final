@@ -511,27 +511,61 @@ class MultiStageRetrievalSystem:
             self.qwen_reranker = None
     
     def _init_llm_generator(self):
-        """初始化LLM生成器"""
+        """初始化LLM生成器 - 使用共享资源管理器"""
         print("正在初始化LLM生成器...")
         try:
-            # 重用现有的LocalLLMGenerator
-            from xlm.components.generator.local_llm_generator import LocalLLMGenerator
-            
-            # 使用配置中的参数
-            model_name = None  # 让LocalLLMGenerator从config读取
-            cache_dir = None   # 让LocalLLMGenerator从config读取
-            device = None      # 让LocalLLMGenerator从config读取
-            use_quantization = None  # 让LocalLLMGenerator从config读取
-            quantization_type = None  # 让LocalLLMGenerator从config读取
-            
-            if self.config:
-                # 如果config中有generator配置，使用它
-                if hasattr(self.config, 'generator'):
+            # 尝试使用共享资源管理器
+            try:
+                from xlm.utils.shared_resource_manager import shared_resource_manager
+                
+                # 使用配置中的参数
+                model_name = None
+                cache_dir = None
+                device = None
+                use_quantization = None
+                quantization_type = None
+                
+                if self.config and hasattr(self.config, 'generator'):
                     model_name = self.config.generator.model_name
                     cache_dir = self.config.generator.cache_dir
                     device = self.config.generator.device
                     use_quantization = self.config.generator.use_quantization
                     quantization_type = self.config.generator.quantization_type
+                
+                # 尝试从共享资源管理器获取LLM生成器
+                self.llm_generator = shared_resource_manager.get_llm_generator(
+                    model_name=model_name,
+                    cache_dir=cache_dir,
+                    device=device,
+                    use_quantization=use_quantization,
+                    quantization_type=quantization_type
+                )
+                
+                if self.llm_generator:
+                    print("✅ 使用共享LLM生成器")
+                    return
+                else:
+                    print("⚠️ 共享LLM生成器获取失败，回退到独立初始化")
+                    
+            except ImportError:
+                print("⚠️ 共享资源管理器不可用，使用独立初始化")
+            
+            # 回退到独立初始化
+            from xlm.components.generator.local_llm_generator import LocalLLMGenerator
+            
+            # 使用配置中的参数
+            model_name = None
+            cache_dir = None
+            device = None
+            use_quantization = None
+            quantization_type = None
+            
+            if self.config and hasattr(self.config, 'generator'):
+                model_name = self.config.generator.model_name
+                cache_dir = self.config.generator.cache_dir
+                device = self.config.generator.device
+                use_quantization = self.config.generator.use_quantization
+                quantization_type = self.config.generator.quantization_type
             
             # 首先尝试GPU模式
             try:
