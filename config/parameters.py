@@ -55,7 +55,7 @@ class RetrieverConfig:
     use_gpu: bool = torch.cuda.is_available() # Dynamically set default based on hardware
     max_context_length: int = 100
     # 重排序相关配置
-    retrieval_top_k: int = 20  # FAISS检索的top-k
+    retrieval_top_k: int = 100  # FAISS检索的top-k chinese:20/english:100
     rerank_top_k: int = 10      # 重排序后的top-k，从10增加到20
     # 预过滤配置
     use_prefilter: bool = True  # 是否使用预过滤功能（使用时会自动启用股票代码和公司名称映射）
