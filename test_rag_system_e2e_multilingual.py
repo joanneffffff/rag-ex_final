@@ -415,7 +415,8 @@ def test_single_dataset(
     data_path: str,
     sample_size: Optional[int] = None,
     enable_reranker: bool = True,
-    enable_stock_prediction: bool = False
+    enable_stock_prediction: bool = False,
+    save_interval: int = 10
 ) -> Dict[str, Any]:
     """
     测试单个数据集
@@ -538,14 +539,14 @@ def test_single_dataset(
         
         raw_data_batch.append(raw_data_record)
         
-        # 每处理10个样本保存一次原始数据
-        if len(raw_data_batch) >= 10:
+        # 每处理指定数量的样本保存一次原始数据
+        if len(raw_data_batch) >= save_interval:
             save_raw_data_batch(raw_data_batch, data_path, batch_num)
             raw_data_batch = []
             batch_num += 1
         
-        # 每处理10个样本输出一次进度
-        if (i + 1) % 10 == 0:
+        # 每处理指定数量的样本输出一次进度
+        if (i + 1) % save_interval == 0:
             avg_time = total_processing_time / (i + 1)
             avg_f1 = np.mean([r["f1_score"] for r in results])
             avg_em = np.mean([r["exact_match"] for r in results])
@@ -636,6 +637,8 @@ def main():
                        help="禁用重排序器")
     parser.add_argument("--enable_stock_prediction", action="store_true",
                        help="启用股票预测模式")
+    parser.add_argument("--save_interval", type=int, default=10,
+                       help="保存间隔 (默认每10个样本保存一次)")
     
     args = parser.parse_args()
     
@@ -649,7 +652,8 @@ def main():
         data_path=args.data_path,
         sample_size=args.sample_size,
         enable_reranker=not args.disable_reranker,
-        enable_stock_prediction=args.enable_stock_prediction
+        enable_stock_prediction=args.enable_stock_prediction,
+        save_interval=args.save_interval
     )
 
 
