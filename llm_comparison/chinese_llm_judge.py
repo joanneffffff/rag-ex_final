@@ -1,24 +1,26 @@
-import sys
-import os
-from pathlib import Path
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
-from transformers.utils.quantization_config import BitsAndBytesConfig
-import time
-import re
-import gc
-import json
-import argparse
-from tqdm import tqdm
-import numpy as np
-from typing import List, Optional, Dict, Any
+import warnings
 import logging
+import os
+import json
+import re
+import torch
+import numpy as np
+from pathlib import Path
+from typing import List, Dict, Any, Optional
+import time
+import argparse
+from collections import Counter # 仍然保留，以防万一需要计算某些统计量
+import sys
+import gc
+import signal
+import atexit
 
-# 添加项目根目录到Python路径 (如果需要)
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
+# 环境设置
+warnings.filterwarnings("ignore")
+logging.getLogger("transformers").setLevel(logging.ERROR)
+os.environ['TRANSFORMERS_VERBOSITY'] = 'error'
 
-# --- 日志配置 (与你的评估脚本保持一致) ---
+# --- 日志配置 ---
 log_dir = Path("logs")
 log_dir.mkdir(parents=True, exist_ok=True)
 log_file_path = log_dir / f"llm_judge_{time.strftime('%Y%m%d_%H%M%S')}.log"
@@ -40,6 +42,15 @@ file_handler = logging.FileHandler(log_file_path, encoding='utf-8')
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
+
+try:
+    from tqdm import tqdm
+except ImportError:
+    logger.error("❌ tqdm is not installed. Please run: pip install tqdm")
+    sys.exit(1)
+
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers.utils.quantization_config import BitsAndBytesConfig
 
 # 导入配置文件 (确保存在)
 try:
@@ -63,18 +74,13 @@ class ModelLoader:
         self.is_loaded = False
         self.cache_dir = config.generator.cache_dir # 使用配置的缓存目录
 
-        # 根据模型名称设置路径
+        # 根据模型名称设置路径 (Judge 默认为 Qwen3-8B)
         if "Qwen3-8B" in model_name:
             local_qwen_path = f"{self.cache_dir}/models--Qwen--Qwen3-8B/snapshots/9c925d64d72725edaf899c6cb9c377fd0709d9c5"
-            if os.path.exists(local_qwen_path):
-                self.model_path = local_qwen_path
-                logger.info(f"✅ [{self.model_name}] 使用本地缓存模型: {self.model_path}")
-            else:
-                self.model_path = "Qwen/Qwen3-8B"
-                logger.warning(f"⚠️ [{self.model_name}] 本地缓存未找到，将从Hub下载: {self.model_path}")
-        else:
+            self.model_path = local_qwen_path if os.path.exists(local_qwen_path) else "Qwen/Qwen3-8B"
+        else: # 允许其他模型作为Judge，但默认只支持Qwen3-8B
             self.model_path = model_name
-            logger.warning(f"⚠️ [{self.model_name}] 模型路径 '{model_name}' 未知，尝试从Hugging Face Hub加载。")
+            logger.warning(f"⚠️ [{self.model_name}] 模型路径 '{model_name}' 未知，尝试从Hub加载。建议Judge使用Qwen3-8B。")
 
         # 4-bit 量化配置
         self.quantization_config = BitsAndBytesConfig(
@@ -85,60 +91,57 @@ class ModelLoader:
         )
 
     def load_model(self):
-        if self.is_loaded:
-            logger.info(f"✅ [{self.model_name}] 已加载到 {self.device}，无需重复加载。")
-            return
+        if not self.is_loaded:
+            logger.info(f"🔄 [{self.model_name}] 正在加载模型到 {self.device} 从 {self.model_path}")
+            is_local_path = Path(self.model_path).exists() and Path(self.model_path).is_dir()
 
-        logger.info(f"🔄 [{self.model_name}] 正在加载模型到 {self.device} 从 {self.model_path}")
-        is_local_path = Path(self.model_path).exists() and Path(self.model_path).is_dir()
+            tokenizer_args = {"trust_remote_code": True, "local_files_only": is_local_path, "cache_dir": self.cache_dir}
+            model_args = {
+                "torch_dtype": torch.float16,
+                "device_map": self.device,
+                "trust_remote_code": True,
+                "quantization_config": self.quantization_config,
+                "local_files_only": is_local_path,
+                "cache_dir": self.cache_dir
+            }
 
-        tokenizer_args = {"trust_remote_code": True, "local_files_only": is_local_path, "cache_dir": self.cache_dir}
-        model_args = {
-            "torch_dtype": torch.float16,
-            "device_map": self.device,
-            "trust_remote_code": True,
-            "quantization_config": self.quantization_config,
-            "local_files_only": is_local_path,
-            "cache_dir": self.cache_dir
-        }
+            try:
+                logger.info(f"🔧 [{self.model_name}] 加载tokenizer...")
+                self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, **tokenizer_args)
+                if self.tokenizer.pad_token is None:
+                    self.tokenizer.pad_token = self.tokenizer.eos_token
+                if self.tokenizer.pad_token_id is None:
+                    self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
+                logger.info(f"✅ [{self.model_name}] Tokenizer加载完成. Chat Template: {self.tokenizer.chat_template}")
 
-        try:
-            logger.info(f"🔧 [{self.model_name}] 加载tokenizer...")
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, **tokenizer_args)
-            if self.tokenizer.pad_token is None:
-                self.tokenizer.pad_token = self.tokenizer.eos_token
-            if self.tokenizer.pad_token_id is None:
-                self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
-            logger.info(f"✅ [{self.model_name}] Tokenizer加载完成. Chat Template: {self.tokenizer.chat_template}")
-
-            logger.info(f"🔧 [{self.model_name}] 加载模型...")
-            self.model = AutoModelForCausalLM.from_pretrained(self.model_path, **model_args)
-            self.model.eval()
-            logger.info(f"✅ [{self.model_name}] 模型加载完成. 设备: {self.model.device.type}:{self.model.device.index}, 量化: 4bit")
-            self.is_loaded = True
-        except Exception as e:
-            logger.exception(f"❌ [{self.model_name}] 模型加载失败: {e}")
-            self.unload_model()
-            raise
+                logger.info(f"🔧 [{self.model_name}] 加载模型...")
+                self.model = AutoModelForCausalLM.from_pretrained(self.model_path, **model_args)
+                self.model.eval()
+                logger.info(f"✅ [{self.model_name}] 模型加载完成. 设备: {self.model.device.type}:{self.model.device.index}, 量化: 4bit")
+                self.is_loaded = True
+            except Exception as e:
+                logger.exception(f"❌ [{self.model_name}] 模型加载失败: {e}")
+                self.unload_model()
+                raise
+        else:
+            logger.info(f"✅ [{self.model_name}] 模型已加载。")
 
     def unload_model(self):
-        if not self.is_loaded:
-            return
-
-        logger.info(f"🗑️ [{self.model_name}] 卸载模型并清理显存...")
-        try:
-            if self.model:
-                del self.model
-            if self.tokenizer:
-                del self.tokenizer
-            self.model = None
-            self.tokenizer = None
-            torch.cuda.empty_cache()
-            gc.collect()
-            self.is_loaded = False
-            logger.info(f"✅ [{self.model_name}] 显存已清理。")
-        except Exception as e:
-            logger.error(f"❌ 卸载 [{self.model_name}] 时发生错误: {e}")
+        if self.is_loaded:
+            logger.info(f"🗑️ [{self.model_name}] 卸载模型并清理显存...")
+            try:
+                if self.model:
+                    del self.model
+                if self.tokenizer:
+                    del self.tokenizer
+                self.model = None
+                self.tokenizer = None
+                torch.cuda.empty_cache()
+                gc.collect()
+                self.is_loaded = False
+                logger.info(f"✅ [{self.model_name}] 显存已清理。")
+            except Exception as e:
+                logger.error(f"❌ 卸载 [{self.model_name}] 时发生错误: {e}")
 
     def generate(self, prompt_string: str, max_new_tokens: int = 512, do_sample: bool = False, repetition_penalty: float = 1.1) -> Dict[str, Any]:
         if not self.is_loaded:
@@ -174,21 +177,61 @@ class ModelLoader:
             "generation_time_pure": end_gen_time - start_gen_time
         }
 
+# --- 资源清理机制 ---
+class ResourceManager:
+    def __init__(self, *args, **kwargs): # 兼容不带参数的init
+        self.model_loaders = {}
+        self.cleanup_registered = False
+        self._register_cleanup()
+    def _register_cleanup(self):
+        if not self.cleanup_registered:
+            atexit.register(self.cleanup_resources)
+            signal.signal(signal.SIGINT, self._signal_handler)
+            signal.signal(signal.SIGTERM, self._signal_handler)
+            self.cleanup_registered = True
+    def _signal_handler(self, signum, frame):
+        logger.info(f"\n🛑 收到信号 {signum}，开始清理资源...")
+        self.cleanup_resources()
+        sys.exit(0)
+    def add_model_loader(self, name: str, loader):
+        self.model_loaders[name] = loader
+    def cleanup_resources(self):
+        logger.info("🧹 开始清理资源...")
+        try:
+            for name, loader in self.model_loaders.items():
+                logger.info(f"🗑️ 清理模型 {name}...")
+                if hasattr(loader, 'unload_model'): 
+                    loader.unload_model()
+                else:
+                    if hasattr(loader, 'model') and loader.model: del loader.model
+                    if hasattr(loader, 'tokenizer') and loader.tokenizer: del loader.tokenizer
+                    torch.cuda.empty_cache(); gc.collect()
+            self.model_loaders.clear()
+            if torch.cuda.is_available():
+                logger.info("🗑️ 清理GPU内存..."); torch.cuda.empty_cache(); torch.cuda.synchronize()
+                for i in range(torch.cuda.device_count()):
+                    allocated = torch.cuda.memory_allocated(i) / 1024**3
+                    cached = torch.cuda.memory_reserved(i) / 1024**3
+                    logger.info(f"   GPU {i}: Allocated {allocated:.2f}GB, Cached {cached:.2f}GB")
+            logger.info("🗑️ Forcing garbage collection..."); gc.collect()
+            logger.info("✅ Resource cleanup complete")
+        except Exception as e: logger.error(f"⚠️ Error during resource cleanup: {e}")
+
+resource_manager = ResourceManager() # 初始化资源管理器
+
 # --- Prompt 构建辅助函数 (用于 LLM-Judge) ---
-def _load_judge_template(template_file_name: str) -> str:
+def _load_template_content_from_file(template_file_name: str) -> str:
     template_path = Path("data/prompt_templates") / template_file_name
     try:
         with open(template_path, 'r', encoding='utf-8') as f:
             return f.read().strip()
     except FileNotFoundError:
-        logger.error(f"❌ LLM-Judge 模板文件未找到: {template_path}，请确保文件存在。")
+        logger.error(f"❌ 模板文件未找到: {template_path}，请确保文件存在。")
         sys.exit(1)
 
 def get_judge_messages(query: str, expected_answer: str, model_final_answer: str, template_file_name: str) -> List[Dict[str, str]]:
-    template_full_string = _load_judge_template(template_file_name)
+    template_full_string = _load_template_content_from_file(template_file_name)
 
-    # 替换 Prompt 模板中的占位符
-    # 使用安全的替换方式，确保只替换一次
     system_part = re.search(r'===SYSTEM===(.*?)===USER===', template_full_string, re.DOTALL)
     user_part = re.search(r'===USER===(.*?)===ASSISTANT===', template_full_string, re.DOTALL)
 
@@ -203,17 +246,32 @@ def get_judge_messages(query: str, expected_answer: str, model_final_answer: str
         user_content = user_content.replace('{model_final_answer}', model_final_answer)
         messages.append({"role": "user", "content": user_content})
 
-    # Judge 的 Prompt 通常以 ASSISTANT 的开始标签结束，等待其生成评分JSON
-    messages.append({"role": "assistant", "content": ""}) # Judge 预期生成内容，所以content为空字符串
+    messages.append({"role": "assistant", "content": ""}) 
 
-    # 将 messages 列表转换为 ChatML 格式
     formatted_prompt = ""
-    for msg in messages[:-1]: # 最后一个是 ASSISTANT 的开始标签，不需要 im_end
+    for msg in messages[:-1]: 
         formatted_prompt += f"<|im_start|>{msg['role']}\n{msg['content']}<|im_end|>\n"
-    formatted_prompt += f"<|im_start|>{messages[-1]['role']}\n" # 添加最后一个 ASSISTANT 的开始标签
+    formatted_prompt += f"<|im_start|>{messages[-1]['role']}\n" 
 
     logger.debug(f"Judge Prompt (前500字符):\n{formatted_prompt[:500]}...")
     return formatted_prompt
+
+# ChatML 转换 (用于 Judge)
+def _convert_messages_to_chatml(messages: List[Dict[str, str]]) -> str:
+    if not messages: return ""
+    formatted_prompt = ""
+    for message in messages[:-1]:
+        role = message.get("role", "")
+        content = message.get("content", "")
+        if role == "system": formatted_prompt += f"<|im_start|>system\n{content.strip()}<|im_end|>\n"
+        elif role == "user": formatted_prompt += f"<|im_start|>user\n{content.strip()}<|im_end|>\n"
+        elif role == "assistant": formatted_prompt += f"<|im_start|>assistant\n{content.strip()}<|im_end|>\n"
+    final_message_role = messages[-1].get("role", "")
+    final_message_content = messages[-1].get("content", "").strip()
+    formatted_prompt += f"<|im_start|>{final_message_role}\n{final_message_content}"
+    logger.debug(f"Converted ChatML Prompt (前500字符):\n{formatted_prompt[:500]}...")
+    return formatted_prompt
+
 
 # --- LLM-Judge 主逻辑 ---
 def run_llm_judge_evaluation(args):
@@ -221,7 +279,7 @@ def run_llm_judge_evaluation(args):
 
     # 加载 Judge 模型 (Qwen3-8B，通常放在 cuda:0)
     judge_model_name = "Qwen3-8B"
-    judge_loader = ModelLoader(judge_model_name, "cuda:0")
+    judge_loader = ModelLoader(judge_model_name, "cuda:0") # 这里固定cuda:0
     try:
         judge_loader.load_model()
     except Exception as e:
@@ -336,10 +394,10 @@ def run_llm_judge_evaluation(args):
             avg_accuracy, avg_conciseness, avg_professionalism = 0.0, 0.0, 0.0
 
         logger.info(f"\n生成模型: {model_name}")
-        logger.info(f"  评估样本数: {data['count']}")
-        logger.info(f"  平均准确性分数: {avg_accuracy:.2f}")
-        logger.info(f"  平均简洁性分数: {avg_conciseness:.2f}")
-        logger.info(f"  平均专业性分数: {avg_professionalism:.2f}")
+        logger.info(f" 评估样本数: {data['count']}")
+        logger.info(f" 平均准确性分数: {avg_accuracy:.2f}")
+        logger.info(f" 平均简洁性分数: {avg_conciseness:.2f}")
+        logger.info(f" 平均专业性分数: {avg_professionalism:.2f}")
     logger.info("----------------------------")
     
     judge_loader.unload_model() # 卸载 Judge 模型
@@ -347,12 +405,9 @@ def run_llm_judge_evaluation(args):
 # --- 主程序入口 ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="LLM-Judge 评估脚本")
-    parser.add_argument("--results_file", type=str, required=True, 
-                        help="包含生成模型输出的JSON文件路径 (例如 comparison_results_chinese_*.json)")
-    parser.add_argument("--judge_template_file", type=str, default="qwen_judge_template.txt",
-                        help="LLM Judge 的 Prompt 模板文件 (例如 qwen_judge_template.txt)")
-    parser.add_argument("--judge_max_new_tokens", type=int, default=256,
-                        help="LLM Judge 生成的最大新 Token 数")
+    parser.add_argument("--results_file", type=str, required=True, help="包含生成模型输出的JSON文件路径 (例如 comparison_results_chinese_*.json)")
+    parser.add_argument("--judge_template_file", type=str, default="qwen_judge_template.txt", help="LLM Judge 的 Prompt 模板文件 (例如 qwen_judge_template.txt)")
+    parser.add_argument("--judge_max_new_tokens", type=int, default=256, help="LLM Judge 生成的最大新 Token 数")
 
     args = parser.parse_args()
     run_llm_judge_evaluation(args)

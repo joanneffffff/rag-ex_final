@@ -4,6 +4,11 @@ from typing import Dict, Any, List, Optional
 from .base_perturber import BasePerturber # 确保正确导入BasePerturber
 
 class TermPerturber(BasePerturber):
+    target = "both"
+    def perturb_context(self, text):
+        return self.perturb(text)
+    def perturb_prompt(self, text):
+        return self.perturb(text)
     """
     Perturbs financial terms in the text by replacing them with other specified terms.
     Requires a predefined list of financial terms and their exact replacements.

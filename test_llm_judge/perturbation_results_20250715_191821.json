@@ -1,0 +1,104 @@
+{
+  "experiment_info": {
+    "timestamp": "20250715_191821",
+    "num_samples": 1,
+    "num_results": 3,
+    "perturbers": [
+      "year",
+      "trend",
+      "term"
+    ]
+  },
+  "samples": [
+    {
+      "sample_id": "unknown",
+      "context": "云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）为19,838,873.03元。",
+      "question": "云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）是多少？",
+      "expected_answer": "",
+      "question_type": "数值型",
+      "context_type": "财务数据型",
+      "complexity_score": 0.12,
+      "diversity_score": 0.0
+    }
+  ],
+  "results": [
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）为19,838,873.03元。",
+        "perturbed_text": "云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）为19,838,873.03元。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "模拟变化"
+        ],
+        "change_description": "year扰动器模拟测试",
+        "timestamp": "2025-07-15T19:18:21.776960"
+      },
+      "similarity_score": 1.0,
+      "importance_score": 0.5,
+      "llm_judge_scores": {
+        "accuracy": 8.0,
+        "conciseness": 7.0,
+        "professionalism": 8.0
+      },
+      "timestamp": "2025-07-15T19:18:21.776970",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "trend",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "trend",
+        "original_text": "云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）为19,838,873.03元。",
+        "perturbed_text": "云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）为19,838,873.03元。",
+        "perturbation_type": "trend",
+        "changed_elements": [
+          "模拟变化"
+        ],
+        "change_description": "trend扰动器模拟测试",
+        "timestamp": "2025-07-15T19:18:21.776985"
+      },
+      "similarity_score": 1.0,
+      "importance_score": 0.5,
+      "llm_judge_scores": {
+        "accuracy": 8.0,
+        "conciseness": 7.0,
+        "professionalism": 8.0
+      },
+      "timestamp": "2025-07-15T19:18:21.776987",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "term",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "term",
+        "original_text": "云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）为19,838,873.03元。",
+        "perturbed_text": "云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）为19,838,873.03元。",
+        "perturbation_type": "term",
+        "changed_elements": [
+          "模拟变化"
+        ],
+        "change_description": "term扰动器模拟测试",
+        "timestamp": "2025-07-15T19:18:21.776998"
+      },
+      "similarity_score": 1.0,
+      "importance_score": 0.5,
+      "llm_judge_scores": {
+        "accuracy": 8.0,
+        "conciseness": 7.0,
+        "professionalism": 8.0
+      },
+      "timestamp": "2025-07-15T19:18:21.777000",
+      "perturbation_target": "summary"
+    }
+  ]
+}

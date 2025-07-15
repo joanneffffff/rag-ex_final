@@ -7,6 +7,11 @@ def is_chinese_text(text: str) -> bool:
     return bool(re.search(r'[\u4e00-\u9fff]', text))
 
 class TrendPerturber(BasePerturber):
+    target = "both"
+    def perturb_context(self, text):
+        return self.perturb(text)
+    def perturb_prompt(self, text):
+        return self.perturb(text)
     """
     Perturbs financial trend terms in the text by replacing them with antonyms.
     Supports both English and Chinese trend terms.
