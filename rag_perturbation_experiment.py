@@ -513,9 +513,17 @@ class RAGPerturbationExperiment:
         # 加载数据集
         samples = []
         with open(dataset_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                data = json.loads(line.strip())
-                samples.append(data)
+            data = json.load(f)
+            
+        # 处理JSON格式的数据
+        if 'categorized_samples' in data:
+            # 从分类样本中提取所有样本
+            for category, category_samples in data['categorized_samples'].items():
+                for sample_data in category_samples:
+                    samples.append(sample_data)
+        else:
+            # 直接处理样本列表
+            samples = data
         
         print(f"📊 总样本数: {len(samples)}")
         
@@ -1333,7 +1341,7 @@ class RAGPerturbationExperiment:
         
         print(f"\n💾 实验结果已保存到: {output_file}")
 
-    def run_integrated_experiment(self, dataset_path: str, num_samples: int = 20, output_dir: str = 'perturbation_results'):
+    def run_integrated_experiment(self, dataset_path: str, num_samples: int = 20, output_dir: str = 'perturbation_results', skip_judge: bool = False):
         """
         运行集成扰动实验（批量两步法）
         - 生成阶段：Fin-R1 on cuda:1
@@ -1361,7 +1369,8 @@ class RAGPerturbationExperiment:
         print("\n📋 步骤1: 选择样本")
         # 为每个扰动器生成7个样本，总共21个
         target_samples = 21  # 7个term + 7个year + 7个trend
-        candidates = self.select_perturbation_samples(dataset_path, num_samples=target_samples*3)
+        # 扩大初选池，确保有足够的样本可用（考虑到总样本数是100个）
+        candidates = self.select_perturbation_samples(dataset_path, num_samples=min(100, target_samples*3))  # 最多100个样本
         if not candidates:
             print("❌ 没有有效的样本，退出实验")
             return
@@ -1380,21 +1389,44 @@ class RAGPerturbationExperiment:
         used_sample_ids = set()
         perturber_counts = {'year': 0, 'term': 0, 'trend': 0}
         samples = filtered_candidates  # 定义samples变量
-        for sample in filtered_candidates:
-            if len(generation_results) >= target_samples:
-                break
+        # 循环处理样本，直到达到目标数量
+        sample_index = 0
+        max_attempts = len(filtered_candidates) * 2  # 允许更多尝试
+        attempts = 0
+        
+        while len(generation_results) < target_samples and attempts < max_attempts:
+            if sample_index >= len(filtered_candidates):
+                # 如果遍历完所有样本还不够，重新开始
+                sample_index = 0
+                print(f"🔄 重新开始样本选择，当前已生成 {len(generation_results)} 个结果")
+            
+            sample = filtered_candidates[sample_index]
+            sample_index += 1
+            attempts += 1
+            
             if sample.sample_id in used_sample_ids:
                 continue
             used_sample_ids.add(sample.sample_id)
+            
+            print(f"🔍 处理样本 {len(generation_results)+1}/{target_samples}: {sample.sample_id}")
+            print(f"   目标：每个样本只选择一种扰动器，生成一次扰动后答案")
+            
             original_answer = self.get_original_answer(sample.context, sample.question)
+            if not original_answer:
+                print(f"⚠️ 样本 {sample.sample_id} 原始答案生成失败，跳过")
+                continue
+                
             best_perturber = self._select_best_perturber_for_sample(sample, perturber_counts)
             if not best_perturber:
                 print(f"❌ 样本 {sample.sample_id} 无法选择扰动器，跳过")
                 continue
+                
             # 处理所有扰动器（term、year、trend）
             if best_perturber not in ['year', 'term', 'trend']:
                 print(f"⚠️ 样本 {sample.sample_id} 选择了{best_perturber}，跳过")
                 continue
+                
+            # 只应用一种扰动器，生成一次扰动后的答案
             perturbation_details = self.apply_perturbation(sample.context, best_perturber)
             if not perturbation_details:
                 print(f"  ⚠️ 样本 {sample.sample_id} 未生成扰动，跳过")
@@ -1403,18 +1435,29 @@ class RAGPerturbationExperiment:
             if perturbation_detail.perturbed_text == perturbation_detail.original_text:
                 print(f"⚠️ 样本 {sample.sample_id} 扰动器未产生实际变化，跳过")
                 continue
+                
+            # 只生成一次扰动后的答案
             perturbed_answer = self.get_perturbed_answer(perturbation_detail.perturbed_text, sample.question, best_perturber)
             if not perturbed_answer:
                 print(f"❌ 样本 {sample.sample_id} 扰动后答案生成失败，跳过")
                 continue
             similarity_score, importance_score, f1_score, em_score = self.calculate_importance_score(original_answer, perturbed_answer)
+            # 每个样本只生成一次扰动结果，格式与incremental_generation.json一致
             generation_result = {
                 'sample_id': sample.sample_id,
                 'question': sample.question,
                 'context': sample.context,
                 'expected_answer': sample.expected_answer,
                 'perturber_name': best_perturber,
-                'perturbation_detail': perturbation_detail,
+                'perturbation_detail': {
+                    'perturber_name': perturbation_detail.perturber_name,
+                    'original_text': perturbation_detail.original_text,
+                    'perturbed_text': perturbation_detail.perturbed_text,
+                    'perturbation_type': perturbation_detail.perturbation_type,
+                    'changed_elements': perturbation_detail.changed_elements,
+                    'change_description': perturbation_detail.change_description,
+                    'timestamp': perturbation_detail.timestamp
+                },
                 'original_answer': original_answer,
                 'perturbed_answer': perturbed_answer,
                 'similarity_score': similarity_score,
@@ -1424,10 +1467,12 @@ class RAGPerturbationExperiment:
                 'timestamp': datetime.now().isoformat()
             }
             generation_results.append(generation_result)
+            
             # 更新扰动器计数
-            if best_perturber:
-                perturber_counts[best_perturber] += 1
+            perturber_counts[best_perturber] += 1
+            
             print(f"  ✅ 生成完成")
+            print(f"    扰动器: {best_perturber}")
             print(f"    相似度: {similarity_score:.4f}")
             print(f"    重要性: {importance_score:.4f}")
             print(f"    F1分数: {f1_score:.4f}")
@@ -1435,6 +1480,23 @@ class RAGPerturbationExperiment:
             print(f"    扰动器计数: {perturber_counts}")
         
         print(f"\n📊 生成阶段完成，共生成 {len(generation_results)} 个有效扰动结果")
+        
+        # 检查是否达到目标数量
+        if len(generation_results) < target_samples:
+            print(f"⚠️ 警告：只生成了 {len(generation_results)} 个结果，少于目标 {target_samples} 个")
+            print(f"   可能原因：样本池不足或太多样本被跳过")
+            print(f"   尝试次数: {attempts}")
+        else:
+            print(f"✅ 成功生成 {len(generation_results)} 个结果，达到目标 {target_samples} 个")
+            print(f"   尝试次数: {attempts}")
+        
+        # 显示各扰动器的分布
+        perturber_distribution = {}
+        for result in generation_results:
+            perturber = result['perturber_name']
+            perturber_distribution[perturber] = perturber_distribution.get(perturber, 0) + 1
+        
+        print(f"📊 扰动器分布: {perturber_distribution}")
         
         # 步骤3: 保存生成结果
         print("\n💾 步骤3: 保存生成结果")
@@ -1451,72 +1513,125 @@ class RAGPerturbationExperiment:
             serializable_results.append(serializable_result)
         
         with open(generation_file, 'w', encoding='utf-8') as f:
-            json.dump({
-                'experiment_info': {
-                    'timestamp': timestamp,
-                    'num_samples': len(samples),
-                    'num_results': len(generation_results),
-                    'perturbers': list(self.perturbers.keys()),
-                    'stage': 'generation_only'
-                },
-                'samples': [asdict(sample) for sample in samples],
-                'generation_results': serializable_results
-            }, f, ensure_ascii=False, indent=2)
+            # 保存为简单的JSON数组格式，与incremental_generation.json一致
+            json.dump(serializable_results, f, ensure_ascii=False, indent=2)
         
         print(f"✅ 生成结果已保存到: {generation_file}")
         
         # 步骤4: 评测阶段（只用Qwen3-8B，cuda:1）
-        print("\n🔬 步骤4: 评测阶段（只用Qwen3-8B）")
+        if not skip_judge:
+            print("\n🔬 步骤4: 评测阶段（只用Qwen3-8B）")
+            
+            # 释放Fin-R1显存
+            print("🧹 释放Fin-R1显存...")
+            del self.generator
+            gc.collect()
+            torch.cuda.empty_cache()
+            
+            # 初始化LLM Judge
+            print("🔧 初始化LLM Judge...")
+            from llm_comparison.chinese_llm_judge import llm_judge_singleton
+            llm_judge_singleton.initialize(model_name="Qwen3-8B", device="cuda:1")
+            
+            # 对每个生成结果进行评测
+            final_results = []
+            for i, gen_result in enumerate(generation_results, 1):
+                print(f"\n📊 评测结果 {i}/{len(generation_results)}: {gen_result['sample_id']} - {gen_result['perturber_name']}")
+                
+                # LLM Judge评估
+                llm_judge_scores = llm_judge_singleton.evaluate(
+                    gen_result['question'],
+                    gen_result['expected_answer'],
+                    gen_result['perturbed_answer']
+                )
+                
+                # 创建最终结果
+                final_result = PerturbationResult(
+                    sample_id=gen_result['sample_id'],
+                    perturber_name=gen_result['perturber_name'],
+                    original_answer=gen_result['original_answer'],
+                    perturbed_answer=gen_result['perturbed_answer'],
+                    perturbation_detail=gen_result['perturbation_detail'],
+                    similarity_score=gen_result['similarity_score'],
+                    importance_score=gen_result['importance_score'],
+                    f1_score=gen_result['f1_score'],
+                    em_score=gen_result['em_score'],
+                    llm_judge_scores=llm_judge_scores,
+                    timestamp=gen_result['timestamp']
+                )
+                
+                final_results.append(final_result)
+                print(f"  ✅ 评测完成")
+                print(f"    LLM Judge: {llm_judge_scores.get('overall_score', 'N/A')}")
+            
+            # 步骤5: 保存最终结果
+            print("\n💾 步骤5: 保存最终结果")
+            self.save_integrated_results(final_results, samples, output_dir)
+            
+            # 步骤6: 计算F1和EM指标
+            print("\n📊 步骤6: 计算F1和EM指标")
+            self.calculate_and_save_metrics(final_results, samples, output_dir)
+            
+            # 清理LLM Judge模型
+            print("🧹 清理LLM Judge模型...")
+            llm_judge_singleton.cleanup()
+            gc.collect()
+            torch.cuda.empty_cache()
+            
+            print(f"\n🎉 集成实验完成（批量两步法）！")
+            print(f"📊 处理了 {len(samples)} 个样本")
+            print(f"📈 生成了 {len(generation_results)} 个结果")
+            print(f"📊 评测了 {len(final_results)} 个结果")
+            print("✅ Fin-R1和Qwen3-8B未同时占用cuda:1，显存安全")
+        else:
+            print("\n⏭️ 跳过LLM Judge评测阶段")
+            print(f"\n🎉 生成阶段完成！")
+            print(f"📊 处理了 {len(samples)} 个样本")
+            print(f"📈 生成了 {len(generation_results)} 个结果")
+            print("✅ 生成结果已保存，可后续进行LLM Judge评测")
+    
+    def run_judge_evaluation_only(self, generation_file: str, output_dir: str):
+        """只运行LLM Judge评测"""
+        print(f"🔍 开始LLM Judge评测: {generation_file}")
         
-        # 释放Fin-R1显存
-        print("🧹 释放Fin-R1显存...")
-        del self.generator
+        # 强制清理GPU内存
+        print("🧹 强制清理GPU内存...")
+        if hasattr(self, 'generator'):
+            del self.generator
         gc.collect()
         torch.cuda.empty_cache()
         
-        # 初始化LLM Judge
+        # 加载生成结果
+        with open(generation_file, 'r', encoding='utf-8') as f:
+            generation_data = json.load(f)
+        
+        print(f"📊 加载了 {len(generation_data)} 个生成结果")
+        
+        # 初始化LLM Judge（使用cuda:1）
         print("🔧 初始化LLM Judge...")
         from llm_comparison.chinese_llm_judge import llm_judge_singleton
         llm_judge_singleton.initialize(model_name="Qwen3-8B", device="cuda:1")
         
-        # 对每个生成结果进行评测
-        final_results = []
-        for i, gen_result in enumerate(generation_results, 1):
-            print(f"\n📊 评测结果 {i}/{len(generation_results)}: {gen_result['sample_id']} - {gen_result['perturber_name']}")
+        # 为每个结果添加LLM Judge评分
+        for i, result in enumerate(generation_data):
+            print(f"🔍 评测样本 {i+1}/{len(generation_data)}: {result.get('sample_id', 'unknown')}")
             
-            # LLM Judge评估
-            llm_judge_scores = llm_judge_singleton.evaluate(
-                gen_result['question'],
-                gen_result['expected_answer'],
-                gen_result['perturbed_answer']
-            )
+            original_answer = result.get('original_answer', '')
+            perturbed_answer = result.get('perturbed_answer', '')
+            question = result.get('question', '')
             
-            # 创建最终结果
-            final_result = PerturbationResult(
-                sample_id=gen_result['sample_id'],
-                perturber_name=gen_result['perturber_name'],
-                original_answer=gen_result['original_answer'],
-                perturbed_answer=gen_result['perturbed_answer'],
-                perturbation_detail=gen_result['perturbation_detail'],
-                similarity_score=gen_result['similarity_score'],
-                importance_score=gen_result['importance_score'],
-                f1_score=gen_result['f1_score'],
-                em_score=gen_result['em_score'],
-                llm_judge_scores=llm_judge_scores,
-                timestamp=gen_result['timestamp']
-            )
-            
-            final_results.append(final_result)
-            print(f"  ✅ 评测完成")
-            print(f"    LLM Judge: {llm_judge_scores.get('overall_score', 'N/A')}")
-        
-        # 步骤5: 保存最终结果
-        print("\n💾 步骤5: 保存最终结果")
-        self.save_integrated_results(final_results, samples, output_dir)
-        
-        # 步骤6: 计算F1和EM指标
-        print("\n📊 步骤6: 计算F1和EM指标")
-        self.calculate_and_save_metrics(final_results, samples, output_dir)
+            if original_answer and perturbed_answer:
+                # 使用LLM Judge评测
+                judge_scores = llm_judge_singleton.evaluate(
+                    question,
+                    original_answer,
+                    perturbed_answer
+                )
+                result['judge_scores'] = judge_scores
+                print(f"✅ 评测完成: {judge_scores}")
+            else:
+                print(f"⚠️ 跳过评测：答案为空")
+                result['judge_scores'] = {}
         
         # 清理LLM Judge模型
         print("🧹 清理LLM Judge模型...")
@@ -1524,23 +1639,31 @@ class RAGPerturbationExperiment:
         gc.collect()
         torch.cuda.empty_cache()
         
-        print(f"\n🎉 集成实验完成（批量两步法）！")
-        print(f"📊 处理了 {len(samples)} 个样本")
-        print(f"📈 生成了 {len(generation_results)} 个结果")
-        print(f"📊 评测了 {len(final_results)} 个结果")
-        print("✅ Fin-R1和Qwen3-8B未同时占用cuda:1，显存安全")
+        # 保存评测结果（保持与incremental_generation.json相同的格式）
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_file = os.path.join(output_dir, f"judge_results_{timestamp}.json")
+        
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(generation_data, f, ensure_ascii=False, indent=2)
+        
+        print(f"💾 评测结果已保存到: {output_file}")
+        print(f"✅ LLM Judge评测完成")
 
     def _select_best_perturber_for_sample(self, sample: PerturbationSample, perturber_counts: Dict[str, int]) -> Optional[str]:
-        """为样本选择最佳扰动器 - 确保每个扰动器获得7个样本"""
-        # 优先选择计数较少的扰动器，确保每个扰动器都能获得样本
-        min_count = min(perturber_counts.values())
-        candidates = [k for k, v in perturber_counts.items() if v == min_count]
+        """为样本选择最佳扰动器 - 每个样本只选择一种扰动器"""
+        # 只选择未达到7个样本的扰动器
+        candidates = [k for k, v in perturber_counts.items() if v < 7]
         
         # 如果所有扰动器都达到了7个样本，则停止
-        if min_count >= 7:
+        if not candidates:
+            print(f"   所有扰动器都已达到7个样本，停止选择")
             return None
             
-        return candidates[0] if candidates else None
+        # 从候选扰动器中选择计数最少的（确保均匀分布）
+        best_candidate = min(candidates, key=lambda x: perturber_counts[x])
+        
+        print(f"   选择扰动器: {best_candidate} (当前计数: {perturber_counts[best_candidate]})")
+        return best_candidate
 
     def save_integrated_results(self, results: List[PerturbationResult], samples: List[PerturbationSample], output_dir: str):
         """保存集成结果"""
@@ -1606,8 +1729,8 @@ def run_judge_only(generation_result_path: str, judge_output_path: str):
 # run_judge_only("generated_answers.json", "judge_results.json")
 
 def main():
-    """主函数 - 为每个扰动器（term、year、trend）各生成7个样本"""
-    print("🚀 启动RAG扰动实验 - 为每个扰动器生成7个样本")
+    """主函数 - 分步骤运行：先生成数据，再用LLM Judge评测"""
+    print("🚀 启动RAG扰动实验 - 分步骤运行")
     
     # 初始化实验
     experiment = RAGPerturbationExperiment()
@@ -1622,14 +1745,49 @@ def main():
     print(f"📊 目标样本数: {target_samples}")
     print(f"📁 数据集: {dataset_path}")
     print(f"📂 输出目录: {output_dir}")
-    print(f"🎯 目标：每个扰动器（term、year、trend）各生成7个样本")
     
-    # 运行集成实验
+    # 步骤1：只生成数据，不进行LLM Judge评测
+    print("\n" + "="*50)
+    print("🔬 步骤1：生成数据（跳过LLM Judge）")
+    print("="*50)
+    
     experiment.run_integrated_experiment(
         dataset_path=dataset_path,
         num_samples=target_samples,
-        output_dir=output_dir
+        output_dir=output_dir,
+        skip_judge=True  # 跳过LLM Judge
     )
+    
+    print("\n" + "="*50)
+    print("✅ 步骤1完成：数据生成已保存")
+    print("="*50)
+    
+    # 强制清理GPU内存
+    print("\n🧹 强制清理GPU内存，准备运行LLM Judge...")
+    if hasattr(experiment, 'generator'):
+        del experiment.generator
+    gc.collect()
+    torch.cuda.empty_cache()
+    
+    # 步骤2：使用LLM Judge进行评测
+    print("\n" + "="*50)
+    print("🔍 步骤2：使用LLM Judge进行评测")
+    print("="*50)
+    
+    # 找到最新的生成结果文件
+    import glob
+    generation_files = glob.glob(os.path.join(output_dir, "generation_results_*.json"))
+    if generation_files:
+        latest_file = max(generation_files, key=os.path.getctime)
+        print(f"📁 使用最新生成文件: {latest_file}")
+        
+        # 运行LLM Judge评测
+        experiment.run_judge_evaluation_only(
+            generation_file=latest_file,
+            output_dir=output_dir
+        )
+    else:
+        print("❌ 未找到生成结果文件")
 
 if __name__ == "__main__":
     main() 
