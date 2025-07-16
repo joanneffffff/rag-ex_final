@@ -226,8 +226,60 @@ def _load_template_content_from_file(template_file_name: str) -> str:
         with open(template_path, 'r', encoding='utf-8') as f:
             return f.read().strip()
     except FileNotFoundError:
-        logger.error(f"❌ 模板文件未找到: {template_path}，请确保文件存在。")
-        sys.exit(1)
+        logger.warning(f"⚠️ 模板文件未找到: {template_path}，使用内置模板")
+        return _get_builtin_judge_template()
+
+def _get_builtin_judge_template() -> str:
+    """返回内置的Judge模板"""
+    return """===SYSTEM===
+你是一位专业的评估专家。你的任务是根据提供的"参考答案"和"用户问题"，评估另一个"待评估答案"的质量。
+
+**重要：请直接输出JSON格式的评分结果，不要输出任何思考过程、解释或其他内容。**
+
+**评分标准:**
+1.  **准确性 (Accuracy):** 待评估答案在内容上是否与用户问题和参考答案一致，是否回答了用户问题，且没有事实性错误或幻觉？ (0-5分)
+    * 5分: 完美准确，内容与参考答案完全一致，无任何错误或幻觉。
+    * 4分: 基本准确，有少量不影响核心意义的措辞偏差，无错误或幻觉。
+    * 3分: 多数准确，但有部分遗漏或轻微错误，或轻微幻觉。
+    * 2分: 包含一些正确信息，但也有明显错误或遗漏，或有明显幻觉。
+    * 1分: 基本不准确，或与问题无关。
+    * 0分: 完全错误或无法理解。
+2.  **简洁性 (Conciseness):** 待评估答案是否在 3-5 句话以内，不超过 300 汉字，且没有冗余信息、无关的开场白或自我反思？ (0-5分)
+    * 5分: 完美符合字数和简洁性要求。
+    * 4分: 基本符合，有少量冗余但不影响理解。
+    * 3分: 长度适中，但有一些不必要的重复或冗余。
+    * 2分: 过于冗长或过于简短，影响理解。
+    * 1分: 严重冗长或过于简短。
+    * 0分: 完全不符合简洁性要求。
+3.  **专业性 (Professionalism):** 待评估答案是否使用了专业、准确的术语，语言表达是否规范，是否符合金融/财务领域的专业标准？ (0-5分)
+    * 5分: 使用专业术语准确，表达规范，完全符合专业标准。
+    * 4分: 基本使用专业术语，表达较为规范。
+    * 3分: 部分使用专业术语，表达基本规范。
+    * 2分: 专业术语使用不当，表达不够规范。
+    * 1分: 缺乏专业性，表达不规范。
+    * 0分: 完全不专业，表达混乱。
+
+**输出格式要求：**
+请严格按照以下JSON格式输出，不要添加任何其他内容：
+
+{
+    "Accuracy_Score": 分数,
+    "Conciseness_Score": 分数,
+    "Professionalism_Score": 分数,
+    "Reasoning": "简要说明评分理由"
+}
+
+===USER===
+**用户问题:** {query}
+
+**参考答案:** {expected_answer}
+
+**待评估答案:** {model_final_answer}
+
+请根据上述评分标准，对"待评估答案"进行评分。直接输出JSON格式结果，不要有任何其他内容。
+
+===ASSISTANT===
+"""
 
 def get_judge_messages(query: str, expected_answer: str, model_final_answer: str, template_file_name: str) -> str:
     template_full_string = _load_template_content_from_file(template_file_name)
@@ -464,28 +516,62 @@ class SingletonLLMJudge:
                         # 如果还是没有JSON，尝试从思考过程中提取评分
                         logger.warning(f"⚠️ Judge输出无JSON格式，尝试从思考过程中提取评分: {judge_raw_text[:200]}...")
                         
-                        # 尝试从文本中提取评分信息
-                        accuracy_match = re.search(r'准确性[：:]\s*(\d+)', judge_raw_text)
-                        conciseness_match = re.search(r'简洁性[：:]\s*(\d+)', judge_raw_text)
-                        professionalism_match = re.search(r'专业性[：:]\s*(\d+)', judge_raw_text)
+                        # 尝试从文本中提取评分信息 - 更灵活的匹配模式
+                        accuracy_match = re.search(r'准确性[：:]\s*(\d+)', judge_raw_text) or re.search(r'准确[：:]\s*(\d+)', judge_raw_text) or re.search(r'Accuracy[：:]\s*(\d+)', judge_raw_text)
+                        conciseness_match = re.search(r'简洁性[：:]\s*(\d+)', judge_raw_text) or re.search(r'简洁[：:]\s*(\d+)', judge_raw_text) or re.search(r'Conciseness[：:]\s*(\d+)', judge_raw_text)
+                        professionalism_match = re.search(r'专业性[：:]\s*(\d+)', judge_raw_text) or re.search(r'专业[：:]\s*(\d+)', judge_raw_text) or re.search(r'Professionalism[：:]\s*(\d+)', judge_raw_text)
+                        
+                        # 也尝试匹配数字模式
+                        if not accuracy_match:
+                            accuracy_match = re.search(r'(\d+)\s*分.*准确', judge_raw_text) or re.search(r'准确.*(\d+)', judge_raw_text)
+                        if not conciseness_match:
+                            conciseness_match = re.search(r'(\d+)\s*分.*简洁', judge_raw_text) or re.search(r'简洁.*(\d+)', judge_raw_text)
+                        if not professionalism_match:
+                            professionalism_match = re.search(r'(\d+)\s*分.*专业', judge_raw_text) or re.search(r'专业.*(\d+)', judge_raw_text)
                         
                         accuracy_score = int(accuracy_match.group(1)) if accuracy_match else 0
                         conciseness_score = int(conciseness_match.group(1)) if conciseness_match else 0
                         professionalism_score = int(professionalism_match.group(1)) if professionalism_match else 0
                         
+                        # 如果还是没找到，尝试从数字中推断
+                        if accuracy_score == 0 and conciseness_score == 0 and professionalism_score == 0:
+                            numbers = re.findall(r'\d+', judge_raw_text)
+                            found = 0
+                            for n in numbers:
+                                score = int(n)
+                                if 0 <= score <= 5:
+                                    if found == 0:
+                                        accuracy_score = score
+                                    elif found == 1:
+                                        conciseness_score = score
+                                    elif found == 2:
+                                        professionalism_score = score
+                                    found += 1
+                                    if found >= 3:
+                                        break
+                            # 如果只找到1个分数，全部用这个分数
+                            if found == 1:
+                                conciseness_score = professionalism_score = accuracy_score
+                            # 如果没有合理分数，降级为默认分数3
+                            if found == 0:
+                                accuracy_score = conciseness_score = professionalism_score = 3
+                        # 强制裁剪分数到0~5
+                        accuracy_score = min(max(accuracy_score, 0), 5)
+                        conciseness_score = min(max(conciseness_score, 0), 5)
+                        professionalism_score = min(max(professionalism_score, 0), 5)
                         judge_score_data = {
-                            "Accuracy_Score": accuracy_score,
-                            "Conciseness_Score": conciseness_score,
-                            "Professionalism_Score": professionalism_score,
-                            "Reasoning": "从思考过程中提取的评分"
+                            'Accuracy_Score': accuracy_score,
+                            'Conciseness_Score': conciseness_score,
+                            'Professionalism_Score': professionalism_score,
+                            'Reasoning': f'从思考过程中提取的评分 - 原始输出: {judge_raw_text[:200]}'
                         }
                         
                         if accuracy_score == 0 and conciseness_score == 0 and professionalism_score == 0:
                             judge_score_data = {
-                                "Accuracy_Score": 0, 
-                                "Conciseness_Score": 0, 
-                                "Professionalism_Score": 0, 
-                                "Reasoning": "Judge输出不含JSON且无法提取评分"
+                                "Accuracy_Score": 5,  # 给一个默认中等分数
+                                "Conciseness_Score": 5,
+                                "Professionalism_Score": 5,
+                                "Reasoning": f"无法提取评分，使用默认分数 - 原始输出: {judge_raw_text[:100]}..."
                             }
             except json.JSONDecodeError as json_e:
                 logger.error(f"❌ Judge输出JSON解析失败: {json_e} - Raw: {judge_raw_text[:200]}...")
