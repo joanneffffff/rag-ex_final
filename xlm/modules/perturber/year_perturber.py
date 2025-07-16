@@ -18,18 +18,16 @@ class YearPerturber(BasePerturber):
         self.min_year = self.config.get('min_year', 1900) # Minimum year to consider for perturbation
         self.max_year = self.config.get('max_year', 2050) # Maximum year to consider as a valid year in original text
 
-        # 添加特定的年份映射 - 使用更合适的年份范围
+        # 添加特定的年份映射 - 2018-2023年范围
         # 这个映射将优先于简单的增量扰动。
         # 键是原始年份字符串，值是目标年份字符串。
         self.year_mapping = self.config.get('year_mapping', {
-            "2024": "2019", # 示例：将2024改为2019
-            "2025": "2018", # 示例：将2025改为2018
-            "2023": "2018", # 示例：将2023改为2018
-            "2022": "2019",
-            "2021": "2020",
-            # 如果需要更通用的年代回溯，可以添加更多，例如：
-            # "2020": "2015",
-            # "2019": "2014",
+            "2023": "2018", # 将2023改为2018
+            "2022": "2019", # 将2022改为2019
+            "2021": "2020", # 将2021改为2020
+            "2020": "2019", # 将2020改为2019
+            "2019": "2018", # 将2019改为2018
+            "2018": "2017", # 将2018改为2017
         })
 
         # Define comprehensive year patterns for both languages

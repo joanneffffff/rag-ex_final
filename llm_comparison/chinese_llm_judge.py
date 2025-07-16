@@ -229,7 +229,7 @@ def _load_template_content_from_file(template_file_name: str) -> str:
         logger.error(f"❌ 模板文件未找到: {template_path}，请确保文件存在。")
         sys.exit(1)
 
-def get_judge_messages(query: str, expected_answer: str, model_final_answer: str, template_file_name: str) -> List[Dict[str, str]]:
+def get_judge_messages(query: str, expected_answer: str, model_final_answer: str, template_file_name: str) -> str:
     template_full_string = _load_template_content_from_file(template_file_name)
 
     system_part = re.search(r'===SYSTEM===(.*?)===USER===', template_full_string, re.DOTALL)
@@ -401,6 +401,132 @@ def run_llm_judge_evaluation(args):
     logger.info("----------------------------")
     
     judge_loader.unload_model() # 卸载 Judge 模型
+
+# --- 单例LLM Judge类 ---
+class SingletonLLMJudge:
+    _instance = None
+    _model_loader = None
+    _is_initialized = False
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(SingletonLLMJudge, cls).__new__(cls)
+        return cls._instance
+    
+    def __init__(self):
+        if not self._is_initialized:
+            self._model_loader = None
+            self._is_initialized = True
+    
+    def initialize(self, model_name: str = "Qwen3-8B", device: str = "cuda:1"):
+        """初始化模型加载器（只初始化一次）"""
+        if self._model_loader is None:
+            logger.info(f"🔧 初始化LLM Judge模型: {model_name} on {device}")
+            self._model_loader = ModelLoader(model_name, device)
+            try:
+                self._model_loader.load_model()
+                logger.info(f"✅ LLM Judge模型初始化完成")
+            except Exception as e:
+                logger.error(f"❌ LLM Judge模型初始化失败: {e}")
+                self._model_loader = None
+                raise
+    
+    def evaluate(self, query: str, expected_answer: str, model_final_answer: str, template_file_name: str = "qwen_judge_template.txt") -> Dict[str, Any]:
+        """执行LLM Judge评估"""
+        if self._model_loader is None:
+            raise RuntimeError("LLM Judge模型未初始化，请先调用initialize()")
+        
+        try:
+            judge_prompt = get_judge_messages(query, expected_answer, model_final_answer, template_file_name)
+            
+            judge_output = self._model_loader.generate(
+                prompt_string=judge_prompt,
+                max_new_tokens=256,
+                do_sample=False,
+                repetition_penalty=1.0
+            )
+            
+            judge_raw_text = judge_output["generated_text"]
+            
+            # 解析Judge输出
+            judge_score_data = {}
+            try:
+                # 首先尝试直接解析整个输出
+                if judge_raw_text.strip().startswith('{') and judge_raw_text.strip().endswith('}'):
+                    judge_score_data = json.loads(judge_raw_text.strip())
+                else:
+                    # 尝试提取JSON部分
+                    json_match = re.search(r'\{[\s\S]*\}', judge_raw_text)
+                    if json_match:
+                        json_string = json_match.group(0)
+                        judge_score_data = json.loads(json_string)
+                    else:
+                        # 如果还是没有JSON，尝试从思考过程中提取评分
+                        logger.warning(f"⚠️ Judge输出无JSON格式，尝试从思考过程中提取评分: {judge_raw_text[:200]}...")
+                        
+                        # 尝试从文本中提取评分信息
+                        accuracy_match = re.search(r'准确性[：:]\s*(\d+)', judge_raw_text)
+                        conciseness_match = re.search(r'简洁性[：:]\s*(\d+)', judge_raw_text)
+                        professionalism_match = re.search(r'专业性[：:]\s*(\d+)', judge_raw_text)
+                        
+                        accuracy_score = int(accuracy_match.group(1)) if accuracy_match else 0
+                        conciseness_score = int(conciseness_match.group(1)) if conciseness_match else 0
+                        professionalism_score = int(professionalism_match.group(1)) if professionalism_match else 0
+                        
+                        judge_score_data = {
+                            "Accuracy_Score": accuracy_score,
+                            "Conciseness_Score": conciseness_score,
+                            "Professionalism_Score": professionalism_score,
+                            "Reasoning": "从思考过程中提取的评分"
+                        }
+                        
+                        if accuracy_score == 0 and conciseness_score == 0 and professionalism_score == 0:
+                            judge_score_data = {
+                                "Accuracy_Score": 0, 
+                                "Conciseness_Score": 0, 
+                                "Professionalism_Score": 0, 
+                                "Reasoning": "Judge输出不含JSON且无法提取评分"
+                            }
+            except json.JSONDecodeError as json_e:
+                logger.error(f"❌ Judge输出JSON解析失败: {json_e} - Raw: {judge_raw_text[:200]}...")
+                judge_score_data = {
+                    "Accuracy_Score": 0, 
+                    "Conciseness_Score": 0, 
+                    "Professionalism_Score": 0, 
+                    "Reasoning": f"JSON解析失败: {judge_raw_text[:50]}"
+                }
+            
+            return {
+                "accuracy": judge_score_data.get("Accuracy_Score", 0),
+                "conciseness": judge_score_data.get("Conciseness_Score", 0),
+                "professionalism": judge_score_data.get("Professionalism_Score", 0),
+                "overall_score": (judge_score_data.get("Accuracy_Score", 0) + 
+                                judge_score_data.get("Conciseness_Score", 0) + 
+                                judge_score_data.get("Professionalism_Score", 0)) / 3,
+                "reasoning": judge_score_data.get("Reasoning", ""),
+                "raw_output": judge_raw_text
+            }
+            
+        except Exception as e:
+            logger.exception(f"❌ LLM Judge评估失败: {e}")
+            return {
+                "accuracy": 0,
+                "conciseness": 0,
+                "professionalism": 0,
+                "overall_score": 0,
+                "reasoning": f"评估失败: {str(e)}",
+                "raw_output": ""
+            }
+    
+    def cleanup(self):
+        """清理模型资源"""
+        if self._model_loader is not None:
+            self._model_loader.unload_model()
+            self._model_loader = None
+            logger.info("✅ LLM Judge模型已清理")
+
+# 全局单例实例
+llm_judge_singleton = SingletonLLMJudge()
 
 # --- 主程序入口 ---
 if __name__ == "__main__":
