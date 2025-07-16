@@ -1,0 +1,1522 @@
+{
+  "experiment_info": {
+    "timestamp": "20250715_200121",
+    "num_samples": 20,
+    "num_results": 42,
+    "perturbers": [
+      "year",
+      "trend",
+      "term"
+    ],
+    "perturbation_targets": [
+      "summary",
+      "prompt"
+    ]
+  },
+  "samples": [
+    {
+      "sample_id": "unknown",
+      "context": "神火股份（000933）公司三季报业绩大幅改善，扣非后净利润同比增长203%，主要得益于云南神火并表驱动增长。公司优化产业结构，煤铝主业经营改善明显，新疆神火、泉店煤矿增利显著，同时原材料价格下降进一步降低成本。云南神火完成并表后，集团计划在未来六个月内增持不超过1.5%的股份，显示出对未来业绩增长的信心。近期市场数据显示，股票价格波动较大，但整体趋势向上。预测结果显示，该股票下个月最终收益为‘涨’，上涨概率为‘极大’。",
+      "question": "神火股份（000933）公司三季报显示业绩大幅改善，云南神火并表驱动增长，煤铝主业经营改善，新疆神火和泉店煤矿增利，同时原材料价格下降降低成本。集团计划未来六个月增持股份，显示对业绩增长的信心。基于近期市场数据，该股票下个月的最终收益预测为‘涨’，上涨概率为‘极大’。请问这一预测是如何得出的？",
+      "expected_answer": "",
+      "question_type": "方法策略型",
+      "context_type": "财务数据型",
+      "complexity_score": 0.441,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "一汽解放于2006年9月22日的股票分析数据显示，其股息率为6.4309%。",
+      "question": "一汽解放(000800.SZ)于2006年9月22日的股息率是多少？",
+      "expected_answer": "",
+      "question_type": "数值型",
+      "context_type": "一般信息型",
+      "complexity_score": 0.102,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "阳光电源在2023年4月24日的股票数据包括：股票代码300274.SZ，当日收盘价103.4元，量比1.26，市盈率97.0291，市销率6.3625，股息率0.1064%，自由流通股本96122.9317万。其中，市销率是6.3625。",
+      "question": "阳光电源在2023年4月24日的市销率是多少？",
+      "expected_answer": "",
+      "question_type": "数值型",
+      "context_type": "一般信息型",
+      "complexity_score": 0.06899999999999999,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "崇达技术的业务结构持续优化，投资扩产稳步进行，特别是在国内市场的拓展和5G业务方面表现突出。公司通过深化大客户战略，优化市场结构，成功引入更多战略客户，如英特尔、三星电子等。研发投入增加，特别是在5G相关产品的开发上取得了显著成果。各工厂的产销情况良好，产能利用有效提升。公司预计随着5G通讯网络的加速建设，将享受到5G带来的红利。基于此，给予崇达技术买入A评级。",
+      "question": "崇达技术（002815）在最近的研究报告中，其业务结构和投资扩产状况如何？",
+      "expected_answer": "",
+      "question_type": "方法策略型",
+      "context_type": "业绩表现型",
+      "complexity_score": 0.111,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "报告指出创维数字（000810）短期内面临需求承压和收入下滑的压力，特别是智能终端业务在国内市场的表现不佳，但海外市场需求有所增长。报告下调了公司2020-2022年的EPS预测，并给出了公司的买入评级。短期内，收入及盈利承压，但报告认为中长期网络融合发展的趋势对公司有利。报告建议给予公司2021年18倍PE的目标价格。",
+      "question": "关于创维数字（000810）的最新研报显示了哪些信息？",
+      "expected_answer": "",
+      "question_type": "数值型",
+      "context_type": "业绩表现型",
+      "complexity_score": 0.081,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "这份利润表数据显示了分众传媒在2013年12月31日的财务状况，包括营业收入、营业成本、财务费用等关键指标，以及所得税费用为19,182,472.01。",
+      "question": "分众传媒在2013年的所得税费用是多少？",
+      "expected_answer": "",
+      "question_type": "数值型",
+      "context_type": "财务数据型",
+      "complexity_score": 0.06,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "立讯精密于2021年6月30日发布的利润表数据显示，其营业总成本为256,325,427,354.55元，其中减去营业成本后的金额为228,699,652,965.8元，资产减值损失为-4,048,920.76元，最终营业利润为1,998,326,683.29元。",
+      "question": "立讯精密（002475.SZ）于2021年6月30日的营业利润是多少？",
+      "expected_answer": "",
+      "question_type": "数值型",
+      "context_type": "财务数据型",
+      "complexity_score": 0.10800000000000001,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "抚顺特钢2022年三季报显示，尽管高温合金等高端产品保持增长，但整体销量下滑影响了Q3业绩。原料成本压力有所缓解，但能源成本上升及民品需求不佳导致产品售价下降，毛利率环比下滑。公司持续加码技改项目，高温合金未来贡献潜力大。近期股票价格波动较大，日涨跌幅和成交量也呈现出不稳定趋势。",
+      "question": "抚顺特钢（600399）2022年三季报主要显示了哪些业绩变化？",
+      "expected_answer": "",
+      "question_type": "趋势分析型",
+      "context_type": "业绩表现型",
+      "complexity_score": 0.096,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）为19,838,873.03元。",
+      "question": "云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）是多少？",
+      "expected_answer": "",
+      "question_type": "数值型",
+      "context_type": "财务数据型",
+      "complexity_score": 0.12,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "恩捷股份（002812）的2021年半年报显示，公司营收和净利润均大幅增长，湿法隔膜出货量稳定增长，市占率优势显著。产能扩张积极，计划未来三年每年新增产线25-30-40条，以提高市场占有率。在线涂覆和铝塑膜业务也在积极推进。预计2021-2023年归母净利润分别为25.72、44.49、64.49亿元，同比增长130.6%、72.9%、45.0%，维持买入评级。",
+      "question": "恩捷股份（002812）在2021年半年报中表现出哪些业绩亮点？",
+      "expected_answer": "",
+      "question_type": "一般描述型",
+      "context_type": "财务数据型",
+      "complexity_score": 0.096,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "双汇发展（000895）2020年报显示，公司主业保持平稳增长，尽管受到屠宰业务拖累，利润端增速放缓。全年收入、利润稳定增长，主要受猪价高位影响。生鲜产品受高猪价影响增速较快，包装肉制品业务保持稳健增长。渠道分析显示，经销渠道为主要收入来源，但毛利率相对较低。进口肉使用量增加，有效控制成本。2020年销售毛利率为17.26%，期间费用率为5.66%，其中销售费用率3.60%。报告还提供了该股票近期市场数据，显示价格波动，涨跌幅情况以及成交量变化。",
+      "question": "关于双汇发展（000895）的2020年报，其主营业务表现如何？是否受到屠宰业务的影响？公司渠道分析和进口肉使用量对成本控制有何影响？股票近期市场表现如何，包括价格、涨跌幅和成交量的变化？",
+      "expected_answer": "",
+      "question_type": "原因分析型",
+      "context_type": "财务数据型",
+      "complexity_score": 0.282,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "赤峰黄金在2022年的业绩未能达到预期，主要原因是矿石品位下降、原材料价格上涨和所得税负担增加。公司计划在2023年维持黄金产量保守目标，同时通过内增和外扩策略加快海外资产布局。内增方面，公司参与铁拓矿业的投资并加强在西非的战略布局；外扩方面，与沙特合作开展金矿勘探项目，并收购新恒河矿业和洱源溪灯坪金矿的股权。此外，公司推出第二期员工持股计划，旨在推动公司发展。截至4月3日，股价为18元，最近一周股价波动较小，整体趋势呈下跌趋势。",
+      "question": "根据研报分析，赤峰黄金（600988）在2022年的业绩表现如何？公司未来有何战略规划？以及近期市场数据显示，该股票的走势如何？",
+      "expected_answer": "",
+      "question_type": "方法策略型",
+      "context_type": "财务数据型",
+      "complexity_score": 0.192,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "荣盛石化（002493）2023年一季度报告指出，虽然归母净利润同比下滑，但环比有所改善，主要由于毛利率回升。公司炼化能力强，产品产能持续释放，PTA和聚酯项目即将投产。上游与沙特阿美合作保障原料供应，下游布局新材料领域。预计未来几年公司净利润将增长，当前估值合理，维持推荐评级。市场数据显示，近期股价呈下跌趋势。",
+      "question": "荣盛石化（002493）2023年一季度的盈利情况如何？",
+      "expected_answer": "",
+      "question_type": "方法策略型",
+      "context_type": "财务数据型",
+      "complexity_score": 0.084,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "恒生电子的业绩在2019年实现了高速增长，预计全年净利润同比增长约100%-108%。收入方面，Q1-Q3期间收入分别同比增长11%-28%，费用控制表现良好，研发费用率略有提升。公司业绩增长主要得益于科创板、资管新规等政策带来的订单落地，预计未来MOM、金融开放、新三板改革等政策将持续推动业绩增长。恒生电子作为金融行业IT解决方案提供商，在多个领域有较高市场份额，看好其在金融行业上云趋势下的发展。给予买入评级。",
+      "question": "恒生电子（600570）在2019年的业绩表现如何？预计未来增长趋势如何？",
+      "expected_answer": "",
+      "question_type": "方法策略型",
+      "context_type": "财务数据型",
+      "complexity_score": 0.111,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "圣农发展（002299）的业绩受到鸡肉价格波动的影响，尽管通过一体化布局减少了风险。鸡肉价格下跌趋势有限，熟食转换率和2C端的发展有助于提升利润率。公司内部管理和成本优化成果显著，但财务费用略有增加。建议长期持有。",
+      "question": "基于圣农发展的业绩报告和近期市场数据，如何评估其下一个月的股价变动方向及其概率？",
+      "expected_answer": "",
+      "question_type": "方法策略型",
+      "context_type": "财务数据型",
+      "complexity_score": 0.12,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "2017年是中国实施‘十三五’规划的关键年份，也是深化供给侧结构性改革的一年。会议强调改革目标为满足需求，提升供给质量，实现路径为深入改革。2017年的改革重心在于推进'三去一降一补'，包括优化产能、消化库存、降杠杆、降低成本和补齐短板，以加速经济转型。",
+      "question": "2017年中央经济工作会议如何定义供给侧结构性改革的目标、主攻方向和根本途径？并指出了当年改革的重点是什么？",
+      "expected_answer": "",
+      "question_type": "方法策略型",
+      "context_type": "一般信息型",
+      "complexity_score": 0.162,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "招商银行业绩发布会讨论了疫情对其零售信贷的短期影响及全年资产质量的控制能力。强调了管理团队在风险上行时的高质量管理和业务策略。公司预计2020年资产和负债规模保持稳定增长，重点投向房贷、战略对公客户及特定行业。LPR改革影响预计在2021年体现，NIM预计将优于同业。资产质量压力在第一季度有所增加，但管理层预计全年较为可控。公司将继续坚持一体两翼战略，加大零售业务投入，保持收入和风险结构的平稳。理财子公司业务转型的核心目标是做大净值型产品的规模，分红比例有望提升。估值建议维持原有盈利预测，目标价为51元人民币，较当前股价有69%的上行空间。",
+      "question": "招商银行(600036)在2020年的业绩发布会上宣布了哪些关键的业务策略和财务目标?",
+      "expected_answer": "",
+      "question_type": "方法策略型",
+      "context_type": "财务数据型",
+      "complexity_score": 0.129,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "建设机械（600984）上半年业绩有所增长，但第二季度受到信用减值损失的影响，利润增速放缓。第二季度公司业绩大幅回升。毛利率方面，第一季度因疫情下降，第二季度受益于下游需求回暖，利润率改善。费用率整体稳定，第二季度略有下降。净利率受信用减值损失影响，第二季度有所提升。在手订单稳步增长，塔机保有量突破7000台，利用率回升。预计未来公司净利润分别为75.5亿、108.9亿、141.1亿，给予买入A评级，6个月目标价34.2元。",
+      "question": "根据提供的研究报告，建设机械（600984）在2020年的中报表现如何？",
+      "expected_answer": "",
+      "question_type": "方法策略型",
+      "context_type": "财务数据型",
+      "complexity_score": 0.10799999999999998,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2025年的费用影响分别为1173万元至3545万元不等。预计2022年至2024年的营收增长目标为每年15%。维持公司买入评级。",
+      "question": "基于恒生电子（600570）的股票期权激励计划和市场数据，该股票下个月的最终收益结果会如何预测？",
+      "expected_answer": "",
+      "question_type": "方法策略型",
+      "context_type": "财务数据型",
+      "complexity_score": 0.144,
+      "diversity_score": 0.0
+    },
+    {
+      "sample_id": "unknown",
+      "context": "平煤股份(Q2)成本显著下降，商品煤盈利提升，2020上半年原煤产量及销量环比改善，成本下降幅度超过价格变动，吨煤毛利增加，盈利能力提升。公司持续高比例分红，股息率处于行业领先地位。预计2020年净利润为13.10亿元，股息率为6.55%，处于行业领先水平。维持买入A评级，6个月目标价为6.19元。",
+      "question": "平煤股份(Q2)的成本变化如何影响其商品煤盈利？",
+      "expected_answer": "",
+      "question_type": "原因分析型",
+      "context_type": "财务数据型",
+      "complexity_score": 0.072,
+      "diversity_score": 0.0
+    }
+  ],
+  "results": [
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "一汽解放于2006年9月22日的股票分析数据显示，其股息率为6.4309%。",
+        "perturbed_text": "一汽解放于2007年9月22日的股票分析数据显示，其股息率为6.4309%。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['一汽解放于2007年9月22日的股票分析数据显示，其股息率为6.4309%。']",
+          "删除词汇: ['一汽解放于2006年9月22日的股票分析数据显示，其股息率为6.4309%。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.501729"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.501753",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "一汽解放(000800.SZ)于2006年9月22日的股息率是多少？",
+        "perturbed_text": "一汽解放(000800.SZ)于2007年9月22日的股息率是多少？",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['一汽解放(000800.SZ)于2007年9月22日的股息率是多少？']",
+          "删除词汇: ['一汽解放(000800.SZ)于2006年9月22日的股息率是多少？']"
+        ],
+        "change_description": "year扰动器对prompt进行了修改",
+        "timestamp": "2025-07-15T20:01:21.501815"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.501819",
+      "perturbation_target": "prompt"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "阳光电源在2023年4月24日的股票数据包括：股票代码300274.SZ，当日收盘价103.4元，量比1.26，市盈率97.0291，市销率6.3625，股息率0.1064%，自由流通股本96122.9317万。其中，市销率是6.3625。",
+        "perturbed_text": "阳光电源在2018年4月24日的股票数据包括：股票代码300274.SZ，当日收盘价103.4元，量比1.26，市盈率97.0291，市销率6.3625，股息率0.1064%，自由流通股本96122.9317万。其中，市销率是6.3625。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['阳光电源在2018年4月24日的股票数据包括：股票代码300274.SZ，当日收盘价103.4元，量比1.26，市盈率97.0291，市销率6.3625，股息率0.1064%，自由流通股本96122.9317万。其中，市销率是6.3625。']",
+          "删除词汇: ['阳光电源在2023年4月24日的股票数据包括：股票代码300274.SZ，当日收盘价103.4元，量比1.26，市盈率97.0291，市销率6.3625，股息率0.1064%，自由流通股本96122.9317万。其中，市销率是6.3625。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.502057"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.502060",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "阳光电源在2023年4月24日的市销率是多少？",
+        "perturbed_text": "阳光电源在2018年4月24日的市销率是多少？",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['阳光电源在2018年4月24日的市销率是多少？']",
+          "删除词汇: ['阳光电源在2023年4月24日的市销率是多少？']"
+        ],
+        "change_description": "year扰动器对prompt进行了修改",
+        "timestamp": "2025-07-15T20:01:21.502109"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.502112",
+      "perturbation_target": "prompt"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "报告指出创维数字（000810）短期内面临需求承压和收入下滑的压力，特别是智能终端业务在国内市场的表现不佳，但海外市场需求有所增长。报告下调了公司2020-2022年的EPS预测，并给出了公司的买入评级。短期内，收入及盈利承压，但报告认为中长期网络融合发展的趋势对公司有利。报告建议给予公司2021年18倍PE的目标价格。",
+        "perturbed_text": "报告指出创维数字（000810）短期内面临需求承压和收入下滑的压力，特别是智能终端业务在国内市场的表现不佳，但海外市场需求有所增长。报告下调了公司2020-2019年的EPS预测，并给出了公司的买入评级。短期内，收入及盈利承压，但报告认为中长期网络融合发展的趋势对公司有利。报告建议给予公司2021年18倍PE的目标价格。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['报告指出创维数字（000810）短期内面临需求承压和收入下滑的压力，特别是智能终端业务在国内市场的表现不佳，但海外市场需求有所增长。报告下调了公司2020-2019年的EPS预测，并给出了公司的买入评级。短期内，收入及盈利承压，但报告认为中长期网络融合发展的趋势对公司有利。报告建议给予公司2021年18倍PE的目标价格。']",
+          "删除词汇: ['报告指出创维数字（000810）短期内面临需求承压和收入下滑的压力，特别是智能终端业务在国内市场的表现不佳，但海外市场需求有所增长。报告下调了公司2020-2022年的EPS预测，并给出了公司的买入评级。短期内，收入及盈利承压，但报告认为中长期网络融合发展的趋势对公司有利。报告建议给予公司2021年18倍PE的目标价格。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.502659"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.502669",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "报告指出创维数字（000810）短期内面临需求承压和收入下滑的压力，特别是智能终端业务在国内市场的表现不佳，但海外市场需求有所增长。报告下调了公司2020-2022年的EPS预测，并给出了公司的买入评级。短期内，收入及盈利承压，但报告认为中长期网络融合发展的趋势对公司有利。报告建议给予公司2021年18倍PE的目标价格。",
+        "perturbed_text": "报告指出创维数字（000810）短期内面临需求承压和收入下滑的压力，特别是智能终端业务在国内市场的表现不佳，但海外市场需求有所增长。报告下调了公司2020-2022年的EPS预测，并给出了公司的买入评级。短期内，收入及盈利承压，但报告认为中长期网络融合发展的趋势对公司有利。报告建议给予公司2020年18倍PE的目标价格。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['报告指出创维数字（000810）短期内面临需求承压和收入下滑的压力，特别是智能终端业务在国内市场的表现不佳，但海外市场需求有所增长。报告下调了公司2020-2022年的EPS预测，并给出了公司的买入评级。短期内，收入及盈利承压，但报告认为中长期网络融合发展的趋势对公司有利。报告建议给予公司2020年18倍PE的目标价格。']",
+          "删除词汇: ['报告指出创维数字（000810）短期内面临需求承压和收入下滑的压力，特别是智能终端业务在国内市场的表现不佳，但海外市场需求有所增长。报告下调了公司2020-2022年的EPS预测，并给出了公司的买入评级。短期内，收入及盈利承压，但报告认为中长期网络融合发展的趋势对公司有利。报告建议给予公司2021年18倍PE的目标价格。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.502705"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.502707",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "这份利润表数据显示了分众传媒在2013年12月31日的财务状况，包括营业收入、营业成本、财务费用等关键指标，以及所得税费用为19,182,472.01。",
+        "perturbed_text": "这份利润表数据显示了分众传媒在2014年12月31日的财务状况，包括营业收入、营业成本、财务费用等关键指标，以及所得税费用为19,182,472.01。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['这份利润表数据显示了分众传媒在2014年12月31日的财务状况，包括营业收入、营业成本、财务费用等关键指标，以及所得税费用为19,182,472.01。']",
+          "删除词汇: ['这份利润表数据显示了分众传媒在2013年12月31日的财务状况，包括营业收入、营业成本、财务费用等关键指标，以及所得税费用为19,182,472.01。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.502982"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.502985",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "分众传媒在2013年的所得税费用是多少？",
+        "perturbed_text": "分众传媒在2014年的所得税费用是多少？",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['分众传媒在2014年的所得税费用是多少？']",
+          "删除词汇: ['分众传媒在2013年的所得税费用是多少？']"
+        ],
+        "change_description": "year扰动器对prompt进行了修改",
+        "timestamp": "2025-07-15T20:01:21.503030"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.503034",
+      "perturbation_target": "prompt"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "立讯精密于2021年6月30日发布的利润表数据显示，其营业总成本为256,325,427,354.55元，其中减去营业成本后的金额为228,699,652,965.8元，资产减值损失为-4,048,920.76元，最终营业利润为1,998,326,683.29元。",
+        "perturbed_text": "立讯精密于2020年6月30日发布的利润表数据显示，其营业总成本为256,325,427,354.55元，其中减去营业成本后的金额为228,699,652,965.8元，资产减值损失为-4,048,920.76元，最终营业利润为1,998,326,683.29元。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['立讯精密于2020年6月30日发布的利润表数据显示，其营业总成本为256,325,427,354.55元，其中减去营业成本后的金额为228,699,652,965.8元，资产减值损失为-4,048,920.76元，最终营业利润为1,998,326,683.29元。']",
+          "删除词汇: ['立讯精密于2021年6月30日发布的利润表数据显示，其营业总成本为256,325,427,354.55元，其中减去营业成本后的金额为228,699,652,965.8元，资产减值损失为-4,048,920.76元，最终营业利润为1,998,326,683.29元。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.503265"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.503268",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "立讯精密（002475.SZ）于2021年6月30日的营业利润是多少？",
+        "perturbed_text": "立讯精密（002475.SZ）于2020年6月30日的营业利润是多少？",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['立讯精密（002475.SZ）于2020年6月30日的营业利润是多少？']",
+          "删除词汇: ['立讯精密（002475.SZ）于2021年6月30日的营业利润是多少？']"
+        ],
+        "change_description": "year扰动器对prompt进行了修改",
+        "timestamp": "2025-07-15T20:01:21.503312"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.503314",
+      "perturbation_target": "prompt"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "抚顺特钢2022年三季报显示，尽管高温合金等高端产品保持增长，但整体销量下滑影响了Q3业绩。原料成本压力有所缓解，但能源成本上升及民品需求不佳导致产品售价下降，毛利率环比下滑。公司持续加码技改项目，高温合金未来贡献潜力大。近期股票价格波动较大，日涨跌幅和成交量也呈现出不稳定趋势。",
+        "perturbed_text": "抚顺特钢2019年三季报显示，尽管高温合金等高端产品保持增长，但整体销量下滑影响了Q3业绩。原料成本压力有所缓解，但能源成本上升及民品需求不佳导致产品售价下降，毛利率环比下滑。公司持续加码技改项目，高温合金未来贡献潜力大。近期股票价格波动较大，日涨跌幅和成交量也呈现出不稳定趋势。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['抚顺特钢2019年三季报显示，尽管高温合金等高端产品保持增长，但整体销量下滑影响了Q3业绩。原料成本压力有所缓解，但能源成本上升及民品需求不佳导致产品售价下降，毛利率环比下滑。公司持续加码技改项目，高温合金未来贡献潜力大。近期股票价格波动较大，日涨跌幅和成交量也呈现出不稳定趋势。']",
+          "删除词汇: ['抚顺特钢2022年三季报显示，尽管高温合金等高端产品保持增长，但整体销量下滑影响了Q3业绩。原料成本压力有所缓解，但能源成本上升及民品需求不佳导致产品售价下降，毛利率环比下滑。公司持续加码技改项目，高温合金未来贡献潜力大。近期股票价格波动较大，日涨跌幅和成交量也呈现出不稳定趋势。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.503594"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.503597",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "抚顺特钢（600399）2022年三季报主要显示了哪些业绩变化？",
+        "perturbed_text": "抚顺特钢（600399）2019年三季报主要显示了哪些业绩变化？",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['抚顺特钢（600399）2019年三季报主要显示了哪些业绩变化？']",
+          "删除词汇: ['抚顺特钢（600399）2022年三季报主要显示了哪些业绩变化？']"
+        ],
+        "change_description": "year扰动器对prompt进行了修改",
+        "timestamp": "2025-07-15T20:01:21.503646"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.503648",
+      "perturbation_target": "prompt"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）为19,838,873.03元。",
+        "perturbed_text": "云南白药公司在2003年3月31日的报告期内，净利润（含少数股东损益）为19,838,873.03元。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['云南白药公司在2003年3月31日的报告期内，净利润（含少数股东损益）为19,838,873.03元。']",
+          "删除词汇: ['云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）为19,838,873.03元。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.503916"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.503919",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）是多少？",
+        "perturbed_text": "云南白药公司在2003年3月31日的报告期内，净利润（含少数股东损益）是多少？",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['云南白药公司在2003年3月31日的报告期内，净利润（含少数股东损益）是多少？']",
+          "删除词汇: ['云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）是多少？']"
+        ],
+        "change_description": "year扰动器对prompt进行了修改",
+        "timestamp": "2025-07-15T20:01:21.503966"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.503967",
+      "perturbation_target": "prompt"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "term",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "term",
+        "original_text": "云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）为19,838,873.03元。",
+        "perturbed_text": "云南白药公司在2002年3月31日的报告期内，市盈率（含少数股东损益）为19,838,873.03元。",
+        "perturbation_type": "term",
+        "changed_elements": [
+          "新增词汇: ['云南白药公司在2002年3月31日的报告期内，市盈率（含少数股东损益）为19,838,873.03元。']",
+          "删除词汇: ['云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）为19,838,873.03元。']"
+        ],
+        "change_description": "term扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.504104"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.504106",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "term",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "term",
+        "original_text": "云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）是多少？",
+        "perturbed_text": "云南白药公司在2002年3月31日的报告期内，市盈率（含少数股东损益）是多少？",
+        "perturbation_type": "term",
+        "changed_elements": [
+          "新增词汇: ['云南白药公司在2002年3月31日的报告期内，市盈率（含少数股东损益）是多少？']",
+          "删除词汇: ['云南白药公司在2002年3月31日的报告期内，净利润（含少数股东损益）是多少？']"
+        ],
+        "change_description": "term扰动器对prompt进行了修改",
+        "timestamp": "2025-07-15T20:01:21.504168"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.504170",
+      "perturbation_target": "prompt"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "恩捷股份（002812）的2021年半年报显示，公司营收和净利润均大幅增长，湿法隔膜出货量稳定增长，市占率优势显著。产能扩张积极，计划未来三年每年新增产线25-30-40条，以提高市场占有率。在线涂覆和铝塑膜业务也在积极推进。预计2021-2023年归母净利润分别为25.72、44.49、64.49亿元，同比增长130.6%、72.9%、45.0%，维持买入评级。",
+        "perturbed_text": "恩捷股份（002812）的2020年半年报显示，公司营收和净利润均大幅增长，湿法隔膜出货量稳定增长，市占率优势显著。产能扩张积极，计划未来三年每年新增产线25-30-40条，以提高市场占有率。在线涂覆和铝塑膜业务也在积极推进。预计2021-2023年归母净利润分别为25.72、44.49、64.49亿元，同比增长130.6%、72.9%、45.0%，维持买入评级。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['恩捷股份（002812）的2020年半年报显示，公司营收和净利润均大幅增长，湿法隔膜出货量稳定增长，市占率优势显著。产能扩张积极，计划未来三年每年新增产线25-30-40条，以提高市场占有率。在线涂覆和铝塑膜业务也在积极推进。预计2021-2023年归母净利润分别为25.72、44.49、64.49亿元，同比增长130.6%、72.9%、45.0%，维持买入评级。']",
+          "删除词汇: ['恩捷股份（002812）的2021年半年报显示，公司营收和净利润均大幅增长，湿法隔膜出货量稳定增长，市占率优势显著。产能扩张积极，计划未来三年每年新增产线25-30-40条，以提高市场占有率。在线涂覆和铝塑膜业务也在积极推进。预计2021-2023年归母净利润分别为25.72、44.49、64.49亿元，同比增长130.6%、72.9%、45.0%，维持买入评级。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.504253"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.504255",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "恩捷股份（002812）的2021年半年报显示，公司营收和净利润均大幅增长，湿法隔膜出货量稳定增长，市占率优势显著。产能扩张积极，计划未来三年每年新增产线25-30-40条，以提高市场占有率。在线涂覆和铝塑膜业务也在积极推进。预计2021-2023年归母净利润分别为25.72、44.49、64.49亿元，同比增长130.6%、72.9%、45.0%，维持买入评级。",
+        "perturbed_text": "恩捷股份（002812）的2021年半年报显示，公司营收和净利润均大幅增长，湿法隔膜出货量稳定增长，市占率优势显著。产能扩张积极，计划未来三年每年新增产线25-30-40条，以提高市场占有率。在线涂覆和铝塑膜业务也在积极推进。预计2021-2018年归母净利润分别为25.72、44.49、64.49亿元，同比增长130.6%、72.9%、45.0%，维持买入评级。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['恩捷股份（002812）的2021年半年报显示，公司营收和净利润均大幅增长，湿法隔膜出货量稳定增长，市占率优势显著。产能扩张积极，计划未来三年每年新增产线25-30-40条，以提高市场占有率。在线涂覆和铝塑膜业务也在积极推进。预计2021-2018年归母净利润分别为25.72、44.49、64.49亿元，同比增长130.6%、72.9%、45.0%，维持买入评级。']",
+          "删除词汇: ['恩捷股份（002812）的2021年半年报显示，公司营收和净利润均大幅增长，湿法隔膜出货量稳定增长，市占率优势显著。产能扩张积极，计划未来三年每年新增产线25-30-40条，以提高市场占有率。在线涂覆和铝塑膜业务也在积极推进。预计2021-2023年归母净利润分别为25.72、44.49、64.49亿元，同比增长130.6%、72.9%、45.0%，维持买入评级。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.504296"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.504298",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "恩捷股份（002812）在2021年半年报中表现出哪些业绩亮点？",
+        "perturbed_text": "恩捷股份（002812）在2020年半年报中表现出哪些业绩亮点？",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['恩捷股份（002812）在2020年半年报中表现出哪些业绩亮点？']",
+          "删除词汇: ['恩捷股份（002812）在2021年半年报中表现出哪些业绩亮点？']"
+        ],
+        "change_description": "year扰动器对prompt进行了修改",
+        "timestamp": "2025-07-15T20:01:21.504345"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.504347",
+      "perturbation_target": "prompt"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "双汇发展（000895）2020年报显示，公司主业保持平稳增长，尽管受到屠宰业务拖累，利润端增速放缓。全年收入、利润稳定增长，主要受猪价高位影响。生鲜产品受高猪价影响增速较快，包装肉制品业务保持稳健增长。渠道分析显示，经销渠道为主要收入来源，但毛利率相对较低。进口肉使用量增加，有效控制成本。2020年销售毛利率为17.26%，期间费用率为5.66%，其中销售费用率3.60%。报告还提供了该股票近期市场数据，显示价格波动，涨跌幅情况以及成交量变化。",
+        "perturbed_text": "双汇发展（000895）2019年报显示，公司主业保持平稳增长，尽管受到屠宰业务拖累，利润端增速放缓。全年收入、利润稳定增长，主要受猪价高位影响。生鲜产品受高猪价影响增速较快，包装肉制品业务保持稳健增长。渠道分析显示，经销渠道为主要收入来源，但毛利率相对较低。进口肉使用量增加，有效控制成本。2020年销售毛利率为17.26%，期间费用率为5.66%，其中销售费用率3.60%。报告还提供了该股票近期市场数据，显示价格波动，涨跌幅情况以及成交量变化。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['双汇发展（000895）2019年报显示，公司主业保持平稳增长，尽管受到屠宰业务拖累，利润端增速放缓。全年收入、利润稳定增长，主要受猪价高位影响。生鲜产品受高猪价影响增速较快，包装肉制品业务保持稳健增长。渠道分析显示，经销渠道为主要收入来源，但毛利率相对较低。进口肉使用量增加，有效控制成本。2020年销售毛利率为17.26%，期间费用率为5.66%，其中销售费用率3.60%。报告还提供了该股票近期市场数据，显示价格波动，涨跌幅情况以及成交量变化。']",
+          "删除词汇: ['双汇发展（000895）2020年报显示，公司主业保持平稳增长，尽管受到屠宰业务拖累，利润端增速放缓。全年收入、利润稳定增长，主要受猪价高位影响。生鲜产品受高猪价影响增速较快，包装肉制品业务保持稳健增长。渠道分析显示，经销渠道为主要收入来源，但毛利率相对较低。进口肉使用量增加，有效控制成本。2020年销售毛利率为17.26%，期间费用率为5.66%，其中销售费用率3.60%。报告还提供了该股票近期市场数据，显示价格波动，涨跌幅情况以及成交量变化。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.504651"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.504653",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "双汇发展（000895）2020年报显示，公司主业保持平稳增长，尽管受到屠宰业务拖累，利润端增速放缓。全年收入、利润稳定增长，主要受猪价高位影响。生鲜产品受高猪价影响增速较快，包装肉制品业务保持稳健增长。渠道分析显示，经销渠道为主要收入来源，但毛利率相对较低。进口肉使用量增加，有效控制成本。2020年销售毛利率为17.26%，期间费用率为5.66%，其中销售费用率3.60%。报告还提供了该股票近期市场数据，显示价格波动，涨跌幅情况以及成交量变化。",
+        "perturbed_text": "双汇发展（000895）2020年报显示，公司主业保持平稳增长，尽管受到屠宰业务拖累，利润端增速放缓。全年收入、利润稳定增长，主要受猪价高位影响。生鲜产品受高猪价影响增速较快，包装肉制品业务保持稳健增长。渠道分析显示，经销渠道为主要收入来源，但毛利率相对较低。进口肉使用量增加，有效控制成本。2019年销售毛利率为17.26%，期间费用率为5.66%，其中销售费用率3.60%。报告还提供了该股票近期市场数据，显示价格波动，涨跌幅情况以及成交量变化。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['双汇发展（000895）2020年报显示，公司主业保持平稳增长，尽管受到屠宰业务拖累，利润端增速放缓。全年收入、利润稳定增长，主要受猪价高位影响。生鲜产品受高猪价影响增速较快，包装肉制品业务保持稳健增长。渠道分析显示，经销渠道为主要收入来源，但毛利率相对较低。进口肉使用量增加，有效控制成本。2019年销售毛利率为17.26%，期间费用率为5.66%，其中销售费用率3.60%。报告还提供了该股票近期市场数据，显示价格波动，涨跌幅情况以及成交量变化。']",
+          "删除词汇: ['双汇发展（000895）2020年报显示，公司主业保持平稳增长，尽管受到屠宰业务拖累，利润端增速放缓。全年收入、利润稳定增长，主要受猪价高位影响。生鲜产品受高猪价影响增速较快，包装肉制品业务保持稳健增长。渠道分析显示，经销渠道为主要收入来源，但毛利率相对较低。进口肉使用量增加，有效控制成本。2020年销售毛利率为17.26%，期间费用率为5.66%，其中销售费用率3.60%。报告还提供了该股票近期市场数据，显示价格波动，涨跌幅情况以及成交量变化。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.504697"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.504700",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "关于双汇发展（000895）的2020年报，其主营业务表现如何？是否受到屠宰业务的影响？公司渠道分析和进口肉使用量对成本控制有何影响？股票近期市场表现如何，包括价格、涨跌幅和成交量的变化？",
+        "perturbed_text": "关于双汇发展（000895）的2019年报，其主营业务表现如何？是否受到屠宰业务的影响？公司渠道分析和进口肉使用量对成本控制有何影响？股票近期市场表现如何，包括价格、涨跌幅和成交量的变化？",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['关于双汇发展（000895）的2019年报，其主营业务表现如何？是否受到屠宰业务的影响？公司渠道分析和进口肉使用量对成本控制有何影响？股票近期市场表现如何，包括价格、涨跌幅和成交量的变化？']",
+          "删除词汇: ['关于双汇发展（000895）的2020年报，其主营业务表现如何？是否受到屠宰业务的影响？公司渠道分析和进口肉使用量对成本控制有何影响？股票近期市场表现如何，包括价格、涨跌幅和成交量的变化？']"
+        ],
+        "change_description": "year扰动器对prompt进行了修改",
+        "timestamp": "2025-07-15T20:01:21.504752"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.504754",
+      "perturbation_target": "prompt"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "赤峰黄金在2022年的业绩未能达到预期，主要原因是矿石品位下降、原材料价格上涨和所得税负担增加。公司计划在2023年维持黄金产量保守目标，同时通过内增和外扩策略加快海外资产布局。内增方面，公司参与铁拓矿业的投资并加强在西非的战略布局；外扩方面，与沙特合作开展金矿勘探项目，并收购新恒河矿业和洱源溪灯坪金矿的股权。此外，公司推出第二期员工持股计划，旨在推动公司发展。截至4月3日，股价为18元，最近一周股价波动较小，整体趋势呈下跌趋势。",
+        "perturbed_text": "赤峰黄金在2019年的业绩未能达到预期，主要原因是矿石品位下降、原材料价格上涨和所得税负担增加。公司计划在2023年维持黄金产量保守目标，同时通过内增和外扩策略加快海外资产布局。内增方面，公司参与铁拓矿业的投资并加强在西非的战略布局；外扩方面，与沙特合作开展金矿勘探项目，并收购新恒河矿业和洱源溪灯坪金矿的股权。此外，公司推出第二期员工持股计划，旨在推动公司发展。截至4月3日，股价为18元，最近一周股价波动较小，整体趋势呈下跌趋势。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['赤峰黄金在2019年的业绩未能达到预期，主要原因是矿石品位下降、原材料价格上涨和所得税负担增加。公司计划在2023年维持黄金产量保守目标，同时通过内增和外扩策略加快海外资产布局。内增方面，公司参与铁拓矿业的投资并加强在西非的战略布局；外扩方面，与沙特合作开展金矿勘探项目，并收购新恒河矿业和洱源溪灯坪金矿的股权。此外，公司推出第二期员工持股计划，旨在推动公司发展。截至4月3日，股价为18元，最近一周股价波动较小，整体趋势呈下跌趋势。']",
+          "删除词汇: ['赤峰黄金在2022年的业绩未能达到预期，主要原因是矿石品位下降、原材料价格上涨和所得税负担增加。公司计划在2023年维持黄金产量保守目标，同时通过内增和外扩策略加快海外资产布局。内增方面，公司参与铁拓矿业的投资并加强在西非的战略布局；外扩方面，与沙特合作开展金矿勘探项目，并收购新恒河矿业和洱源溪灯坪金矿的股权。此外，公司推出第二期员工持股计划，旨在推动公司发展。截至4月3日，股价为18元，最近一周股价波动较小，整体趋势呈下跌趋势。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.505094"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.505096",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "赤峰黄金在2022年的业绩未能达到预期，主要原因是矿石品位下降、原材料价格上涨和所得税负担增加。公司计划在2023年维持黄金产量保守目标，同时通过内增和外扩策略加快海外资产布局。内增方面，公司参与铁拓矿业的投资并加强在西非的战略布局；外扩方面，与沙特合作开展金矿勘探项目，并收购新恒河矿业和洱源溪灯坪金矿的股权。此外，公司推出第二期员工持股计划，旨在推动公司发展。截至4月3日，股价为18元，最近一周股价波动较小，整体趋势呈下跌趋势。",
+        "perturbed_text": "赤峰黄金在2022年的业绩未能达到预期，主要原因是矿石品位下降、原材料价格上涨和所得税负担增加。公司计划在2018年维持黄金产量保守目标，同时通过内增和外扩策略加快海外资产布局。内增方面，公司参与铁拓矿业的投资并加强在西非的战略布局；外扩方面，与沙特合作开展金矿勘探项目，并收购新恒河矿业和洱源溪灯坪金矿的股权。此外，公司推出第二期员工持股计划，旨在推动公司发展。截至4月3日，股价为18元，最近一周股价波动较小，整体趋势呈下跌趋势。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['赤峰黄金在2022年的业绩未能达到预期，主要原因是矿石品位下降、原材料价格上涨和所得税负担增加。公司计划在2018年维持黄金产量保守目标，同时通过内增和外扩策略加快海外资产布局。内增方面，公司参与铁拓矿业的投资并加强在西非的战略布局；外扩方面，与沙特合作开展金矿勘探项目，并收购新恒河矿业和洱源溪灯坪金矿的股权。此外，公司推出第二期员工持股计划，旨在推动公司发展。截至4月3日，股价为18元，最近一周股价波动较小，整体趋势呈下跌趋势。']",
+          "删除词汇: ['赤峰黄金在2022年的业绩未能达到预期，主要原因是矿石品位下降、原材料价格上涨和所得税负担增加。公司计划在2023年维持黄金产量保守目标，同时通过内增和外扩策略加快海外资产布局。内增方面，公司参与铁拓矿业的投资并加强在西非的战略布局；外扩方面，与沙特合作开展金矿勘探项目，并收购新恒河矿业和洱源溪灯坪金矿的股权。此外，公司推出第二期员工持股计划，旨在推动公司发展。截至4月3日，股价为18元，最近一周股价波动较小，整体趋势呈下跌趋势。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.505137"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.505138",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "根据研报分析，赤峰黄金（600988）在2022年的业绩表现如何？公司未来有何战略规划？以及近期市场数据显示，该股票的走势如何？",
+        "perturbed_text": "根据研报分析，赤峰黄金（600988）在2019年的业绩表现如何？公司未来有何战略规划？以及近期市场数据显示，该股票的走势如何？",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['根据研报分析，赤峰黄金（600988）在2019年的业绩表现如何？公司未来有何战略规划？以及近期市场数据显示，该股票的走势如何？']",
+          "删除词汇: ['根据研报分析，赤峰黄金（600988）在2022年的业绩表现如何？公司未来有何战略规划？以及近期市场数据显示，该股票的走势如何？']"
+        ],
+        "change_description": "year扰动器对prompt进行了修改",
+        "timestamp": "2025-07-15T20:01:21.505192"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.505194",
+      "perturbation_target": "prompt"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "荣盛石化（002493）2023年一季度报告指出，虽然归母净利润同比下滑，但环比有所改善，主要由于毛利率回升。公司炼化能力强，产品产能持续释放，PTA和聚酯项目即将投产。上游与沙特阿美合作保障原料供应，下游布局新材料领域。预计未来几年公司净利润将增长，当前估值合理，维持推荐评级。市场数据显示，近期股价呈下跌趋势。",
+        "perturbed_text": "荣盛石化（002493）2018年一季度报告指出，虽然归母净利润同比下滑，但环比有所改善，主要由于毛利率回升。公司炼化能力强，产品产能持续释放，PTA和聚酯项目即将投产。上游与沙特阿美合作保障原料供应，下游布局新材料领域。预计未来几年公司净利润将增长，当前估值合理，维持推荐评级。市场数据显示，近期股价呈下跌趋势。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['荣盛石化（002493）2018年一季度报告指出，虽然归母净利润同比下滑，但环比有所改善，主要由于毛利率回升。公司炼化能力强，产品产能持续释放，PTA和聚酯项目即将投产。上游与沙特阿美合作保障原料供应，下游布局新材料领域。预计未来几年公司净利润将增长，当前估值合理，维持推荐评级。市场数据显示，近期股价呈下跌趋势。']",
+          "删除词汇: ['荣盛石化（002493）2023年一季度报告指出，虽然归母净利润同比下滑，但环比有所改善，主要由于毛利率回升。公司炼化能力强，产品产能持续释放，PTA和聚酯项目即将投产。上游与沙特阿美合作保障原料供应，下游布局新材料领域。预计未来几年公司净利润将增长，当前估值合理，维持推荐评级。市场数据显示，近期股价呈下跌趋势。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.505501"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.505503",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "荣盛石化（002493）2023年一季度的盈利情况如何？",
+        "perturbed_text": "荣盛石化（002493）2018年一季度的盈利情况如何？",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['荣盛石化（002493）2018年一季度的盈利情况如何？']",
+          "删除词汇: ['荣盛石化（002493）2023年一季度的盈利情况如何？']"
+        ],
+        "change_description": "year扰动器对prompt进行了修改",
+        "timestamp": "2025-07-15T20:01:21.505551"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.505553",
+      "perturbation_target": "prompt"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "恒生电子的业绩在2019年实现了高速增长，预计全年净利润同比增长约100%-108%。收入方面，Q1-Q3期间收入分别同比增长11%-28%，费用控制表现良好，研发费用率略有提升。公司业绩增长主要得益于科创板、资管新规等政策带来的订单落地，预计未来MOM、金融开放、新三板改革等政策将持续推动业绩增长。恒生电子作为金融行业IT解决方案提供商，在多个领域有较高市场份额，看好其在金融行业上云趋势下的发展。给予买入评级。",
+        "perturbed_text": "恒生电子的业绩在2018年实现了高速增长，预计全年净利润同比增长约100%-108%。收入方面，Q1-Q3期间收入分别同比增长11%-28%，费用控制表现良好，研发费用率略有提升。公司业绩增长主要得益于科创板、资管新规等政策带来的订单落地，预计未来MOM、金融开放、新三板改革等政策将持续推动业绩增长。恒生电子作为金融行业IT解决方案提供商，在多个领域有较高市场份额，看好其在金融行业上云趋势下的发展。给予买入评级。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['恒生电子的业绩在2018年实现了高速增长，预计全年净利润同比增长约100%-108%。收入方面，Q1-Q3期间收入分别同比增长11%-28%，费用控制表现良好，研发费用率略有提升。公司业绩增长主要得益于科创板、资管新规等政策带来的订单落地，预计未来MOM、金融开放、新三板改革等政策将持续推动业绩增长。恒生电子作为金融行业IT解决方案提供商，在多个领域有较高市场份额，看好其在金融行业上云趋势下的发展。给予买入评级。']",
+          "删除词汇: ['恒生电子的业绩在2019年实现了高速增长，预计全年净利润同比增长约100%-108%。收入方面，Q1-Q3期间收入分别同比增长11%-28%，费用控制表现良好，研发费用率略有提升。公司业绩增长主要得益于科创板、资管新规等政策带来的订单落地，预计未来MOM、金融开放、新三板改革等政策将持续推动业绩增长。恒生电子作为金融行业IT解决方案提供商，在多个领域有较高市场份额，看好其在金融行业上云趋势下的发展。给予买入评级。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.505830"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.505832",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "恒生电子（600570）在2019年的业绩表现如何？预计未来增长趋势如何？",
+        "perturbed_text": "恒生电子（600570）在2018年的业绩表现如何？预计未来增长趋势如何？",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['恒生电子（600570）在2018年的业绩表现如何？预计未来增长趋势如何？']",
+          "删除词汇: ['恒生电子（600570）在2019年的业绩表现如何？预计未来增长趋势如何？']"
+        ],
+        "change_description": "year扰动器对prompt进行了修改",
+        "timestamp": "2025-07-15T20:01:21.505878"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.505880",
+      "perturbation_target": "prompt"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "2017年是中国实施‘十三五’规划的关键年份，也是深化供给侧结构性改革的一年。会议强调改革目标为满足需求，提升供给质量，实现路径为深入改革。2017年的改革重心在于推进'三去一降一补'，包括优化产能、消化库存、降杠杆、降低成本和补齐短板，以加速经济转型。",
+        "perturbed_text": "2018年是中国实施‘十三五’规划的关键年份，也是深化供给侧结构性改革的一年。会议强调改革目标为满足需求，提升供给质量，实现路径为深入改革。2017年的改革重心在于推进'三去一降一补'，包括优化产能、消化库存、降杠杆、降低成本和补齐短板，以加速经济转型。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: [\"2018年是中国实施‘十三五’规划的关键年份，也是深化供给侧结构性改革的一年。会议强调改革目标为满足需求，提升供给质量，实现路径为深入改革。2017年的改革重心在于推进'三去一降一补'，包括优化产能、消化库存、降杠杆、降低成本和补齐短板，以加速经济转型。\"]",
+          "删除词汇: [\"2017年是中国实施‘十三五’规划的关键年份，也是深化供给侧结构性改革的一年。会议强调改革目标为满足需求，提升供给质量，实现路径为深入改革。2017年的改革重心在于推进'三去一降一补'，包括优化产能、消化库存、降杠杆、降低成本和补齐短板，以加速经济转型。\"]"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.506404"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.506406",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "2017年是中国实施‘十三五’规划的关键年份，也是深化供给侧结构性改革的一年。会议强调改革目标为满足需求，提升供给质量，实现路径为深入改革。2017年的改革重心在于推进'三去一降一补'，包括优化产能、消化库存、降杠杆、降低成本和补齐短板，以加速经济转型。",
+        "perturbed_text": "2017年是中国实施‘十三五’规划的关键年份，也是深化供给侧结构性改革的一年。会议强调改革目标为满足需求，提升供给质量，实现路径为深入改革。2018年的改革重心在于推进'三去一降一补'，包括优化产能、消化库存、降杠杆、降低成本和补齐短板，以加速经济转型。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: [\"2017年是中国实施‘十三五’规划的关键年份，也是深化供给侧结构性改革的一年。会议强调改革目标为满足需求，提升供给质量，实现路径为深入改革。2018年的改革重心在于推进'三去一降一补'，包括优化产能、消化库存、降杠杆、降低成本和补齐短板，以加速经济转型。\"]",
+          "删除词汇: [\"2017年是中国实施‘十三五’规划的关键年份，也是深化供给侧结构性改革的一年。会议强调改革目标为满足需求，提升供给质量，实现路径为深入改革。2017年的改革重心在于推进'三去一降一补'，包括优化产能、消化库存、降杠杆、降低成本和补齐短板，以加速经济转型。\"]"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.506447"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.506449",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "2017年中央经济工作会议如何定义供给侧结构性改革的目标、主攻方向和根本途径？并指出了当年改革的重点是什么？",
+        "perturbed_text": "2018年中央经济工作会议如何定义供给侧结构性改革的目标、主攻方向和根本途径？并指出了当年改革的重点是什么？",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['2018年中央经济工作会议如何定义供给侧结构性改革的目标、主攻方向和根本途径？并指出了当年改革的重点是什么？']",
+          "删除词汇: ['2017年中央经济工作会议如何定义供给侧结构性改革的目标、主攻方向和根本途径？并指出了当年改革的重点是什么？']"
+        ],
+        "change_description": "year扰动器对prompt进行了修改",
+        "timestamp": "2025-07-15T20:01:21.506496"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.506498",
+      "perturbation_target": "prompt"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "招商银行业绩发布会讨论了疫情对其零售信贷的短期影响及全年资产质量的控制能力。强调了管理团队在风险上行时的高质量管理和业务策略。公司预计2020年资产和负债规模保持稳定增长，重点投向房贷、战略对公客户及特定行业。LPR改革影响预计在2021年体现，NIM预计将优于同业。资产质量压力在第一季度有所增加，但管理层预计全年较为可控。公司将继续坚持一体两翼战略，加大零售业务投入，保持收入和风险结构的平稳。理财子公司业务转型的核心目标是做大净值型产品的规模，分红比例有望提升。估值建议维持原有盈利预测，目标价为51元人民币，较当前股价有69%的上行空间。",
+        "perturbed_text": "招商银行业绩发布会讨论了疫情对其零售信贷的短期影响及全年资产质量的控制能力。强调了管理团队在风险上行时的高质量管理和业务策略。公司预计2019年资产和负债规模保持稳定增长，重点投向房贷、战略对公客户及特定行业。LPR改革影响预计在2021年体现，NIM预计将优于同业。资产质量压力在第一季度有所增加，但管理层预计全年较为可控。公司将继续坚持一体两翼战略，加大零售业务投入，保持收入和风险结构的平稳。理财子公司业务转型的核心目标是做大净值型产品的规模，分红比例有望提升。估值建议维持原有盈利预测，目标价为51元人民币，较当前股价有69%的上行空间。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['招商银行业绩发布会讨论了疫情对其零售信贷的短期影响及全年资产质量的控制能力。强调了管理团队在风险上行时的高质量管理和业务策略。公司预计2019年资产和负债规模保持稳定增长，重点投向房贷、战略对公客户及特定行业。LPR改革影响预计在2021年体现，NIM预计将优于同业。资产质量压力在第一季度有所增加，但管理层预计全年较为可控。公司将继续坚持一体两翼战略，加大零售业务投入，保持收入和风险结构的平稳。理财子公司业务转型的核心目标是做大净值型产品的规模，分红比例有望提升。估值建议维持原有盈利预测，目标价为51元人民币，较当前股价有69%的上行空间。']",
+          "删除词汇: ['招商银行业绩发布会讨论了疫情对其零售信贷的短期影响及全年资产质量的控制能力。强调了管理团队在风险上行时的高质量管理和业务策略。公司预计2020年资产和负债规模保持稳定增长，重点投向房贷、战略对公客户及特定行业。LPR改革影响预计在2021年体现，NIM预计将优于同业。资产质量压力在第一季度有所增加，但管理层预计全年较为可控。公司将继续坚持一体两翼战略，加大零售业务投入，保持收入和风险结构的平稳。理财子公司业务转型的核心目标是做大净值型产品的规模，分红比例有望提升。估值建议维持原有盈利预测，目标价为51元人民币，较当前股价有69%的上行空间。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.506780"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.506782",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "招商银行业绩发布会讨论了疫情对其零售信贷的短期影响及全年资产质量的控制能力。强调了管理团队在风险上行时的高质量管理和业务策略。公司预计2020年资产和负债规模保持稳定增长，重点投向房贷、战略对公客户及特定行业。LPR改革影响预计在2021年体现，NIM预计将优于同业。资产质量压力在第一季度有所增加，但管理层预计全年较为可控。公司将继续坚持一体两翼战略，加大零售业务投入，保持收入和风险结构的平稳。理财子公司业务转型的核心目标是做大净值型产品的规模，分红比例有望提升。估值建议维持原有盈利预测，目标价为51元人民币，较当前股价有69%的上行空间。",
+        "perturbed_text": "招商银行业绩发布会讨论了疫情对其零售信贷的短期影响及全年资产质量的控制能力。强调了管理团队在风险上行时的高质量管理和业务策略。公司预计2020年资产和负债规模保持稳定增长，重点投向房贷、战略对公客户及特定行业。LPR改革影响预计在2020年体现，NIM预计将优于同业。资产质量压力在第一季度有所增加，但管理层预计全年较为可控。公司将继续坚持一体两翼战略，加大零售业务投入，保持收入和风险结构的平稳。理财子公司业务转型的核心目标是做大净值型产品的规模，分红比例有望提升。估值建议维持原有盈利预测，目标价为51元人民币，较当前股价有69%的上行空间。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['招商银行业绩发布会讨论了疫情对其零售信贷的短期影响及全年资产质量的控制能力。强调了管理团队在风险上行时的高质量管理和业务策略。公司预计2020年资产和负债规模保持稳定增长，重点投向房贷、战略对公客户及特定行业。LPR改革影响预计在2020年体现，NIM预计将优于同业。资产质量压力在第一季度有所增加，但管理层预计全年较为可控。公司将继续坚持一体两翼战略，加大零售业务投入，保持收入和风险结构的平稳。理财子公司业务转型的核心目标是做大净值型产品的规模，分红比例有望提升。估值建议维持原有盈利预测，目标价为51元人民币，较当前股价有69%的上行空间。']",
+          "删除词汇: ['招商银行业绩发布会讨论了疫情对其零售信贷的短期影响及全年资产质量的控制能力。强调了管理团队在风险上行时的高质量管理和业务策略。公司预计2020年资产和负债规模保持稳定增长，重点投向房贷、战略对公客户及特定行业。LPR改革影响预计在2021年体现，NIM预计将优于同业。资产质量压力在第一季度有所增加，但管理层预计全年较为可控。公司将继续坚持一体两翼战略，加大零售业务投入，保持收入和风险结构的平稳。理财子公司业务转型的核心目标是做大净值型产品的规模，分红比例有望提升。估值建议维持原有盈利预测，目标价为51元人民币，较当前股价有69%的上行空间。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.506823"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.506825",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "招商银行(600036)在2020年的业绩发布会上宣布了哪些关键的业务策略和财务目标?",
+        "perturbed_text": "招商银行(600036)在2019年的业绩发布会上宣布了哪些关键的业务策略和财务目标?",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['招商银行(600036)在2019年的业绩发布会上宣布了哪些关键的业务策略和财务目标?']",
+          "删除词汇: ['招商银行(600036)在2020年的业绩发布会上宣布了哪些关键的业务策略和财务目标?']"
+        ],
+        "change_description": "year扰动器对prompt进行了修改",
+        "timestamp": "2025-07-15T20:01:21.506873"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.506874",
+      "perturbation_target": "prompt"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "根据提供的研究报告，建设机械（600984）在2020年的中报表现如何？",
+        "perturbed_text": "根据提供的研究报告，建设机械（600984）在2019年的中报表现如何？",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['根据提供的研究报告，建设机械（600984）在2019年的中报表现如何？']",
+          "删除词汇: ['根据提供的研究报告，建设机械（600984）在2020年的中报表现如何？']"
+        ],
+        "change_description": "year扰动器对prompt进行了修改",
+        "timestamp": "2025-07-15T20:01:21.507222"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.507224",
+      "perturbation_target": "prompt"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2025年的费用影响分别为1173万元至3545万元不等。预计2022年至2024年的营收增长目标为每年15%。维持公司买入评级。",
+        "perturbed_text": "恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2019年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2025年的费用影响分别为1173万元至3545万元不等。预计2022年至2024年的营收增长目标为每年15%。维持公司买入评级。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2019年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2025年的费用影响分别为1173万元至3545万元不等。预计2022年至2024年的营收增长目标为每年15%。维持公司买入评级。']",
+          "删除词汇: ['恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2025年的费用影响分别为1173万元至3545万元不等。预计2022年至2024年的营收增长目标为每年15%。维持公司买入评级。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.507546"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.507548",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2025年的费用影响分别为1173万元至3545万元不等。预计2022年至2024年的营收增长目标为每年15%。维持公司买入评级。",
+        "perturbed_text": "恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2019年至2025年的费用影响分别为1173万元至3545万元不等。预计2022年至2024年的营收增长目标为每年15%。维持公司买入评级。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2019年至2025年的费用影响分别为1173万元至3545万元不等。预计2022年至2024年的营收增长目标为每年15%。维持公司买入评级。']",
+          "删除词汇: ['恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2025年的费用影响分别为1173万元至3545万元不等。预计2022年至2024年的营收增长目标为每年15%。维持公司买入评级。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.507587"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.507589",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2025年的费用影响分别为1173万元至3545万元不等。预计2022年至2024年的营收增长目标为每年15%。维持公司买入评级。",
+        "perturbed_text": "恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2026年的费用影响分别为1173万元至3545万元不等。预计2022年至2024年的营收增长目标为每年15%。维持公司买入评级。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2026年的费用影响分别为1173万元至3545万元不等。预计2022年至2024年的营收增长目标为每年15%。维持公司买入评级。']",
+          "删除词汇: ['恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2025年的费用影响分别为1173万元至3545万元不等。预计2022年至2024年的营收增长目标为每年15%。维持公司买入评级。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.507629"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.507630",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2025年的费用影响分别为1173万元至3545万元不等。预计2022年至2024年的营收增长目标为每年15%。维持公司买入评级。",
+        "perturbed_text": "恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2025年的费用影响分别为1173万元至3545万元不等。预计2019年至2024年的营收增长目标为每年15%。维持公司买入评级。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2025年的费用影响分别为1173万元至3545万元不等。预计2019年至2024年的营收增长目标为每年15%。维持公司买入评级。']",
+          "删除词汇: ['恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2025年的费用影响分别为1173万元至3545万元不等。预计2022年至2024年的营收增长目标为每年15%。维持公司买入评级。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.507671"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.507672",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2025年的费用影响分别为1173万元至3545万元不等。预计2022年至2024年的营收增长目标为每年15%。维持公司买入评级。",
+        "perturbed_text": "恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2025年的费用影响分别为1173万元至3545万元不等。预计2022年至2025年的营收增长目标为每年15%。维持公司买入评级。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2025年的费用影响分别为1173万元至3545万元不等。预计2022年至2025年的营收增长目标为每年15%。维持公司买入评级。']",
+          "删除词汇: ['恒生电子（600570）发布股票期权激励计划，调整授予数量至1666万份，占总股本的0.88%，不再设臵预留。激励计划涉及267人，包括12位董监高，激励力度高于2020年股权激励。计划对当期利润影响较小，预计成为公司人效提升的拐点。股票价格在公告发布后上涨至36.15元/股，较行权价格高出1.27元/股。股票期权授予对2022年至2025年的费用影响分别为1173万元至3545万元不等。预计2022年至2024年的营收增长目标为每年15%。维持公司买入评级。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.507704"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.507706",
+      "perturbation_target": "summary"
+    },
+    {
+      "sample_id": "unknown",
+      "perturber_name": "year",
+      "original_answer": "",
+      "perturbed_answer": "",
+      "perturbation_detail": {
+        "perturber_name": "year",
+        "original_text": "平煤股份(Q2)成本显著下降，商品煤盈利提升，2020上半年原煤产量及销量环比改善，成本下降幅度超过价格变动，吨煤毛利增加，盈利能力提升。公司持续高比例分红，股息率处于行业领先地位。预计2020年净利润为13.10亿元，股息率为6.55%，处于行业领先水平。维持买入A评级，6个月目标价为6.19元。",
+        "perturbed_text": "平煤股份(Q2)成本显著下降，商品煤盈利提升，2020上半年原煤产量及销量环比改善，成本下降幅度超过价格变动，吨煤毛利增加，盈利能力提升。公司持续高比例分红，股息率处于行业领先地位。预计2019年净利润为13.10亿元，股息率为6.55%，处于行业领先水平。维持买入A评级，6个月目标价为6.19元。",
+        "perturbation_type": "year",
+        "changed_elements": [
+          "新增词汇: ['平煤股份(Q2)成本显著下降，商品煤盈利提升，2020上半年原煤产量及销量环比改善，成本下降幅度超过价格变动，吨煤毛利增加，盈利能力提升。公司持续高比例分红，股息率处于行业领先地位。预计2019年净利润为13.10亿元，股息率为6.55%，处于行业领先水平。维持买入A评级，6个月目标价为6.19元。']",
+          "删除词汇: ['平煤股份(Q2)成本显著下降，商品煤盈利提升，2020上半年原煤产量及销量环比改善，成本下降幅度超过价格变动，吨煤毛利增加，盈利能力提升。公司持续高比例分红，股息率处于行业领先地位。预计2020年净利润为13.10亿元，股息率为6.55%，处于行业领先水平。维持买入A评级，6个月目标价为6.19元。']"
+        ],
+        "change_description": "year扰动器对summary进行了修改",
+        "timestamp": "2025-07-15T20:01:21.508027"
+      },
+      "similarity_score": 0.0,
+      "importance_score": 1.0,
+      "f1_score": 0.0,
+      "em_score": 0.0,
+      "llm_judge_scores": {
+        "accuracy": 0.0,
+        "conciseness": 0.0,
+        "professionalism": 0.0,
+        "overall_score": 0.0,
+        "reasoning": "答案为空，无法评估"
+      },
+      "timestamp": "2025-07-15T20:01:21.508030",
+      "perturbation_target": "summary"
+    }
+  ]
+}
