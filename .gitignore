@@ -75,6 +75,7 @@ data/prompt_templates/*
 !data/prompt_templates/template_for_hybrid_answer.txt
 !data/prompt_templates/unified_english_template_no_think.txt
 !data/prompt_templates/multi_stage_chinese_template_with_fewshot.txt
+!data/prompt_templates/qwen_judge_template.txt
 
 # --- Other Specific Ignores ---
 models/
