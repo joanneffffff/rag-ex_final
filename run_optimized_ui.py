@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-启动集成RAG UI系统 - 结合多阶段检索和传统RAG
-中文查询：使用AlphaFin多阶段检索
-英文查询：使用传统RAG系统
+Start the integrated RAG UI system - combines multi-stage retrieval and traditional RAG.
+Chinese queries: use AlphaFin multi-stage retrieval.
+English queries: use traditional RAG system.
 """
 
 import sys
@@ -14,28 +14,28 @@ from config.parameters import Config
 sys.path.append(str(Path(__file__).parent))
 
 def main():
-    """启动集成RAG UI系统"""
+    """Start the integrated RAG UI system"""
     try:
-        # 检查gradio是否安装
+        # Check if gradio is installed
         try:
             import gradio as gr
         except ImportError:
-            print("❌ Gradio未安装，正在安装...")
+            print("Gradio is not installed, installing...")
             import subprocess
             subprocess.check_call([sys.executable, "-m", "pip", "install", "gradio"])
-            print("✅ Gradio安装完成")
+            print("Gradio installation completed")
         
-        print("🚀 启动集成RAG UI系统...")
+        print("Starting the integrated RAG UI system...")
         print("Access URL: http://localhost:7860")
         print("Press Ctrl+C to stop server")
         
-        # 使用config中的平台感知配置
+        # Use platform-aware config
         config = Config()
         
-        # 导入并启动集成UI
+        # Import and start the integrated UI
         from xlm.ui.optimized_rag_ui import OptimizedRagUI
         
-        # 创建UI实例，使用集成版本
+        # Create UI instance using the integrated version
         ui = OptimizedRagUI(
             cache_dir=config.cache_dir,
             use_faiss=True,
@@ -54,7 +54,7 @@ def main():
             ]
         )
         
-        # 启动UI
+        # Launch the UI
         ui.launch(share=False)
         
     except KeyboardInterrupt:

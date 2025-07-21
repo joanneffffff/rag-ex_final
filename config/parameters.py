@@ -24,54 +24,54 @@ RERANKER_CACHE_DIR = DEFAULT_CACHE_DIR
 
 @dataclass
 class EncoderConfig:
-    # 中文微调模型路径
+    # Path to the fine-tuned Chinese model
     chinese_model_path: str = "models/alphafin_encoder_finetuned_1epoch"
-    # 英文微调模型路径
+    # Path to the fine-tuned English model
     english_model_path: str = "models/finetuned_tatqa_mixed_enhanced"
     cache_dir: str = EMBEDDING_CACHE_DIR
-    device: Optional[str] = "cuda:0"  # 编码器使用cuda:0
-    batch_size: int = 64  # 从32增加到64，利用充足的GPU内存加速处理
+    device: Optional[str] = "cuda:0"  # Encoder uses cuda:0
+    batch_size: int = 64  # Increased from 32 to 64 to utilize sufficient GPU memory for faster processing
     max_length: int = 512
 
 @dataclass
 class RerankerConfig:
     model_name: str = "Qwen/Qwen3-Reranker-0.6B"
     cache_dir: str = RERANKER_CACHE_DIR
-    device: Optional[str] = "cuda:0"  # 重排序器使用cuda:1，避免与编码器冲突
+    device: Optional[str] = "cuda:0"  # Reranker uses cuda:1 to avoid conflict with encoder
     use_quantization: bool = True
-    quantization_type: str = "4bit"  # 改为4bit量化以节省GPU内存
-    use_flash_attention: bool = False  # 关闭Flash Attention优化
-    batch_size: int = 1  # 减少到1以避免内存不足
-    enabled: bool = True  # 是否启用重排序器
+    quantization_type: str = "4bit"  # Changed to 4bit quantization to save GPU memory
+    use_flash_attention: bool = False  # Disable Flash Attention optimization
+    batch_size: int = 1  # Reduced to 1 to avoid out-of-memory
+    enabled: bool = True  # Whether to enable reranker
 
 @dataclass
 class RetrieverConfig:
     use_faiss: bool = True  # Changed default to True for efficiency
     num_threads: int = 4
-    batch_size: int = 64  # 从32增加到64，利用充足的GPU内存加速处理
+    batch_size: int = 64  # Increased from 32 to 64 to utilize sufficient GPU memory for faster processing
     use_gpu: bool = torch.cuda.is_available() # Dynamically set default based on hardware
     max_context_length: int = 100
-    # 重排序相关配置
-    retrieval_top_k: int = 100  # FAISS检索的top-k chinese:20/english:100
-    rerank_top_k: int = 10      # 重排序后的top-k，从10增加到20
-    # 预过滤配置
-    use_prefilter: bool = True  # 是否使用预过滤功能（使用时会自动启用股票代码和公司名称映射）
-    # 嵌入向量缓存控制
-    use_existing_embedding_index: bool = True  # True=使用现有缓存，False=强制重新计算embedding
-    max_alphafin_chunks: int = 1000000  # 限制AlphaFin数据chunk数量
+    # Rerank related config
+    retrieval_top_k: int = 100  # FAISS retrieval top-k chinese:20/english:100
+    rerank_top_k: int = 10      # Top-k after rerank, increased from 10 to 20
+    # Prefilter config
+    use_prefilter: bool = True  # Whether to use prefiltering (automatically enables stock code and company name mapping)
+    # Embedding cache control
+    use_existing_embedding_index: bool = True  # True=use existing cache, False=force recompute embedding
+    max_alphafin_chunks: int = 1000000  # Limit the number of AlphaFin data chunks
 
 @dataclass
 class DataConfig:
     data_dir: str = "data"  # Unified root data directory
-    max_samples: int = -1  # -1表示加载所有数据，500表示限制样本数
-    # 数据路径配置
-    chinese_data_path: str = "data/alphafin/alphafin_final_clean.json"  # 中文数据路径
-    english_data_path: str = "data/unified/tatqa_knowledge_base_combined.jsonl"     # 英文数据路径
-    prompt_template_dir: str = "data/prompt_templates"  # prompt模板目录
+    max_samples: int = -1  # -1 means load all data, 500 means limit sample count
+    # Data path config
+    chinese_data_path: str = "data/alphafin/alphafin_final_clean.json"  # Chinese data path
+    english_data_path: str = "data/unified/tatqa_knowledge_base_combined.jsonl"     # English data path
+    prompt_template_dir: str = "data/prompt_templates"  # Prompt template directory
     
-    # 语言特定配置
-    chinese_prompt_template: str = "multi_stage_chinese_template_with_fewshot.txt"  # 中文提示模板
-    english_prompt_template: str = "unified_english_template_no_think.txt"  # 英文提示模板
+    # Language-specific config
+    chinese_prompt_template: str = "multi_stage_chinese_template_with_fewshot.txt"  # Chinese prompt template
+    english_prompt_template: str = "unified_english_template_no_think.txt"  # English prompt template
 
 @dataclass
 class ModalityConfig:
@@ -88,44 +88,44 @@ class SystemConfig:
 
 @dataclass
 class GeneratorConfig:
-    model_name: str = "SUFE-AIFLM-Lab/Fin-R1"  # 上海财经大学金融推理大模型，专门针对金融领域优化
+    model_name: str = "SUFE-AIFLM-Lab/Fin-R1"  # Shanghai University of Finance and Economics financial reasoning LLM, optimized for finance
     cache_dir: str = GENERATOR_CACHE_DIR
     device: Optional[str] = "cuda:1"
     
-    # 模型特定配置 - 与test_clean.py保持一致
-    use_quantization: bool = True  # 启用量化
-    quantization_type: str = "4bit"  # 使用4bit量化以节省内存
-    use_flash_attention: bool = False  # 启用Flash Attention优化
-    max_new_tokens: int = 8196  # 增加到4096以生成更完整的答案
-    # 对于Fin-R1模型，这些参数会被忽略，但保留在配置中以防其他模型使用
-    temperature: float = 0.1  # Fin-R1不使用此参数
-    top_p: float = 0.7  # Fin-R1不使用此参数
-    do_sample: bool = False  # 使用确定性生成，与test_clean.py一致
-    repetition_penalty: float = 1.1  # 与test_clean.py一致
-    pad_token_id: int = 0  # 填充token ID
-    eos_token_id: int = 151645  # Fin-R1的结束token ID
+    # Model-specific config - consistent with test_clean.py
+    use_quantization: bool = True  # Enable quantization
+    quantization_type: str = "4bit"  # Use 4bit quantization to save memory
+    use_flash_attention: bool = False  # Enable Flash Attention optimization
+    max_new_tokens: int = 8196  # Increased to 4096 for more complete answers
+    # For Fin-R1 model, these parameters are ignored, but kept for compatibility with other models
+    temperature: float = 0.1  # Not used by Fin-R1
+    top_p: float = 0.7  # Not used by Fin-R1
+    do_sample: bool = False  # Use deterministic generation, consistent with test_clean.py
+    repetition_penalty: float = 1.1  # Consistent with test_clean.py
+    pad_token_id: int = 0  # Padding token ID
+    eos_token_id: int = 151645  # End token ID for Fin-R1
     
-    # 句子完整性检测配置
-    enable_sentence_completion: bool = False  # 暂时禁用句子完整性检测以解决停滞问题
-    max_completion_attempts: int = 2  # 最大重试次数
-    token_increment: int = 100  # 每次重试增加的token数量
-    max_total_tokens: int = 5000  # 增加到5000以支持更长的生成
+    # Sentence completion detection config
+    enable_sentence_completion: bool = False  # Temporarily disable sentence completion detection to solve stalling issue
+    max_completion_attempts: int = 2  # Max retry attempts
+    token_increment: int = 100  # Token increment per retry
+    max_total_tokens: int = 5000  # Increased to 5000 to support longer generation
     
-    # 语言一致性检查配置
-    enable_language_consistency_check: bool = True  # 是否启用语言一致性检查
-    force_chinese_company_names: bool = True  # 强制保持中文公司名称
-    enable_company_name_correction: bool = True  # 是否启用公司名称修正
+    # Language consistency check config
+    enable_language_consistency_check: bool = True  # Whether to enable language consistency check
+    force_chinese_company_names: bool = True  # Force to keep Chinese company names
+    enable_company_name_correction: bool = True  # Whether to enable company name correction
     
-    # 回答长度控制
-    max_response_chars: int = 1200  # 增加最大回答字符数，支持更长的答案
-    enable_response_length_limit: bool = False  # 是否启用回答长度限制，设为False以测试回答质量
+    # Answer length control
+    max_response_chars: int = 1200  # Increase max answer characters to support longer answers
+    enable_response_length_limit: bool = False  # Whether to enable answer length limit, set to False to test answer quality
     
-    # 性能优化配置
-    enable_fast_mode: bool = True  # 启用快速模式，减少生成参数
-    enable_performance_monitoring: bool = True  # 启用性能监控
+    # Performance optimization config
+    enable_fast_mode: bool = True  # Enable fast mode, reduce generation parameters
+    enable_performance_monitoring: bool = True  # Enable performance monitoring
 
-    # 超时和性能配置
-    max_generation_time: int = 300  # 生成超时时间（秒），增加到5分钟
+    # Timeout and performance config
+    max_generation_time: int = 300  # Generation timeout (seconds), increased to 5 minutes
 
 @dataclass
 class Config:
@@ -142,11 +142,11 @@ class Config:
     def __post_init__(self):
         # Propagate the global cache_dir to other configs if they have it
         if hasattr(self.encoder, 'cache_dir'):
-            self.encoder.cache_dir = EMBEDDING_CACHE_DIR  # 编码器使用embedding缓存目录
+            self.encoder.cache_dir = EMBEDDING_CACHE_DIR  # Encoder uses embedding cache directory
         if hasattr(self.reranker, 'cache_dir'):
-            self.reranker.cache_dir = RERANKER_CACHE_DIR  # 重排序器使用DEFAULT_CACHE_DIR
+            self.reranker.cache_dir = RERANKER_CACHE_DIR  # Reranker uses DEFAULT_CACHE_DIR
         if hasattr(self.generator, 'cache_dir'):
-            self.generator.cache_dir = GENERATOR_CACHE_DIR  # 生成器使用DEFAULT_CACHE_DIR
+            self.generator.cache_dir = GENERATOR_CACHE_DIR  # Generator uses DEFAULT_CACHE_DIR
 
     @classmethod
     def load_environment_config(cls) -> 'Config':
@@ -155,7 +155,6 @@ class Config:
         if os.getenv("PRODUCTION") == "1":
             return cls(
                 encoder=EncoderConfig(
-                    # chinese_model_path="models/finetuned_alphafin_zh",
                     chinese_model_path="models/finetuned_alphafin_zh_optimized",
                     english_model_path="models/finetuned_finbert_tatqa",
                     batch_size=64
