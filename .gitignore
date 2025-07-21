@@ -56,15 +56,11 @@ data/**/*/ # 忽略 data/ 下所有子目录中的所有文件和子目录
 
 # 忽略 data/alphafin/ 目录下除指定文件外的所有文件
 data/alphafin/*
-!data/alphafin/alphafin_summarized_and_structured_qa_0627_b8_s50_fullsentence.json
-!data/alphafin/alphafin_summarized_and_structured_qa_0627_colab_backward.json
-!data/alphafin/alphafin_summarized_and_structured_qa_0628_colab_backward.json
-!data/alphafin/alphafin_summarized_and_structured_qa_0628_colab_missing.json
-!data/alphafin/alphafin_merged_generated_qa.json
 # retrieval samples
 !data/alphafin/alphafin_eval_samples.jsonl 
 # generator samples  
 !data/alphafin/alphafin_eval_samples_updated.jsonl 
+!data/alphafin/alphafin_final_clean.json
 
 # 忽略 data/prompt_templates/ 目录下除指定文件外的所有文件
 data/prompt_templates/*
