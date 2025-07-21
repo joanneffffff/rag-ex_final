@@ -1,2 +1,0 @@
-2025-07-09 17:23:13,176 - INFO - 总结报告已生成: alphafin_data_process/evaluation_results/summary_report_20250709_172313.txt
-2025-07-09 17:23:13,176 - INFO - 后台评测完成！

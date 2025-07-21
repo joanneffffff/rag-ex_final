@@ -184,7 +184,6 @@ class EnhancedEnglishPromptIntegrator:
             
             return content
         except FileNotFoundError:
-            print(f"⚠️ 模板文件 {filename} 未找到，使用默认模板")
             return self._get_default_template()
         except Exception as e:
             print(f"⚠️ 加载模板文件 {filename} 失败: {e}")
