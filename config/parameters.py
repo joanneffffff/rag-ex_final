@@ -25,12 +25,9 @@ RERANKER_CACHE_DIR = DEFAULT_CACHE_DIR
 @dataclass
 class EncoderConfig:
     # 中文微调模型路径
-    # chinese_model_path: str = "models/finetuned_alphafin_zh_optimized"
     chinese_model_path: str = "models/alphafin_encoder_finetuned_1epoch"
     # 英文微调模型路径
-    # english_model_path: str = "models/finetuned_finbert_tatqa"
     english_model_path: str = "models/finetuned_tatqa_mixed_enhanced"
-    # english_model_path: str = "models/finetuned_finbert_simple_continued_fixed"
     cache_dir: str = EMBEDDING_CACHE_DIR
     device: Optional[str] = "cuda:0"  # 编码器使用cuda:0
     batch_size: int = 64  # 从32增加到64，利用充足的GPU内存加速处理
@@ -91,10 +88,6 @@ class SystemConfig:
 
 @dataclass
 class GeneratorConfig:
-    # 可选的生成器模型
-    # model_name : str = "Qwen/Qwen2-0.5B-Instruct"  # 原始小模型
-    # model_name: str = "Qwen/Qwen2-1.5B-Instruct"  # 原始小模型
-    # model_name: str = "Qwen/Qwen3-8B"  # Qwen3-8B基础版本，更大的模型，替代Fin-R1
     model_name: str = "SUFE-AIFLM-Lab/Fin-R1"  # 上海财经大学金融推理大模型，专门针对金融领域优化
     cache_dir: str = GENERATOR_CACHE_DIR
     device: Optional[str] = "cuda:1"
