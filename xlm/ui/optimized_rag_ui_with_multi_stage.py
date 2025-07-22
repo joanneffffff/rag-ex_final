@@ -57,15 +57,15 @@ def build_smart_context(summary: str, context: str, query: str) -> str:
         context_data = json.loads(context.replace("'", '"')) 
         if isinstance(context_data, dict):
             processed_context = json.dumps(context_data, ensure_ascii=False, indent=2)
-            logger.debug("✅ Context identified as a dictionary string and formatted as JSON.")
+            logger.debug("Context identified as a dictionary string and formatted as JSON.")
     except (json.JSONDecodeError, TypeError):
-        logger.debug("⚠️ Context is not a JSON string format, using original context directly.")
+        logger.debug("Context is not a JSON string format, using original context directly.")
         pass
 
     # Use the same length limit as chinese_llm_evaluation.py: 3500 characters
     max_processed_context_length = 3500 # Character length, as a rough limit
     if len(processed_context) > max_processed_context_length:
-        logger.warning(f"⚠️ Processed context length is too long ({len(processed_context)} characters), truncating.")
+        logger.warning(f"Processed context length is too long ({len(processed_context)} characters), truncating.")
         processed_context = processed_context[:max_processed_context_length] + "..."
 
     return processed_context
@@ -76,14 +76,14 @@ def _load_template_content_from_file(template_file_name: str) -> str:
     """
     template_path = Path("data/prompt_templates") / template_file_name
     if not template_path.exists():
-        logger.error(f"❌ Template file does not exist: {template_path}")
+        logger.error(f"Template file does not exist: {template_path}")
         return ""
     
     try:
         with open(template_path, 'r', encoding='utf-8') as f:
             return f.read()
     except Exception as e:
-        logger.error(f"❌ Failed to read template file: {e}")
+        logger.error(f"Failed to read template file: {e}")
         return ""
 
 def get_messages_for_test(summary: str, context: str, query: str, 
@@ -307,9 +307,9 @@ class OptimizedRagUIWithMultiStage:
                 generator=self.generator,
                 retriever_top_k=self.config.retriever.retrieval_top_k  # Use settings from config
             )
-            print("✅ Traditional RAG system initialized")
+            print("Traditional RAG system initialized")
         except Exception as e:
-            print(f"❌ Traditional RAG system initialization failed: {e}")
+            print(f"Traditional RAG system initialization failed: {e}")
             self.rag_system = None
         
         # Initialize multi-stage retrieval system
@@ -319,44 +319,44 @@ class OptimizedRagUIWithMultiStage:
                 chinese_data_path = Path(config.data.chinese_data_path)
                 
                 if chinese_data_path.exists():
-                    print("✅ Initializing Chinese multi-stage retrieval system...")
+                    print("Initializing Chinese multi-stage retrieval system...")
                     self.chinese_retrieval_system = MultiStageRetrievalSystem(
                         data_path=chinese_data_path,
                         dataset_type="chinese",
                         use_existing_config=True
                     )
-                    print("✅ Chinese multi-stage retrieval system initialized")
+                    print("Chinese multi-stage retrieval system initialized")
                 else:
-                    print(f"❌ Chinese data file does not exist: {chinese_data_path}")
+                    print(f"Chinese data file does not exist: {chinese_data_path}")
                     self.chinese_retrieval_system = None
                 
                 # English data path (if available)
                 english_data_path = Path("data/tatqa/processed_data.json")  # Requires preprocessing
                 if english_data_path.exists():
-                    print("✅ Initializing English multi-stage retrieval system...")
+                    print("Initializing English multi-stage retrieval system...")
                     self.english_retrieval_system = MultiStageRetrievalSystem(
                         data_path=english_data_path,
                         dataset_type="english",
                         use_existing_config=True
                     )
-                    print("✅ English multi-stage retrieval system initialized")
+                    print("English multi-stage retrieval system initialized")
                 else:
-                    print(f"⚠️ English data file does not exist: {english_data_path}")
+                    print(f"English data file does not exist: {english_data_path}")
                     self.english_retrieval_system = None
                 
             except Exception as e:
-                print(f"❌ Multi-stage retrieval system initialization failed: {e}")
+                print(f"Multi-stage retrieval system initialization failed: {e}")
                 self.chinese_retrieval_system = None
                 self.english_retrieval_system = None
         else:
-            print("❌ Multi-stage retrieval system is not available, falling back to traditional retrieval")
+            print("Multi-stage retrieval system is not available, falling back to traditional retrieval")
             self.chinese_retrieval_system = None
             self.english_retrieval_system = None
         
         print("\nStep 3. Loading visualizer...")
         self.visualizer = Visualizer(show_mid_features=True)
         
-        print("✅ All components initialized")
+        print("All components initialized")
     
     def _create_interface(self) -> gr.Blocks:
         """Create optimized Gradio interface"""
@@ -471,14 +471,14 @@ class OptimizedRagUIWithMultiStage:
         Process stock prediction mode - only applicable for Chinese queries
         Retrieval uses the original query, generation uses the instruction
         """
-        print(f"🔍 [Stock Prediction Mode] Starting processing...")
-        print(f"📝 [Stock Prediction Mode] Original query: '{question}'")
+        print(f"[Stock Prediction Mode] Starting processing...")
+        print(f"[Stock Prediction Mode] Original query: '{question}'")
         
         # Build stock prediction instruction
         instruction = self._build_stock_prediction_instruction(question)
-        print(f"📋 [Stock Prediction Mode] Generated instruction:")
+        print(f"[Stock Prediction Mode] Generated instruction:")
         print(f"   {instruction}")
-        print(f"🔄 [Stock Prediction Mode] Query conversion complete:")
+        print(f"[Stock Prediction Mode] Query conversion complete:")
         print(f"   - Retrieval uses: '{question}'")
         print(f"   - Generation uses: '{instruction[:100]}{'...' if len(instruction) > 100 else ''}'")
         
@@ -490,10 +490,10 @@ class OptimizedRagUIWithMultiStage:
         Process Chinese query using multi-stage retrieval system (separate mode)
         Use query for retrieval, instruction for generation
         """
-        print(f"🚀 [Multi-stage Separate Mode] Starting processing...")
-        print(f"🔍 [Multi-stage Separate Mode] Retrieval query: '{query}'")
-        print(f"📝 [Multi-stage Separate Mode] Generation instruction: '{instruction[:100]}{'...' if len(instruction) > 100 else ''}'")
-        print(f"📊 [Multi-stage Separate Mode] Processing strategy:")
+        print(f"[Multi-stage Separate Mode] Starting processing...")
+        print(f"[Multi-stage Separate Mode] Retrieval query: '{query}'")
+        print(f"[Multi-stage Separate Mode] Generation instruction: '{instruction[:100]}{'...' if len(instruction) > 100 else ''}'")
+        print(f"[Multi-stage Separate Mode] Processing strategy:")
         print(f"   - Retrieval stage: Use original query '{query}' for document retrieval")
         print(f"   - Generation stage: Use instruction for answer generation")
         
@@ -501,12 +501,12 @@ class OptimizedRagUIWithMultiStage:
             return self._fallback_retrieval(query, 'zh')
         
         try:
-            print(f"🔍 [Multi-stage Separate Mode] Starting Chinese multi-stage retrieval...")
+            print(f"[Multi-stage Separate Mode] Starting Chinese multi-stage retrieval...")
             company_name, stock_code = extract_stock_info_with_mapping(query)
             report_date = extract_report_date(query)
-            print(f"🏢 [Multi-stage Separate Mode] Company name: {company_name}")
-            print(f"📈 [Multi-stage Separate Mode] Stock code: {stock_code}")
-            print(f"📅 [Multi-stage Separate Mode] Report date: {report_date}")
+            print(f"[Multi-stage Separate Mode] Company name: {company_name}")
+            print(f"[Multi-stage Separate Mode] Stock code: {stock_code}")
+            print(f"[Multi-stage Separate Mode] Report date: {report_date}")
             
             # Use query for retrieval
             results = self.chinese_retrieval_system.search(
@@ -522,10 +522,10 @@ class OptimizedRagUIWithMultiStage:
             retriever_scores = []
             
             # Check results format
-            print(f"📊 [Multi-stage Separate Mode] Retrieval result type: {type(results)}")
+            print(f"[Multi-stage Separate Mode] Retrieval result type: {type(results)}")
             if isinstance(results, dict) and 'retrieved_documents' in results:
                 documents = results['retrieved_documents']
-                print(f"📄 [Multi-stage Separate Mode] Retrieved {len(documents)} documents")
+                print(f"[Multi-stage Separate Mode] Retrieved {len(documents)} documents")
                 for result in documents:
                     doc = DocumentWithMetadata(
                         content=result.get('original_context', result.get('summary', '')),
@@ -580,15 +580,15 @@ class OptimizedRagUIWithMultiStage:
                 messages = get_messages_for_test(summary, context_str, instruction, chinese_template)
                 prompt = _convert_messages_to_chatml(messages)
                 
-                print(f"🤖 [Multi-stage Separate Mode] Generating answer using instruction...")
+                print(f"[Multi-stage Separate Mode] Generating answer using instruction...")
                 
                 # Generate answer
                 try:
                     generated_responses = self.generator.generate(texts=[prompt])
                     answer = generated_responses[0] if generated_responses else "Unable to generate answer"
-                    print(f"✅ [Multi-stage Separate Mode] Answer generation complete")
+                    print(f"[Multi-stage Separate Mode] Answer generation complete")
                 except Exception as e:
-                    print(f"❌ [Multi-stage Separate Mode] Answer generation failed: {e}")
+                    print(f"[Multi-stage Separate Mode] Answer generation failed: {e}")
                     answer = f"[Multi-stage Separate Mode] Answer generation failed: {e}"
                 
                 # Clean up stock prediction answer, remove "Note:" and everything after it
@@ -601,11 +601,11 @@ class OptimizedRagUIWithMultiStage:
                 
                 return answer, context_data
             else:
-                print(f"❌ [Multi-stage Separate Mode] No relevant documents found")
+                print(f"[Multi-stage Separate Mode] No relevant documents found")
                 return "No relevant documents found", []
                 
         except Exception as e:
-            print(f"❌ [Multi-stage Separate Mode] Processing failed: {e}")
+            print(f"[Multi-stage Separate Mode] Processing failed: {e}")
             return self._fallback_retrieval(query, 'zh')
     
     def _build_stock_prediction_instruction(self, question: str) -> str:
@@ -627,7 +627,7 @@ class OptimizedRagUIWithMultiStage:
         if notice_index != -1:
             # Remove "Note:" and everything after it
             cleaned_answer = answer[:notice_index].strip()
-            print(f"🔧 Cleaning stock prediction answer:")
+            print(f"Cleaning stock prediction answer:")
             print(f"   Original answer: {answer}")
             print(f"   Cleaned answer: {cleaned_answer}")
             return cleaned_answer
@@ -640,14 +640,14 @@ class OptimizedRagUIWithMultiStage:
             return self._fallback_retrieval(question, 'zh')
         
         try:
-            print(f"🔍 Starting Chinese multi-stage retrieval...")
-            print(f"📋 Query: {question}")
+            print(f"Starting Chinese multi-stage retrieval...")
+            print(f"Query: {question}")
             company_name, stock_code = extract_stock_info_with_mapping(question)
             report_date = extract_report_date(question)
-            print(f"🏢 Company name: {company_name}")
-            print(f"📈 Stock code: {stock_code}")
-            print(f"📅 Report date: {report_date}")
-            print(f"⚙️ Configuration parameters: retrieval_top_k={self.config.retriever.retrieval_top_k}, rerank_top_k={self.config.retriever.rerank_top_k}")
+            print(f"Company name: {company_name}")
+            print(f"Stock code: {stock_code}")
+            print(f"Report date: {report_date}")
+            print(f"Configuration parameters: retrieval_top_k={self.config.retriever.retrieval_top_k}, rerank_top_k={self.config.retriever.rerank_top_k}")
             
             results = self.chinese_retrieval_system.search(
                 query=question,
@@ -662,12 +662,12 @@ class OptimizedRagUIWithMultiStage:
             retriever_scores = []
             
             # Check results format
-            print(f"📊 Retrieval result type: {type(results)}")
+            print(f"Retrieval result type: {type(results)}")
             if isinstance(results, dict) and 'retrieved_documents' in results:
                 documents = results['retrieved_documents']
                 llm_answer = results.get('llm_answer', '')
-                print(f"📄 Retrieved {len(documents)} documents")
-                print(f"🤖 LLM answer: {'Generated' if llm_answer else 'Not generated'}")
+                print(f"Retrieved {len(documents)} documents")
+                print(f"LLM answer: {'Generated' if llm_answer else 'Not generated'}")
                 for result in documents:
                     doc = DocumentWithMetadata(
                         content=result.get('original_context', result.get('summary', '')),
@@ -773,9 +773,9 @@ class OptimizedRagUIWithMultiStage:
             return self._fallback_retrieval(question, 'en')
         
         try:
-            print(f"🔍 Starting English multi-stage retrieval...")
-            print(f"📋 Query: {question}")
-            print(f"⚙️ Configuration parameters: retrieval_top_k={self.config.retriever.retrieval_top_k}, rerank_top_k={self.config.retriever.rerank_top_k}")
+            print(f"Starting English multi-stage retrieval...")
+            print(f"Query: {question}")
+            print(f"Configuration parameters: retrieval_top_k={self.config.retriever.retrieval_top_k}, rerank_top_k={self.config.retriever.rerank_top_k}")
             
             # Perform multi-stage retrieval
             results = self.english_retrieval_system.search(
