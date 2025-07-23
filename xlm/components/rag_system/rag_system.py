@@ -279,7 +279,7 @@ class RagSystem:
         doc_count = len(retrieved_documents) if isinstance(retrieved_documents, list) else 1
         print(f"FAISS检索完成，找到 {doc_count} 个文档")
         if has_reranker:
-            print(f"重排序器处理完成，返回 {doc_count} 个文档")
+            print(f"Reranker processing completed, returning {doc_count} documents")
         print(f"使用生成器生成答案...")
 
         # 3. For Chinese queries, we should use multi-stage retrieval system

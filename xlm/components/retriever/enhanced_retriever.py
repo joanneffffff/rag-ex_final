@@ -203,7 +203,7 @@ class EnhancedRetriever(Retriever):
         
         Args:
             text: 查询文本
-            top_k: 返回的文档数量
+            top_k: Number of documents to return
             return_scores: 是否返回分数
             
         Returns:
@@ -261,15 +261,15 @@ class EnhancedRetriever(Retriever):
         
         # 2. 重排序（如果启用）
         if self.reranker and len(initial_results) > 1:
-            print(f"开始重排序，候选文档数量: {len(initial_results)}")
+            print(f"Starting reranking, candidate document count: {len(initial_results)}")
             final_results = self._rerank_documents(text, initial_results, top_k)
-            print(f"重排序完成，返回 {len(final_results)} 个文档")
+            print(f"Reranking completed, returning {len(final_results)} documents")
         else:
             final_results = initial_results[:top_k]
             if not self.reranker:
                 print("重排序器未启用，使用FAISS原始结果")
             else:
-                print("候选文档数量不足，跳过重排序")
+                print("Insufficient candidate documents, skipping reranking")
         
         # 3. 提取文档和分数
         result_documents = [documents[result['corpus_id']] for result in final_results]

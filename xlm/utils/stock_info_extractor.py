@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-股票信息提取工具
-支持多种格式的股票代码和公司名称提取，用于多阶段检索系统的元数据过滤
+Stock Information Extraction Tool
+Supports extraction of stock codes and company names in various formats, used for metadata filtering in multi-stage retrieval systems
 """
 
 import re
@@ -12,15 +12,15 @@ from typing import Tuple, Optional, Dict
 
 def load_stock_company_mapping() -> Tuple[Dict[str, str], Dict[str, str]]:
     """
-    加载股票代码和公司名称映射文件
+    Load stock code and company name mapping file
     
     Returns:
-        (stock_company_mapping, company_stock_mapping): 双向映射字典
+        (stock_company_mapping, company_stock_mapping): Bidirectional mapping dictionaries
     """
     stock_company_mapping = {}
     company_stock_mapping = {}
     
-    # 尝试从多个路径加载映射文件
+    # Try to load mapping file from multiple paths
     possible_paths = [
         Path("data/astock_code_company_name.csv"),
         Path(__file__).parent.parent.parent / "data" / "astock_code_company_name.csv",
@@ -37,96 +37,96 @@ def load_stock_company_mapping() -> Tuple[Dict[str, str], Dict[str, str]]:
         try:
             df = pd.read_csv(mapping_path, encoding='utf-8')
             
-            # 构建双向映射
+            # Build bidirectional mapping
             for _, row in df.iterrows():
                 stock_code = str(row['stock_code']).strip()
                 company_name = str(row['company_name']).strip()
                 
                 if stock_code and company_name:
-                    # 股票代码 -> 公司名称
+                    # Stock code -> Company name
                     stock_company_mapping[stock_code] = company_name
-                    # 公司名称 -> 股票代码
+                    # Company name -> Stock code
                     company_stock_mapping[company_name] = stock_code
             
-            print(f"成功加载股票代码和公司名称映射文件: {mapping_path}")
-            print(f"股票代码映射数量: {len(stock_company_mapping)}")
-            print(f"公司名称映射数量: {len(company_stock_mapping)}")
+            print(f"Successfully loaded stock code and company name mapping file: {mapping_path}")
+            print(f"Stock code mapping count: {len(stock_company_mapping)}")
+            print(f"Company name mapping count: {len(company_stock_mapping)}")
             
         except Exception as e:
-            print(f"加载股票代码和公司名称映射文件失败: {e}")
-            print(f"文件路径: {mapping_path}")
+            print(f"Failed to load stock code and company name mapping file: {e}")
+            print(f"File path: {mapping_path}")
     else:
-        print("股票代码和公司名称映射文件不存在")
-        print(f"尝试的路径: {[str(p) for p in possible_paths]}")
+        print("Stock code and company name mapping file does not exist")
+        print(f"Attempted paths: {[str(p) for p in possible_paths]}")
     
     return stock_company_mapping, company_stock_mapping
 
 
 def extract_stock_info_with_mapping(query: str) -> Tuple[Optional[str], Optional[str]]:
     """
-    使用映射文件优先的股票信息提取函数
+    Stock information extraction function with mapping file priority
     
-    策略：
-    1. 先使用映射文件查找已知的公司名称和股票代码
-    2. 再使用正则表达式提取未在映射中的信息
-    3. 优先使用映射文件中的准确信息
+    Strategy:
+    1. First use mapping file to find known company names and stock codes
+    2. Then use regular expressions to extract information not in mapping
+    3. Prioritize accurate information from mapping file
     
     Args:
-        query: 查询文本
+        query: Query text
         
     Returns:
-        (company_name, stock_code): 公司名称和股票代码的元组
+        (company_name, stock_code): Tuple of company name and stock code
     """
-    # 加载映射文件
+    # Load mapping file
     stock_company_mapping, company_stock_mapping = load_stock_company_mapping()
     
     stock_code = None
     company_name = None
     
-    # 第一步：使用映射文件查找
-    print(f"使用映射文件查找查询中的公司信息...")
+    # Step 1: Use mapping file to search
+    print(f"Using mapping file to search for company information in query...")
     
-    # 1.1 查找股票代码
+    # 1.1 Search for stock codes
     stock_patterns = [
-        r'[（(](\d{6})[）)]',  # 中英文括号
-        r'(\d{6}(?:\.(?:SZ|SH))?)',  # 带交易所后缀
-        r'(\d{6})',  # 纯数字
+        r'[（(](\d{6})[）)]',  # Chinese and English brackets
+        r'(\d{6}(?:\.(?:SZ|SH))?)',  # With exchange suffix
+        r'(\d{6})',  # Pure numbers
     ]
     
     for pattern in stock_patterns:
         match = re.search(pattern, query)
         if match:
             found_stock_code = match.group(1)
-            # 清理股票代码（移除交易所后缀）
+            # Clean stock code (remove exchange suffix)
             pure_code_match = re.search(r'(\d{6})', found_stock_code)
             if pure_code_match:
                 found_stock_code = pure_code_match.group(1)
             
-            # 检查是否在映射文件中
+            # Check if it's in the mapping file
             if found_stock_code in stock_company_mapping:
                 stock_code = found_stock_code
                 mapped_company = stock_company_mapping[found_stock_code]
-                print(f"✅ 通过映射文件找到股票代码: {found_stock_code} -> 公司: {mapped_company}")
+                print(f"Found stock code through mapping file: {found_stock_code} -> Company: {mapped_company}")
                 break
     
-    # 1.2 查找公司名称
+    # 1.2 Search for company names
     if not company_name:
-        # 在映射文件中查找查询中提到的公司名称
+        # Search for company names mentioned in query within mapping file
         for mapped_company in company_stock_mapping.keys():
             if mapped_company in query:
                 company_name = mapped_company
                 mapped_stock = company_stock_mapping[mapped_company]
-                print(f"✅ 通过映射文件找到公司名称: {mapped_company} -> 股票: {mapped_stock}")
-                # 如果还没有找到股票代码，使用映射的股票代码
+                print(f"Found company name through mapping file: {mapped_company} -> Stock: {mapped_stock}")
+                # If stock code not found yet, use mapped stock code
                 if not stock_code:
                     stock_code = mapped_stock
                 break
     
-    # 第二步：如果映射文件没有找到，使用正则表达式
+    # Step 2: If mapping file doesn't find complete information, use regular expressions
     if not stock_code or not company_name:
-        print("映射文件未找到完整信息，使用正则表达式提取...")
+        print("Mapping file didn't find complete information, using regular expressions to extract...")
         
-        # 2.1 提取股票代码（如果还没有找到）
+        # 2.1 Extract stock code (if not found yet)
         if not stock_code:
             for pattern in stock_patterns:
                 match = re.search(pattern, query)
@@ -135,26 +135,26 @@ def extract_stock_info_with_mapping(query: str) -> Tuple[Optional[str], Optional
                     pure_code_match = re.search(r'(\d{6})', found_stock_code)
                     if pure_code_match:
                         stock_code = pure_code_match.group(1)
-                        print(f"🔍 正则表达式提取股票代码: {stock_code}")
+                        print(f"Regular expression extracted stock code: {stock_code}")
                         break
         
-        # 2.2 提取公司名称（如果还没有找到）
+        # 2.2 Extract company name (if not found yet)
         if not company_name:
-            # 优先查找带括号格式的公司名称
+            # Prioritize company names with bracket format
             bracket_patterns = [
-                r'([^，。？\s]+)[（(]\d{6}(?:\.(?:SZ|SH))?[）)]',  # 公司名(股票代码)
+                r'([^，。？\s]+)[（(]\d{6}(?:\.(?:SZ|SH))?[）)]',  # Company name (stock code)
             ]
             
             for pattern in bracket_patterns:
                 match = re.search(pattern, query)
                 if match:
                     company_name = match.group(1).strip()
-                    print(f"🔍 正则表达式提取公司名称: {company_name}")
+                    print(f"Regular expression extracted company name: {company_name}")
                     break
             
-            # 如果没有找到，尝试其他格式
+            # If not found, try other formats
             if not company_name:
-                # 查找公司后缀
+                # Search for company suffixes
                 company_patterns = [
                     r'([^，。？\s]+(?:股份|集团|公司|有限|科技|网络|银行|证券|保险))',
                 ]
@@ -163,35 +163,35 @@ def extract_stock_info_with_mapping(query: str) -> Tuple[Optional[str], Optional
                     match = re.search(pattern, query)
                     if match:
                         potential_company = match.group(1).strip()
-                        # 验证提取的公司名称是否合理（长度、内容等）
+                        # Validate if extracted company name is reasonable (length, content, etc.)
                         if len(potential_company) >= 2 and len(potential_company) <= 20:
-                            # 检查是否包含明显的公司后缀
+                            # Check if it contains obvious company suffixes
                             if any(suffix in potential_company for suffix in ['股份', '集团', '公司', '有限', '科技', '网络', '银行', '证券', '保险']):
                                 company_name = potential_company
-                                print(f"🔍 正则表达式提取公司名称: {company_name}")
+                                print(f"🔍 Regular expression extracted company name: {company_name}")
                                 break
     
-    # 第三步：验证和清理结果
+    # Step 3: Validate and clean results
     if company_name:
-        # 清理公司名称
+        # Clean company name
         company_name = company_name.strip()
-        # 移除可能的标点符号
+        # Remove possible punctuation
         company_name = re.sub(r'[，。？\s]+$', '', company_name)
         
-        # 验证公司名称是否合理
+        # Validate if company name is reasonable
         if len(company_name) < 2 or len(company_name) > 20:
-            print(f"⚠️  公司名称长度不合理: {company_name}")
+            print(f"Company name length is unreasonable: {company_name}")
             company_name = None
     
     if stock_code:
-        # 验证股票代码格式 - 修复：允许6位数字，不强制要求前导零
+        # Validate stock code format - Fix: Allow 6 digits, don't force leading zeros
         if not re.match(r'^\d{6}$', stock_code):
-            # 尝试补全前导零
+            # Try to complete leading zeros
             if re.match(r'^\d{1,6}$', stock_code):
                 stock_code = stock_code.zfill(6)
-                print(f"🔧 补全股票代码前导零: {stock_code}")
+                print(f"Completed stock code leading zeros: {stock_code}")
             else:
-                print(f"⚠️  股票代码格式不正确: {stock_code}")
+                print(f"Stock code format is incorrect: {stock_code}")
                 stock_code = None
     
     return company_name, stock_code
@@ -199,7 +199,7 @@ def extract_stock_info_with_mapping(query: str) -> Tuple[Optional[str], Optional
 
 def extract_stock_info(query: str) -> Tuple[Optional[str], Optional[str]]:
     """
-    从查询中提取股票代码和公司名称
+    Extract stock code and company name from query
     
     支持的格式：
     1. 德赛电池(000049) - 英文括号
@@ -213,55 +213,55 @@ def extract_stock_info(query: str) -> Tuple[Optional[str], Optional[str]]:
     9. 首钢股份的业绩表现如何？ - 仅公司名称，无股票代码
     
     Args:
-        query: 查询文本
+        query: Query text
         
     Returns:
-        (company_name, stock_code): 公司名称和股票代码的元组
+        (company_name, stock_code): Tuple of company name and stock code
     """
     stock_code = None
     company_name = None
     
-    # 1. 首先尝试匹配带括号的格式（中英文括号）
+    # 1. First try to match bracket format (Chinese and English brackets)
     bracket_patterns = [
-        r'([^，。？\s]+)[（(](\d{6}(?:\.(?:SZ|SH))?)[）)]',  # 公司名(股票代码)
-        r'[（(](\d{6}(?:\.(?:SZ|SH))?)[）)]',  # 纯(股票代码)
+        r'([^，。？\s]+)[（(](\d{6}(?:\.(?:SZ|SH))?)[）)]',  # Company name (stock code)
+        r'[（(](\d{6}(?:\.(?:SZ|SH))?)[）)]',  # Pure (stock code)
     ]
     
     for pattern in bracket_patterns:
         match = re.search(pattern, query)
         if match:
             if len(match.groups()) == 2:
-                # 第一个模式：公司名(股票代码)
+                # First pattern: Company name (stock code)
                 company_name = match.group(1)
                 stock_code = match.group(2)
             else:
-                # 第二个模式：纯(股票代码)
+                # Second pattern: Pure (stock code)
                 stock_code = match.group(1)
             break
     
-    # 2. 如果没有找到括号格式，尝试无括号格式
+    # 2. If bracket format not found, try no-bracket format
     if not stock_code:
         no_bracket_patterns = [
-            r'([^，。？\s]+)\s*(\d{6}(?:\.(?:SZ|SH))?)',  # 公司名+股票代码（支持空格）
-            r'([^，。？\s]+)(\d{6}(?:\.(?:SZ|SH))?)',  # 公司名+股票代码（无空格）
-            r'(\d{6}(?:\.(?:SZ|SH))?)',  # 纯股票代码
+            r'([^，。？\s]+)\s*(\d{6}(?:\.(?:SZ|SH))?)',  # Company name + stock code (supports space)
+            r'([^，。？\s]+)(\d{6}(?:\.(?:SZ|SH))?)',  # Company name + stock code (no space)
+            r'(\d{6}(?:\.(?:SZ|SH))?)',  # Pure stock code
         ]
         
         for pattern in no_bracket_patterns:
             match = re.search(pattern, query)
             if match:
                 if len(match.groups()) == 2:
-                    # 前两个模式：公司名+股票代码
+                    # First two patterns: Company name + stock code
                     company_name = match.group(1)
                     stock_code = match.group(2)
                 else:
-                    # 第三个模式：纯股票代码
+                    # Third pattern: Pure stock code
                     stock_code = match.group(1)
                 break
     
-    # 3. 如果还没有找到公司名，尝试从股票代码前后提取
+    # 3. If company name not found yet, try to extract from before/after stock code
     if stock_code and not company_name:
-        # 在股票代码前查找可能的公司名
+        # Search for possible company name before stock code
         stock_code_escaped = re.escape(stock_code)
         company_patterns = [
             rf'([^，。？\s]+(?:股份|集团|公司|有限|科技|网络|银行|证券|保险))\s*{stock_code_escaped}',
@@ -274,7 +274,7 @@ def extract_stock_info(query: str) -> Tuple[Optional[str], Optional[str]]:
                 company_name = match.group(1)
                 break
     
-    # 4. 如果没有找到股票代码，尝试提取仅公司名称（新增步骤）
+    # 4. If stock code not found, try to extract company name only (new step)
     if not company_name:
         company_patterns = [
             r'([^，。？\s]+(?:股份|集团|公司|有限|科技|网络|银行|证券|保险))',
@@ -287,9 +287,9 @@ def extract_stock_info(query: str) -> Tuple[Optional[str], Optional[str]]:
                 company_name = company_match.group(1)
                 break
     
-    # 5. 清理股票代码（移除交易所后缀用于索引匹配）
+    # 5. Clean stock code (remove exchange suffix for index matching)
     if stock_code:
-        # 提取纯6位数字代码
+        # Extract pure 6-digit code
         pure_code_match = re.search(r'(\d{6})', stock_code)
         if pure_code_match:
             stock_code = pure_code_match.group(1)
@@ -299,21 +299,21 @@ def extract_stock_info(query: str) -> Tuple[Optional[str], Optional[str]]:
 
 def extract_stock_info_simple(query: str) -> Tuple[Optional[str], Optional[str]]:
     """
-    简化版本的股票信息提取函数，用于向后兼容
+    Simplified version of stock information extraction function, for backward compatibility
     
     Args:
-        query: 查询文本
+        query: Query text
         
     Returns:
-        (company_name, stock_code): 公司名称和股票代码的元组
+        (company_name, stock_code): Tuple of company name and stock code
     """
     stock_code = None
     company_name = None
     
-    # 提取股票代码 - 匹配6位数字（支持中英文括号）
+    # Extract stock code - Match 6 digits (supports Chinese and English brackets)
     stock_patterns = [
-        r'[（(](\d{6})[）)]',  # 中英文括号
-        r'(\d{6})',  # 纯数字
+        r'[（(](\d{6})[）)]',  # Chinese and English brackets
+        r'(\d{6})',  # Pure numbers
     ]
     
     for pattern in stock_patterns:
@@ -322,7 +322,7 @@ def extract_stock_info_simple(query: str) -> Tuple[Optional[str], Optional[str]]
             stock_code = stock_match.group(1)
             break
     
-    # 提取公司名称 - 匹配公司后缀
+    # Extract company name - Match company suffixes
     company_patterns = [
         r'([^，。？\s]+(?:股份|集团|公司|有限|科技|网络|银行|证券|保险))',
         r'([^，。？\s]+(?:股份|集团|公司|有限|科技|网络|银行|证券|保险)[^，。？\s]*)'
@@ -339,25 +339,25 @@ def extract_stock_info_simple(query: str) -> Tuple[Optional[str], Optional[str]]
 
 def extract_report_date(query: str) -> Optional[str]:
     """
-    从查询中提取年份/季度/日期等信息，适配元数据report_date字段
-    支持格式：2021、2021年、2021年度、2021Q1、2021年第一季度、2021-03-31等
+    Extract year/quarter/date information from query, adapts to metadata report_date field
+    Supports formats: 2021, 2021年, 2021年度, 2021Q1, 2021年第一季度, 2021-03-31, etc.
     """
-    # 年份
+    # Year
     m = re.search(r'(20\d{2})[年度]?', query)
     if m:
         return m.group(1)
-    # 年+季度
+    # Year + quarter
     m = re.search(r'(20\d{2})[年\s]*[第]?(1|2|3|4)[季度Q]', query)
     if m:
         return f"{m.group(1)}Q{m.group(2)}"
     m = re.search(r'(20\d{2})Q([1-4])', query)
     if m:
         return f"{m.group(1)}Q{m.group(2)}"
-    # 年-月-日
+    # Year-month-day
     m = re.search(r'(20\d{2}-\d{1,2}-\d{1,2})', query)
     if m:
         return m.group(1)
-    # 只提取年
+    # Extract year only
     m = re.search(r'(20\d{2})', query)
     if m:
         return m.group(1)
@@ -365,7 +365,7 @@ def extract_report_date(query: str) -> Optional[str]:
 
 
 def test_extraction():
-    """测试提取函数"""
+    """Test extraction functions"""
     test_queries = [
         "德赛电池(000049)的下一季度收益预测如何？",
         "德赛电池（000049）2021年利润持续增长的主要原因是什么？",
