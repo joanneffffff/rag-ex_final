@@ -21,27 +21,27 @@ class QwenReranker:
         use_flash_attention: bool = False
     ):
         """
-        初始化Qwen重排序器
+        Initialize Qwen reranker
         
         Args:
-            model_name: 模型名称或路径
-            device: 设备 (cpu/cuda)
-            cache_dir: 模型缓存目录
-            use_quantization: 是否使用量化
-            quantization_type: 量化类型 ("8bit" 或 "4bit")
-            use_flash_attention: 是否使用flash attention
+            model_name: Model name or path
+            device: Device (cpu/cuda)
+            cache_dir: Model cache directory
+            use_quantization: Whether to use quantization
+            quantization_type: Quantization type ("8bit" or "4bit")
+            use_flash_attention: Whether to use flash attention
         """
         self.model_name = model_name
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.cache_dir = cache_dir
         
-        print(f"\n加载重排序器模型: {model_name}")
-        print(f"- 设备: {self.device}")
-        print(f"- 缓存目录: {cache_dir}")
-        print(f"- 量化: {use_quantization} ({quantization_type})")
+        print(f"\nLoading reranker model: {model_name}")
+        print(f"- Device: {self.device}")
+        print(f"- Cache directory: {cache_dir}")
+        print(f"- Quantization: {use_quantization} ({quantization_type})")
         print(f"- Flash Attention: {use_flash_attention}")
         
-        # 配置量化参数
+        # Configure quantization parameters
         quantization_config = None
         if use_quantization:
             if quantization_type == "8bit":
@@ -53,14 +53,14 @@ class QwenReranker:
                     bnb_4bit_compute_dtype=torch.float16
                 )
         
-        # 加载分词器
+        # Load tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(
             model_name,
             cache_dir=cache_dir,
             padding_side='left'
         )
         
-        # 加载模型
+        # Load model
         model_kwargs = {
             "torch_dtype": torch.float16,
             "cache_dir": cache_dir
@@ -77,13 +77,13 @@ class QwenReranker:
             **model_kwargs
         )
         
-        # 移动到设备
+        # Move to device
         if quantization_config:
-            # 量化模型需要明确指定设备
-            print(f"量化模型设置到设备: {self.device}")
+            # Quantized model needs explicit device assignment
+            print(f"Quantized model moved to device: {self.device}")
             self.model = self.model.to(self.device)
         else:
-            # 非量化模型需要手动移动到设备
+            # Non-quantized model needs manual device assignment
             if self.device.startswith("cuda"):
                 self.model = self.model.to(self.device)
             else:
@@ -91,34 +91,34 @@ class QwenReranker:
         
         self.model.eval()
         
-        # 获取特殊token ID
+        # Get special token IDs
         self.token_false_id = self.tokenizer.convert_tokens_to_ids("no")
         self.token_true_id = self.tokenizer.convert_tokens_to_ids("yes")
         
-        # 设置最大长度
+        # Set max length
         self.max_length = 8192
         
-        # 设置提示模板（按照官方实现）
+        # Set prompt templates (following official implementation)
         self.prefix = "<|im_start|>system\nJudge whether the Document meets the requirements based on the Query and the Instruct provided. Note that the answer can only be \"yes\" or \"no\".<|im_end|>\n<|im_start|>user\n"
         self.suffix = "<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
         
-        # 预编码prefix和suffix tokens（按照官方实现）
+        # Pre-encode prefix and suffix tokens (following official implementation)
         self.prefix_tokens = self.tokenizer.encode(self.prefix, add_special_tokens=False)
         self.suffix_tokens = self.tokenizer.encode(self.suffix, add_special_tokens=False)
         
-        print("重排序器模型加载完成")
+        print("Reranker model loaded successfully")
     
     def format_instruction(self, instruction: Optional[str], query: str, document: str) -> str:
         """
-        格式化指令（按照官方实现）
+        Format instruction (following official implementation)
         
         Args:
-            instruction: 指令文本
-            query: 查询文本
-            document: 文档文本
+            instruction: Instruction text
+            query: Query text
+            document: Document text
             
         Returns:
-            格式化后的指令字符串
+            Formatted instruction string
         """
         if instruction is None:
             instruction = 'Given a web search query, retrieve relevant passages that answer the query'
@@ -127,22 +127,22 @@ class QwenReranker:
     
     def process_inputs(self, pairs: List[str]) -> Dict[str, torch.Tensor]:
         """
-        处理输入（优化版本，直接使用tokenizer.__call__方法）
+        Process inputs (optimized version, directly uses tokenizer.__call__ method)
         
         Args:
-            pairs: 格式化后的指令字符串列表
+            pairs: Formatted instruction string list
             
         Returns:
-            分词器输出字典
+            Tokenizer output dictionary
         """
-        # 为每个输入添加prefix和suffix
+        # Add prefix and suffix for each input
         processed_pairs = []
         for pair in pairs:
-            # 直接组合字符串，而不是预编码tokens
+            # Combine strings directly, rather than pre-encoding tokens
             full_text = self.prefix + pair + self.suffix
             processed_pairs.append(full_text)
         
-        # 使用tokenizer处理完整的字符串
+        # Use tokenizer to process the full string
         inputs = self.tokenizer(
             processed_pairs,
             padding='max_length',
@@ -151,7 +151,7 @@ class QwenReranker:
             return_tensors="pt"
         )
         
-        # 移动到正确的设备
+        # Move to the correct device
         for key in inputs:
             inputs[key] = inputs[key].to(self.model.device)
         
@@ -160,13 +160,13 @@ class QwenReranker:
     @torch.no_grad()
     def compute_logits(self, inputs: Dict[str, torch.Tensor]) -> List[float]:
         """
-        计算logits（按照官方实现）
+        Compute logits (following official implementation)
         
         Args:
-            inputs: 分词器输出
+            inputs: Tokenizer output
             
         Returns:
-            分数列表
+            Score list
         """
         batch_scores = self.model(**inputs).logits[:, -1, :]
         true_vector = batch_scores[:, self.token_true_id]
@@ -180,76 +180,76 @@ class QwenReranker:
         self,
         query: str,
         documents: List[str],
-        batch_size: int = 1  # 减少到1以避免内存不足
+        batch_size: int = 1  # Reduce to 1 to avoid memory issues
     ) -> List[Tuple[str, float]]:
         """
-        对文档进行重排序（优化内存使用）
+        Rerank documents (optimized memory usage)
         
         Args:
-            query: 查询文本
-            documents: 文档列表
-            batch_size: 批处理大小（默认2以减少内存使用）
+            query: Query text
+            documents: Document list
+            batch_size: Batch size (default 2 to reduce memory usage)
             
         Returns:
-            重排序后的(文档, 分数)列表
+            List of (document, score) tuples
         """
         if not documents:
             return []
         
-        # 格式化所有文档
+        # Format all documents
         formatted_pairs = []
         for doc in documents:
             formatted_text = self.format_instruction(None, query, doc)
             formatted_pairs.append((formatted_text, doc))
         
-        # 批处理重排序（优化内存使用）
+        # Batch reranking (optimized memory usage)
         all_scores = []
         for i in range(0, len(formatted_pairs), batch_size):
             batch_pairs = formatted_pairs[i:i + batch_size]
             batch_texts = [pair[0] for pair in batch_pairs]
             
             try:
-                # 处理输入
+                # Process inputs
                 inputs = self.process_inputs(batch_texts)
                 
-                # 计算分数
+                # Compute scores
                 batch_scores = self.compute_logits(inputs)
                 all_scores.extend(batch_scores)
                 
-                # 清理GPU内存
+                # Clean up GPU memory
                 del inputs
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
                     
-                # 强制垃圾回收
+                # Force garbage collection
                 import gc
                 gc.collect()
                 
-                # 更频繁的内存清理
+                # More frequent memory cleanup
                 if torch.cuda.is_available():
                     torch.cuda.synchronize()
                     torch.cuda.empty_cache()
                     
             except RuntimeError as e:
                 if "out of memory" in str(e):
-                    print(f"GPU内存不足，尝试减小批处理大小...")
-                    # 如果内存不足，尝试更小的批处理
+                    print(f"GPU memory insufficient, attempting to reduce batch size...")
+                    # If memory is insufficient, try a smaller batch size
                     if batch_size > 1:
-                        # 递归调用，使用更小的批处理大小
+                        # Recursive call, using a smaller batch size
                         return self.rerank(query, documents, batch_size=batch_size // 2)
                     else:
-                        print("批处理大小已最小化，仍内存不足，尝试CPU处理...")
-                        # 最后尝试CPU处理
+                        print("Batch size is already minimized, still insufficient memory, attempting CPU processing...")
+                        # Finally attempt CPU processing
                         return self._rerank_on_cpu(query, documents)
                 else:
                     raise e
         
-        # 组合文档和分数
+        # Combine documents and scores
         results = []
         for i, (formatted_text, doc) in enumerate(formatted_pairs):
             results.append((doc, all_scores[i]))
         
-        # 按分数降序排序
+        # Sort by score in descending order
         results.sort(key=lambda x: x[1], reverse=True)
         
         return results
@@ -262,105 +262,105 @@ class QwenReranker:
         batch_size: int = 1
     ) -> List[Tuple[str, float, str]]:
         """
-        对文档进行重排序并返回doc_id
+        Rerank documents and return doc_id
         
         Args:
-            query: 查询文本
-            documents: 文档列表
-            doc_ids: 文档ID列表（与documents对应）
-            batch_size: 批处理大小
+            query: Query text
+            documents: Document list
+            doc_ids: Document ID list (corresponding to documents)
+            batch_size: Batch size
             
         Returns:
-            重排序后的(文档文本, 分数, doc_id)列表
+            List of (document text, score, doc_id) tuples
         """
         if not documents or not doc_ids or len(documents) != len(doc_ids):
-            print("警告：文档列表和doc_id列表不匹配或为空")
+            print("Warning: Document list and doc_id list do not match or are empty")
             return []
         
-        # 格式化所有文档
+        # Format all documents
         formatted_pairs = []
         for doc, doc_id in zip(documents, doc_ids):
             formatted_text = self.format_instruction(None, query, doc)
             formatted_pairs.append((formatted_text, doc, doc_id))
         
-        # 批处理重排序
+        # Batch reranking
         all_scores = []
         for i in range(0, len(formatted_pairs), batch_size):
             batch_pairs = formatted_pairs[i:i + batch_size]
             batch_texts = [pair[0] for pair in batch_pairs]
             
             try:
-                # 处理输入
+                # Process inputs
                 inputs = self.process_inputs(batch_texts)
                 
-                # 计算分数
+                # Compute scores
                 batch_scores = self.compute_logits(inputs)
                 all_scores.extend(batch_scores)
                 
-                # 清理GPU内存
+                # Clean up GPU memory
                 del inputs
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
                     
-                # 强制垃圾回收
+                # Force garbage collection
                 import gc
                 gc.collect()
                 
-                # 更频繁的内存清理
+                # More frequent memory cleanup
                 if torch.cuda.is_available():
                     torch.cuda.synchronize()
                     torch.cuda.empty_cache()
                     
             except RuntimeError as e:
                 if "out of memory" in str(e):
-                    print(f"GPU内存不足，尝试减小批处理大小...")
-                    # 如果内存不足，尝试更小的批处理
+                    print(f"GPU memory insufficient, attempting to reduce batch size...")
+                    # If memory is insufficient, try a smaller batch size
                     if batch_size > 1:
-                        # 递归调用，使用更小的批处理大小
+                        # Recursive call, using a smaller batch size
                         return self.rerank_with_doc_ids(query, documents, doc_ids, batch_size=batch_size // 2)
                     else:
-                        print("批处理大小已最小化，仍内存不足，尝试CPU处理...")
-                        # 最后尝试CPU处理
+                        print("Batch size is already minimized, still insufficient memory, attempting CPU processing...")
+                        # Finally attempt CPU processing
                         return self._rerank_with_doc_ids_on_cpu(query, documents, doc_ids)
                 else:
                     raise e
         
-        # 组合文档、分数和doc_id
+        # Combine documents, scores, and doc_id
         results = []
         for i, (formatted_text, doc, doc_id) in enumerate(formatted_pairs):
             results.append((doc, all_scores[i], doc_id))
         
-        # 按分数降序排序
+        # Sort by score in descending order
         results.sort(key=lambda x: x[1], reverse=True)
         
         return results
 
     def _rerank_with_doc_ids_on_cpu(self, query: str, documents: List[str], doc_ids: List[str]) -> List[Tuple[str, float, str]]:
         """
-        CPU回退重排序（当GPU内存不足时使用）
+        CPU fallback reranking (when GPU memory is insufficient)
         
         Args:
-            query: 查询文本
-            documents: 文档列表
-            doc_ids: 文档ID列表
+            query: Query text
+            documents: Document list
+            doc_ids: Document ID list
             
         Returns:
-            重排序后的(文档文本, 分数, doc_id)列表
+            List of (document text, score, doc_id) tuples
         """
-        print("使用CPU进行重排序...")
+        print("Using CPU for reranking...")
         
-        # 临时将模型移动到CPU
+        # Temporarily move model to CPU
         original_device = next(self.model.parameters()).device
         self.model = self.model.cpu()
         
         try:
-            # 格式化所有文档
+            # Format all documents
             formatted_pairs = []
             for doc, doc_id in zip(documents, doc_ids):
                 formatted_text = self.format_instruction(None, query, doc)
                 formatted_pairs.append((formatted_text, doc, doc_id))
             
-            # 逐个处理（CPU模式）
+            # Process one by one (CPU mode)
             all_scores = []
             for formatted_text, doc, doc_id in formatted_pairs:
                 inputs = self.process_inputs([formatted_text])
@@ -368,45 +368,45 @@ class QwenReranker:
                 all_scores.append(score)
                 del inputs
             
-            # 组合文档、分数和doc_id
+            # Combine documents, scores, and doc_id
             results = []
             for i, (formatted_text, doc, doc_id) in enumerate(formatted_pairs):
                 results.append((doc, all_scores[i], doc_id))
             
-            # 按分数降序排序
+            # Sort by score in descending order
             results.sort(key=lambda x: x[1], reverse=True)
             
             return results
             
         finally:
-            # 恢复模型到原始设备
+            # Restore model to original device
             self.model = self.model.to(original_device)
     
     def _rerank_on_cpu(self, query: str, documents: List[str]) -> List[Tuple[str, float]]:
         """
-        CPU回退重排序（当GPU内存不足时使用）
+        CPU fallback reranking (when GPU memory is insufficient)
         
         Args:
-            query: 查询文本
-            documents: 文档列表
+            query: Query text
+            documents: Document list
             
         Returns:
-            重排序后的(文档, 分数)列表
+            List of (document, score) tuples
         """
-        print("使用CPU进行重排序...")
+        print("Using CPU for reranking...")
         
-        # 临时将模型移动到CPU
+        # Temporarily move model to CPU
         original_device = next(self.model.parameters()).device
         self.model = self.model.cpu()
         
         try:
-            # 格式化所有文档
+            # Format all documents
             formatted_pairs = []
             for doc in documents:
                 formatted_text = self.format_instruction(None, query, doc)
                 formatted_pairs.append((formatted_text, doc))
             
-            # 逐个处理（CPU模式）
+            # Process one by one (CPU mode)
             all_scores = []
             for formatted_text, doc in formatted_pairs:
                 inputs = self.process_inputs([formatted_text])
@@ -414,18 +414,18 @@ class QwenReranker:
                 all_scores.append(score)
                 del inputs
             
-            # 组合文档和分数
+            # Combine documents and scores
             results = []
             for i, (formatted_text, doc) in enumerate(formatted_pairs):
                 results.append((doc, all_scores[i]))
             
-            # 按分数降序排序
+            # Sort by score in descending order
             results.sort(key=lambda x: x[1], reverse=True)
             
             return results
             
         finally:
-            # 恢复模型到原始设备
+            # Restore model to original device
             self.model = self.model.to(original_device)
     
 
@@ -437,40 +437,40 @@ class QwenReranker:
         batch_size: int = 4
     ) -> List[Dict]:
         """
-        对带元数据的文档进行重排序
+        Rerank documents with metadata
         
         Args:
-            query: 查询文本
-            documents_with_metadata: 带元数据的文档列表
-            batch_size: 批处理大小
+            query: Query text
+            documents_with_metadata: List of documents with metadata
+            batch_size: Batch size
             
         Returns:
-            重排序后的文档元数据列表
+            List of reranked document metadata
         """
         if not documents_with_metadata:
             return []
         
-        # 提取文档文本并创建映射
+        # Extract document text and create a map
         documents = []
         doc_to_metadata_map = {}
         
         for i, doc_metadata in enumerate(documents_with_metadata):
             doc_text = doc_metadata.get('content', doc_metadata.get('text', ''))
             documents.append(doc_text)
-            # 使用文档内容作为key来映射元数据
+            # Use document content as key to map metadata
             doc_to_metadata_map[doc_text] = doc_metadata
         
-        # 进行重排序
+        # Perform reranking
         reranked_results = self.rerank(query, documents, batch_size)
         
-        # 将分数添加回元数据，保持重排序后的顺序
+        # Add scores back to metadata, maintaining the order after reranking
         results = []
         for doc_text, score in reranked_results:
-            # 通过文档内容找到对应的原始元数据
+            # Find the corresponding original metadata by document content
             original_metadata = doc_to_metadata_map.get(doc_text, {})
             updated_metadata = original_metadata.copy()
             updated_metadata['reranker_score'] = score
-            updated_metadata['content'] = doc_text  # 确保content字段存在
+            updated_metadata['content'] = doc_text  # Ensure content field exists
             results.append(updated_metadata)
         
         return results 
