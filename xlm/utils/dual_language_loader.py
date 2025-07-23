@@ -12,18 +12,18 @@ from xlm.dto.dto import DocumentWithMetadata, DocumentMetadata
 
 class DualLanguageLoader:
     def __init__(self):
-        """初始化双语言数据加载器"""
+        """Initialize dual language data loader"""
         pass
     
     def detect_language(self, text: str) -> str:
         """
-        检测文本语言
+        Detect the language of the text
         
         Args:
-            text: 文本内容
-            
+            text: Text content
+        
         Returns:
-            语言标识 ('chinese' 或 'english')
+            Language identifier ('chinese' or 'english')
         """
         try:
             lang = detect(text)
@@ -32,26 +32,26 @@ class DualLanguageLoader:
             else:
                 return 'english'
         except LangDetectException:
-            # 默认返回英文
+            # Default to English
             return 'english'
     
     def load_alphafin_data(self, file_path: str) -> List[DocumentWithMetadata]:
         """
-        加载AlphaFin中文数据，字段映射如下：
+        Load AlphaFin Chinese data, field mapping:
         - question: generated_question
         - answer: original_answer
         - context: original_context
-        - summary: summary（用于FAISS索引）
+        - summary: summary (for FAISS index)
         """
-        print(f"加载AlphaFin中文数据: {file_path}")
+        print(f"Loading AlphaFin Chinese data: {file_path}")
         documents = []
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            for idx, item in enumerate(tqdm(data, desc="处理AlphaFin数据")):
+            for idx, item in enumerate(tqdm(data, desc="Processing AlphaFin data")):
                 question = item.get('generated_question', '').strip()
                 answer = item.get('original_answer', '').strip()
-                # 比较original_content和context的长度，使用更长的那个
+                # Use the longer one between original_content and context_content
                 original_content = item.get('original_content', '').strip()
                 context_content = item.get('context', '').strip()
                 context = original_content if len(original_content) > len(context_content) else context_content
@@ -59,10 +59,10 @@ class DualLanguageLoader:
                 company_name = item.get('company_name', '')
                 stock_code = item.get('stock_code', '')
                 report_date = item.get('report_date', '')
-                # summary为空则跳过
+                # Skip if summary is empty
                 if not summary:
                     continue
-                # 组装元数据
+                # Assemble metadata
                 metadata = DocumentMetadata(
                     source="alphafin",
                     language="chinese",
@@ -74,48 +74,48 @@ class DualLanguageLoader:
                     report_date=report_date,
                     summary=summary
                 )
-                # content字段为context，summary单独存入metadata
+                # The content field is context, summary is stored separately in metadata
                 document = DocumentWithMetadata(
                     content=context,
                     metadata=metadata
                 )
                 documents.append(document)
-            print(f"加载了 {len(documents)} 个AlphaFin文档（summary不为空）")
+            print(f"Loaded {len(documents)} AlphaFin documents (summary not empty)")
             return documents
         except Exception as e:
-            print(f"错误: 加载AlphaFin数据失败: {e}")
+            print(f"Error: Failed to load AlphaFin data: {e}")
             return []
 
     def get_alphafin_summaries(self, documents: List[DocumentWithMetadata]) -> List[str]:
         """
-        获取所有AlphaFin文档的summary字段列表，用于FAISS索引
+        Get the list of summary fields for all AlphaFin documents, used for FAISS index
         """
         return [doc.metadata.summary for doc in documents if hasattr(doc.metadata, 'summary') and doc.metadata.summary]
     
     def load_tatqa_data(self, file_path: str) -> List[DocumentWithMetadata]:
         """
-        加载TatQA英文数据
+        Load TatQA English data
         
         Args:
-            file_path: 数据文件路径
-            
+            file_path: Data file path
+        
         Returns:
-            英文文档列表
+            List of English documents
         """
-        print(f"加载TatQA英文数据: {file_path}")
+        print(f"Loading TatQA English data: {file_path}")
         
         documents = []
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
-            for idx, item in enumerate(tqdm(data, desc="处理TatQA数据")):
+            for idx, item in enumerate(tqdm(data, desc="Processing TatQA data")):
                 question = item.get('question', '').strip()
                 answer = item.get('answer', '').strip()
                 context = item.get('context', '').strip()
                 
                 if question and answer and context:
-                    # 创建文档元数据
+                    # Create document metadata
                     metadata = DocumentMetadata(
                         source="tatqa",
                         language="english",
@@ -124,7 +124,7 @@ class DualLanguageLoader:
                         answer=answer
                     )
                     
-                    # 创建文档对象
+                    # Create document object
                     document = DocumentWithMetadata(
                         content=context,
                         metadata=metadata
@@ -132,23 +132,23 @@ class DualLanguageLoader:
                     
                     documents.append(document)
             
-            print(f"加载了 {len(documents)} 个英文文档")
+            print(f"Loaded {len(documents)} English documents")
             return documents
             
         except Exception as e:
-            print(f"错误: 加载TatQA数据失败: {e}")
+            print(f"Error: Failed to load TatQA data: {e}")
             return []
     
     def load_jsonl_data(self, file_path: str, language: str = None) -> List[DocumentWithMetadata]:
         """
-        加载JSONL格式数据
+        Load JSONL format data
         
         Args:
-            file_path: 数据文件路径
-            language: 指定语言，如果为None则自动检测
+            file_path: Data file path
+            language: Specify language, if None, it will be detected automatically
             
         Returns:
-            文档列表
+            List of documents
         """
         print(f"加载JSONL数据: {file_path}")
         
@@ -159,19 +159,19 @@ class DualLanguageLoader:
                     try:
                         item = json.loads(line.strip())
                         
-                        # 提取必要字段
+                        # Extract necessary fields
                         question = item.get('question', '').strip()
                         answer = item.get('answer', '').strip()
                         context = item.get('context', '').strip()
                         
                         if question and answer and context:
-                            # 检测语言
+                            # Detect language
                             if language is None:
                                 detected_lang = self.detect_language(question)
                             else:
                                 detected_lang = language
                             
-                            # 创建文档元数据
+                            # Create document metadata
                             metadata = DocumentMetadata(
                                 source="jsonl",
                                 language=detected_lang,
@@ -180,7 +180,7 @@ class DualLanguageLoader:
                                 answer=answer
                             )
                             
-                            # 创建文档对象
+                            # Create document object
                             document = DocumentWithMetadata(
                                 content=context,
                                 metadata=metadata
@@ -189,25 +189,25 @@ class DualLanguageLoader:
                             documents.append(document)
                             
                     except json.JSONDecodeError:
-                        print(f"警告: 跳过无效的JSON行 {idx+1}")
+                        print(f"Warning: Skipping invalid JSON line {idx+1}")
                         continue
             
-            print(f"加载了 {len(documents)} 个JSONL文档")
+            print(f"Loaded {len(documents)} JSONL documents")
             return documents
             
         except Exception as e:
-            print(f"错误: 加载JSONL数据失败: {e}")
+            print(f"Error: Failed to load JSONL data: {e}")
             return []
     
     def separate_documents_by_language(self, documents: List[DocumentWithMetadata]) -> Tuple[List[DocumentWithMetadata], List[DocumentWithMetadata]]:
         """
-        根据语言分离文档
+        Separate documents by language
         
         Args:
-            documents: 文档列表
+            documents: List of documents
             
         Returns:
-            (中文文档列表, 英文文档列表)
+            (Chinese document list, English document list)
         """
         chinese_docs = []
         english_docs = []
@@ -218,21 +218,21 @@ class DualLanguageLoader:
             else:
                 english_docs.append(doc)
         
-        print(f"分离结果: {len(chinese_docs)} 个中文文档, {len(english_docs)} 个英文文档")
+        print(f"Separated result: {len(chinese_docs)} Chinese documents, {len(english_docs)} English documents")
         return chinese_docs, english_docs
     
     def load_tatqa_context_only(self, file_path: str) -> List[DocumentWithMetadata]:
         """
-        只加载TAT-QA英文数据的context字段（用于FAISS索引/检索库）
+        Load only the context field of TAT-QA English data (for FAISS index/retrieval library)
         """
-        print(f"加载TAT-QA context-only数据: {file_path}")
+        print(f"Loading TAT-QA context-only data: {file_path}")
         documents = []
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 for idx, line in enumerate(f):
                     try:
                         item = json.loads(line.strip())
-                        # 尝试获取content字段，如果不存在则尝试text字段，最后尝试context字段
+                        # Try to get the content field, if it doesn't exist, try the text field, and finally the context field
                         context = (item.get('content', '') or 
                                  item.get('text', '') or 
                                  item.get('context', ''))
@@ -251,11 +251,11 @@ class DualLanguageLoader:
                             )
                             documents.append(document)
                     except Exception as e:
-                        print(f"跳过第{idx+1}行，原因: {e}")
-            print(f"加载了 {len(documents)} 个TAT-QA context文档")
+                        print(f"Skipping line {idx+1}, reason: {e}")
+            print(f"Loaded {len(documents)} TAT-QA context documents")
             return documents
         except Exception as e:
-            print(f"错误: 加载TAT-QA context数据失败: {e}")
+            print(f"Error: Failed to load TAT-QA context data: {e}")
             return []
 
     def load_dual_language_data(
@@ -265,100 +265,100 @@ class DualLanguageLoader:
         jsonl_data_path: str = None
     ) -> Tuple[List[DocumentWithMetadata], List[DocumentWithMetadata]]:
         """
-        加载双语言数据（英文优先用context-only方法）
+        Load dual language data (English prioritizes context-only method)
         """
         chinese_docs = []
         english_docs = []
-        # 加载中文数据
+        # Load Chinese data
         if chinese_data_path:
             if chinese_data_path.endswith('.json'):
                 chinese_docs.extend(self.load_alphafin_data(chinese_data_path))
             elif chinese_data_path.endswith('.jsonl'):
                 chinese_docs.extend(self.load_jsonl_data(chinese_data_path, 'chinese'))
-        # 加载英文数据（优先用context-only）
+        # Load English data (prioritize context-only)
         if english_data_path:
             if english_data_path.endswith('.json'):
                 english_docs.extend(self.load_tatqa_context_only(english_data_path))
             elif english_data_path.endswith('.jsonl'):
                 english_docs.extend(self.load_tatqa_context_only(english_data_path))
-        # 加载JSONL数据（自动检测语言）
+        # Load JSONL data (automatically detect language)
         if jsonl_data_path:
             all_docs = self.load_jsonl_data(jsonl_data_path)
             chinese_temp, english_temp = self.separate_documents_by_language(all_docs)
             chinese_docs.extend(chinese_temp)
             english_docs.extend(english_temp)
-        print(f"总计: {len(chinese_docs)} 个中文文档, {len(english_docs)} 个英文文档")
+        print(f"Total: {len(chinese_docs)} Chinese documents, {len(english_docs)} English documents")
         return chinese_docs, english_docs
     
     def load_context_only_data(self, file_path: str, language: str = None) -> List[DocumentWithMetadata]:
         """
-        只加载context字段的优化数据加载方法（用于RAG知识库）
+        Optimized data loading method for context field only (for RAG knowledge base)
         
         Args:
-            file_path: 数据文件路径
-            language: 指定语言，如果为None则自动检测
+            file_path: Data file path
+            language: Specify language, if None, it will be detected automatically
             
         Returns:
-            文档列表（只包含context内容，元数据简化）
+            List of documents (only context content, simplified metadata)
         """
-        print(f"加载纯context数据: {file_path}")
+        print(f"Loading pure context data: {file_path}")
         
         documents = []
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
-                for idx, line in enumerate(tqdm(f, desc="处理context数据")):
+                for idx, line in enumerate(tqdm(f, desc="Processing context data")):
                     try:
                         item = json.loads(line.strip())
                         
-                        # 确保context字段存在且为字符串
+                        # Ensure context field exists and is a string
                         context = item.get('context', '')
                         if isinstance(context, str):
                             context = context.strip()
                         else:
-                            # 如果context不是字符串，尝试转换或跳过
-                            print(f"警告: 第{idx}行的context不是字符串类型: {type(context)}")
+                            # If context is not a string, try to convert or skip
+                            print(f"Warning: The context in line {idx} is not a string type: {type(context)}")
                             if isinstance(context, dict):
-                                # 如果是字典，尝试提取其中的context字段
+                                # If it's a dictionary, try to extract the context field
                                 context = context.get('context', str(context))
                             else:
                                 context = str(context)
                         
-                        if context:  # 只检查context是否存在且不为空
-                            # 检测语言（使用context内容而不是query）
+                        if context:  # Only check if context exists and is not empty
+                            # Detect language (use context content instead of query)
                             if language is None:
                                 detected_lang = self.detect_language(context)
                             else:
                                 detected_lang = language
                             
-                            # 创建简化的文档元数据（只保留必要字段）
+                            # Create simplified document metadata (only keep necessary fields)
                             metadata = DocumentMetadata(
                                 source="context_only",
                                 language=detected_lang,
                                 doc_id=f"context_{idx}"
                             )
                             
-                            # 创建文档对象，确保content字段是字符串
+                            # Create document object, ensure content field is a string
                             doc = DocumentWithMetadata(
                                 content=context,
                                 metadata=metadata
                             )
                             documents.append(doc)
                         else:
-                            print(f"警告: 第{idx}行的context为空，跳过")
+                            print(f"Warning: The context in line {idx} is empty, skipping")
                             
                     except json.JSONDecodeError as e:
-                        print(f"警告: 第{idx}行JSON解析失败: {e}")
+                        print(f"Warning: JSON parsing failed in line {idx}: {e}")
                         continue
                     except Exception as e:
-                        print(f"警告: 第{idx}行处理失败: {e}")
+                        print(f"Warning: Processing failed in line {idx}: {e}")
                         continue
                         
         except FileNotFoundError:
-            print(f"错误: 文件不存在: {file_path}")
+            print(f"Error: File not found: {file_path}")
             return []
         except Exception as e:
-            print(f"错误: 读取文件失败: {e}")
+            print(f"Error: Failed to read file: {e}")
             return []
         
-        print(f"✅ 成功加载 {len(documents)} 个context文档")
+        print(f"Successfully loaded {len(documents)} context documents")
         return documents 
