@@ -150,12 +150,12 @@ class DualLanguageLoader:
         Returns:
             List of documents
         """
-        print(f"加载JSONL数据: {file_path}")
+        print(f"Loading JSONL data: {file_path}")
         
         documents = []
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
-                for idx, line in enumerate(tqdm(f, desc="处理JSONL数据")):
+                for idx, line in enumerate(tqdm(f, desc="Processing JSONL data")):
                     try:
                         item = json.loads(line.strip())
                         

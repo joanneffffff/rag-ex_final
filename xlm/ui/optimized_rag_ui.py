@@ -1111,6 +1111,8 @@ class OptimizedRagUI:
                                  reranker_checkbox: bool, method: str) -> tuple[str, str]:
         """Format and return result"""
         # Print retrieval result
+        if method == "统一RAG":
+            method = "Unified RAG"
         print(f"\n=== Retrieved original context ({method}) ===")
         print(f"Retrieved {len(unique_docs)} unique documents")
         for i, (doc, score) in enumerate(unique_docs[:5]):
